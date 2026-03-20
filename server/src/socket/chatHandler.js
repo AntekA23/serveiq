@@ -33,7 +33,7 @@ const chatHandler = (io) => {
         // Weryfikuj JWT
         let decoded;
         try {
-          decoded = jwt.verify(token, process.env.JWT_SECRET);
+          decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
         } catch {
           socket.emit('error', { message: 'Nieprawidłowy token autoryzacji' });
           return;
@@ -81,7 +81,7 @@ const chatHandler = (io) => {
         // Weryfikuj JWT
         let decoded;
         try {
-          decoded = jwt.verify(token, process.env.JWT_SECRET);
+          decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
         } catch {
           socket.emit('error', { message: 'Nieprawidłowy token autoryzacji' });
           return;

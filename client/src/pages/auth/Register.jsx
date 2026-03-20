@@ -43,8 +43,12 @@ export default function Register() {
     setError('')
     setLoading(true)
     try {
-      const { confirmPassword, ...data } = formData
-      await registerUser({ ...data, role: 'coach' })
+      const { confirmPassword, club, itfLevel, ...data } = formData
+      await registerUser({
+        ...data,
+        role: 'coach',
+        coachProfile: { club: club || undefined, itfLevel: itfLevel || undefined },
+      })
       toast.success('Konto utworzone. Zaloguj się.')
       navigate('/login')
     } catch (err) {
