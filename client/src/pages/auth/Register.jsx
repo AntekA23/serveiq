@@ -44,7 +44,7 @@ export default function Register() {
     setLoading(true)
     try {
       const { confirmPassword, ...data } = formData
-      await registerUser(data)
+      await registerUser({ ...data, role: 'coach' })
       toast.success('Konto utworzone. Zaloguj się.')
       navigate('/login')
     } catch (err) {

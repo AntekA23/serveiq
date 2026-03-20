@@ -32,6 +32,7 @@ const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 // ====== Express App ======
 
 const app = express();
+app.set('trust proxy', 1);
 const httpServer = createServer(app);
 
 // ====== Socket.io ======
