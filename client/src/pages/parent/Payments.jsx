@@ -15,7 +15,7 @@ export default function Payments() {
       try {
         setLoading(true)
         const { data } = await api.get('/payments')
-        setPayments(data.payments || data || [])
+        setPayments(Array.isArray(data) ? data : data.payments || [])
       } catch (err) {
         setError('Nie udało się załadować płatności')
       } finally {

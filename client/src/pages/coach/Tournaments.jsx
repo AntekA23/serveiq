@@ -94,7 +94,7 @@ export default function Tournaments() {
   const fetchTournaments = useCallback(async () => {
     try {
       const res = await api.get('/tournaments')
-      setTournaments(res.data)
+      setTournaments(Array.isArray(res.data) ? res.data : res.data.tournaments || [])
     } catch (err) {
       addToast('Nie udało się pobrać turniejów', 'error')
     } finally {
@@ -104,7 +104,7 @@ export default function Tournaments() {
 
   useEffect(() => {
     fetchTournaments()
-    api.get('/players').then((res) => setPlayers(res.data)).catch(() => {})
+    api.get('/players').then((res) => setPlayers(Array.isArray(res.data) ? res.data : res.data.players || [])).catch(() => {})
   }, [fetchTournaments])
 
   const onAddSubmit = async (data) => {

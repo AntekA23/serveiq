@@ -54,7 +54,7 @@ export default function Sessions() {
         url += '&player=' + playerFilter
       }
       const res = await api.get(url)
-      setSessions(res.data)
+      setSessions(Array.isArray(res.data) ? res.data : res.data.sessions || [])
     } catch (err) {
       addToast('Nie udało się pobrać treningów', 'error')
     } finally {
@@ -63,7 +63,7 @@ export default function Sessions() {
   }, [monthFilter, playerFilter, addToast])
 
   useEffect(() => {
-    api.get('/players').then((res) => setPlayers(res.data)).catch(() => {})
+    api.get('/players').then((res) => setPlayers(Array.isArray(res.data) ? res.data : res.data.players || [])).catch(() => {})
   }, [])
 
   useEffect(() => {

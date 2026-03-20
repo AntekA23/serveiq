@@ -53,7 +53,7 @@ export default function Messages() {
   const fetchConversations = useCallback(async () => {
     try {
       const res = await api.get('/messages/conversations')
-      setConversations(res.data)
+      setConversations(Array.isArray(res.data) ? res.data : res.data.conversations || [])
     } catch (err) {
       addToast('Nie udało się pobrać konwersacji', 'error')
     } finally {
@@ -66,7 +66,7 @@ export default function Messages() {
     if (!userId) return
     try {
       const res = await api.get('/messages/conversation/' + userId)
-      setMessages(res.data)
+      setMessages(Array.isArray(res.data) ? res.data : res.data.messages || [])
       // Mark as read
       await api.put('/messages/read/' + userId).catch(() => {})
     } catch (err) {

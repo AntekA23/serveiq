@@ -48,7 +48,7 @@ export default function Players() {
   const fetchPlayers = useCallback(async () => {
     try {
       const res = await api.get('/players')
-      setPlayers(res.data)
+      setPlayers(Array.isArray(res.data) ? res.data : res.data.players || [])
     } catch (err) {
       addToast('Nie udało się pobrać zawodników', 'error')
     } finally {

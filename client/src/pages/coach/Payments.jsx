@@ -52,8 +52,8 @@ export default function Payments() {
         api.get('/payments'),
         api.get('/payments/stats'),
       ])
-      setPayments(paymentsRes.data)
-      setStats(statsRes.data)
+      setPayments(Array.isArray(paymentsRes.data) ? paymentsRes.data : paymentsRes.data.payments || [])
+      setStats(statsRes.data.stats || statsRes.data)
     } catch (err) {
       addToast('Nie udało się pobrać płatności', 'error')
     } finally {
@@ -63,7 +63,7 @@ export default function Payments() {
 
   useEffect(() => {
     fetchData()
-    api.get('/players').then((res) => setPlayers(res.data)).catch(() => {})
+    api.get('/players').then((res) => setPlayers(Array.isArray(res.data) ? res.data : res.data.players || [])).catch(() => {})
   }, [fetchData])
 
   const selectedPlayer = players.find((p) => p._id === watchedPlayer)

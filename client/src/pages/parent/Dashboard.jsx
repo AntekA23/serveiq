@@ -43,7 +43,8 @@ export default function Dashboard() {
         setLoading(true)
 
         // Fetch children/players
-        const { data: players } = await api.get('/players')
+        const { data: playersRaw } = await api.get('/players')
+        const players = Array.isArray(playersRaw) ? playersRaw : playersRaw.players || []
         const childIds = user?.parentProfile?.children || []
         const myChildren = childIds.length > 0
           ? players.filter((p) => childIds.includes(p._id))
@@ -55,7 +56,8 @@ export default function Dashboard() {
         for (const child of myChildren) {
           try {
             const { data } = await api.get(`/sessions?player=${child._id}`)
-            sessionsMap[child._id] = (data.sessions || data || []).slice(0, 3)
+            const sessionsArr = Array.isArray(data) ? data : data.sessions || []
+            sessionsMap[child._id] = sessionsArr.slice(0, 3)
           } catch {
             sessionsMap[child._id] = []
           }
@@ -64,8 +66,8 @@ export default function Dashboard() {
 
         // Fetch pending payments
         try {
-          const { data: payments } = await api.get('/payments')
-          const paymentsArr = payments.payments || payments || []
+          const { data: paymentsRaw } = await api.get('/payments')
+          const paymentsArr = Array.isArray(paymentsRaw) ? paymentsRaw : paymentsRaw.payments || []
           const pending = paymentsArr.find(
             (p) => p.status === 'pending' || p.status === 'overdue'
           )

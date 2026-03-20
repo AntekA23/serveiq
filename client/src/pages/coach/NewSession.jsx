@@ -70,7 +70,7 @@ export default function NewSession() {
 
   useEffect(() => {
     api.get('/players')
-      .then((res) => setPlayers(res.data))
+      .then((res) => setPlayers(Array.isArray(res.data) ? res.data : res.data.players || []))
       .catch(() => addToast('Nie udało się pobrać listy zawodników', 'error'))
   }, [addToast])
 

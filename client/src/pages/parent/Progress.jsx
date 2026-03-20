@@ -34,7 +34,8 @@ export default function Progress() {
     const fetchData = async () => {
       try {
         setLoading(true)
-        const { data: players } = await api.get('/players')
+        const { data: playersRaw } = await api.get('/players')
+        const players = Array.isArray(playersRaw) ? playersRaw : playersRaw.players || []
         const childIds = user?.parentProfile?.children || []
         const myChildren = childIds.length > 0
           ? players.filter((p) => childIds.includes(p._id))

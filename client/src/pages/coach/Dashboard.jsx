@@ -28,9 +28,11 @@ export default function Dashboard() {
           api.get('/payments/stats'),
         ])
 
-        setPlayers(playersRes.data)
-        setSessions(sessionsRes.data)
-        setPaymentStats(statsRes.data)
+        const playersData = playersRes.data
+        setPlayers(Array.isArray(playersData) ? playersData : playersData.players || [])
+        const sessionsData = sessionsRes.data
+        setSessions(Array.isArray(sessionsData) ? sessionsData : sessionsData.sessions || [])
+        setPaymentStats(statsRes.data.stats || statsRes.data)
       } catch (err) {
         addToast('Nie udało się pobrać danych', 'error')
       } finally {

@@ -75,11 +75,12 @@ export default function PlayerDetail() {
         api.get('/sessions?player=' + id),
         api.get('/tournaments?player=' + id),
       ])
-      setPlayer(playerRes.data)
-      setSessions(sessionsRes.data)
-      setTournaments(tournamentsRes.data)
+      const playerData = playerRes.data.player || playerRes.data
+      setPlayer(playerData)
+      setSessions(Array.isArray(sessionsRes.data) ? sessionsRes.data : sessionsRes.data.sessions || [])
+      setTournaments(Array.isArray(tournamentsRes.data) ? tournamentsRes.data : tournamentsRes.data.tournaments || [])
 
-      const skills = playerRes.data.skills || {}
+      const skills = playerData.skills || {}
       const values = {}
       const notes = {}
       skillDefs.forEach((s) => {
