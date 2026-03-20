@@ -22,7 +22,7 @@ const seed = async () => {
     console.log('========================\n');
 
     // Połącz z MongoDB
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/serveiq';
+    const mongoUri = process.env.MONGO_URL || process.env.MONGODB_URI || 'mongodb://localhost:27017/serveiq';
     await mongoose.connect(mongoUri);
     console.log('[MongoDB] Połączono z bazą danych\n');
 
