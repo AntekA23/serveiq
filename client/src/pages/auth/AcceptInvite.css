@@ -1,0 +1,47 @@
+.accept-invite-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-secondary);
+  padding: 20px;
+}
+
+.accept-invite-card {
+  background: var(--color-bg);
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.accept-invite-logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.accept-invite-subtitle {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.accept-invite-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.accept-invite-error {
+  font-size: 13px;
+  color: var(--color-red-text);
+  background: var(--color-red-bg);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+}

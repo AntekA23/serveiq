@@ -1,0 +1,206 @@
+.player-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.player-detail-name {
+  font-size: 22px;
+  font-family: 'DM Serif Display', serif;
+}
+
+.player-detail-meta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  display: flex;
+  gap: 12px;
+}
+
+.player-detail-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.player-detail-section {
+}
+
+.player-detail-section-title {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.player-detail-section-title > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.player-detail-empty {
+  text-align: center;
+  padding: 20px;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+.player-detail-loading {
+  text-align: center;
+  padding: 48px;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.goals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.goal-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.goal-item-text {
+  flex: 1;
+  font-size: 13px;
+}
+
+.goal-item-date {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+.goal-item.completed .goal-item-text {
+  text-decoration: line-through;
+  color: var(--color-text-tertiary);
+}
+
+.goal-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--color-green);
+}
+
+.tournaments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tournament-mini-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.tournament-mini-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tournament-mini-name {
+  font-size: 13px;
+  font-weight: 500;
+  display: block;
+}
+
+.tournament-mini-dates {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+.tournament-mini-result {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* Skill edit modal */
+.skill-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skill-edit-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.skill-edit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skill-edit-label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.skill-edit-value {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
+.skill-edit-slider {
+  width: 100%;
+  accent-color: var(--color-blue);
+}
+
+.skill-edit-notes {
+  font-family: inherit;
+  font-size: 12px;
+  padding: 6px 10px;
+  border: 0.5px solid var(--color-border-md);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  resize: vertical;
+  min-height: 32px;
+}
+
+.skill-edit-notes:focus {
+  outline: none;
+  border-color: var(--color-blue);
+}
+
+/* Goal form */
+.goal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+}

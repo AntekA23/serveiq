@@ -1,0 +1,120 @@
+.progress-page {
+}
+
+.progress-loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+.progress-error {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-red-text);
+  font-size: 13px;
+}
+
+.progress-empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+.progress-child {
+  margin-bottom: 32px;
+}
+
+.progress-child-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.progress-child-name {
+  font-size: 22px;
+  font-family: 'DM Serif Display', serif;
+}
+
+.progress-skills {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.progress-skill-item {
+}
+
+.progress-skill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.progress-skill-name {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.progress-skill-score {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.progress-skill-notes {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.progress-goals-section {
+  margin-top: 24px;
+}
+
+.progress-goals-title {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.progress-goal {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  margin-bottom: 6px;
+}
+
+.progress-goal-check {
+  color: var(--color-green);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.progress-goal-pending {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.progress-goal-text {
+  font-size: 13px;
+}
+
+.progress-goal-text.completed {
+  color: var(--color-text-tertiary);
+  text-decoration: line-through;
+}
+
+.progress-goal-date {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+}

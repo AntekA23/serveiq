@@ -1,0 +1,96 @@
+.new-session {
+  max-width: 640px;
+}
+
+.new-session .card {
+  padding: 24px;
+}
+
+.new-session-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.new-session-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.new-session-textarea {
+  min-height: 80px;
+  resize: vertical;
+  padding: 8px 12px;
+  font-family: inherit;
+}
+
+.new-session-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+
+.focus-areas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.focus-area-tag {
+  padding: 4px 12px;
+  border: 0.5px solid var(--color-border-md);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.1s;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.focus-area-tag:hover {
+  border-color: var(--color-blue);
+}
+
+.focus-area-tag.selected {
+  background: var(--color-blue-bg);
+  color: var(--color-blue-text);
+  border-color: var(--color-blue);
+}
+
+.skill-updates {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.skill-update-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.skill-update-label {
+  font-size: 12px;
+  min-width: 80px;
+}
+
+.skill-update-slider {
+  flex: 1;
+  accent-color: var(--color-blue);
+}
+
+.skill-update-values {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  min-width: 60px;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .new-session-row {
+    grid-template-columns: 1fr;
+  }
+}

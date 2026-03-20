@@ -1,0 +1,54 @@
+.btn {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--color-border-md);
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.1s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text);
+}
+.btn:hover {
+  background: var(--color-bg-secondary);
+}
+.btn-primary {
+  background: var(--color-text);
+  color: var(--color-bg);
+  border-color: transparent;
+}
+.btn-primary:hover {
+  opacity: 0.85;
+  background: var(--color-text);
+}
+.btn-danger {
+  color: var(--color-red-text);
+  border-color: var(--color-red);
+}
+.btn-danger:hover {
+  background: var(--color-red-bg);
+}
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-loading .spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

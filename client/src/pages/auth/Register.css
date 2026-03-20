@@ -1,0 +1,72 @@
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-secondary);
+  padding: 20px;
+}
+
+.register-card {
+  background: var(--color-bg);
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.register-logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.register-subtitle {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.register-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.register-error {
+  font-size: 13px;
+  color: var(--color-red-text);
+  background: var(--color-red-bg);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+}
+
+.register-links {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.register-links a {
+  color: var(--color-blue-text);
+}
+
+.register-links a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .register-row {
+    grid-template-columns: 1fr;
+  }
+}

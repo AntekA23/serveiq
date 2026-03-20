@@ -1,0 +1,48 @@
+.session-item {
+  cursor: pointer;
+  transition: border-color 0.1s;
+  margin-bottom: 8px;
+}
+
+.session-item-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.session-item-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.session-item-title {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.session-item-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
+.session-item-date,
+.session-item-duration {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.session-item-player {
+  color: var(--color-text-secondary);
+}
+
+.session-item-tags {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}

@@ -1,0 +1,91 @@
+.parent-dashboard {
+}
+
+.parent-dashboard-banner {
+  background: var(--color-amber-bg);
+  border: 0.5px solid var(--color-amber);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.parent-dashboard-banner-text {
+  font-size: 13px;
+  color: var(--color-amber-text);
+}
+
+.parent-dashboard-loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+.parent-dashboard-error {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-red-text);
+  font-size: 13px;
+}
+
+.parent-dashboard-empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+.parent-child-card {
+  margin-bottom: 20px;
+}
+
+.parent-child-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.parent-child-name {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.parent-skills-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.parent-goals-list {
+  margin-bottom: 16px;
+}
+
+.parent-goal-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.parent-goal-item input[type="checkbox"] {
+  accent-color: var(--color-green);
+}
+
+.parent-section-title {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 640px) {
+  .parent-skills-grid {
+    grid-template-columns: 1fr;
+  }
+}
