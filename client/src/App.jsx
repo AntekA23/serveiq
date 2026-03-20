@@ -26,11 +26,11 @@ import CoachMessages from './pages/coach/Messages'
 import ParentDashboard from './pages/parent/Dashboard'
 import Progress from './pages/parent/Progress'
 import ParentPayments from './pages/parent/Payments'
-import ParentMessages from './pages/parent/Messages'
+import ParentMessages from './pages/parent/Chat'
 
 // Payment pages
-import PaymentSuccess from './pages/payment/PaymentSuccess'
-import PaymentCancel from './pages/payment/PaymentCancel'
+import PaymentSuccess from './pages/parent/PaymentSuccess'
+import PaymentCancel from './pages/parent/PaymentCancel'
 
 function ProtectedRoute({ children, role }) {
   const user = useAuthStore((s) => s.user)

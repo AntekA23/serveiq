@@ -103,10 +103,10 @@ export default function Chat() {
 
     setSending(true)
     try {
-      const recipientId = activeConversation.userId || activeConversation._id
+      const toId = activeConversation.userId || activeConversation._id
       const { data } = await api.post('/messages', {
-        recipientId,
-        content: newMessage.trim(),
+        to: toId,
+        text: newMessage.trim(),
       })
       const msg = data.message || data
       setMessages((prev) => [...prev, msg])
@@ -168,15 +168,16 @@ export default function Chat() {
           </div>
         )}
         {messages.map((msg, idx) => {
-          const isSent = msg.sender === user?._id || msg.senderId === user?._id
+          const fromId = typeof msg.from === 'object' ? msg.from?._id : msg.from
+          const isSent = fromId === user?._id
           return (
             <div
               key={msg._id || idx}
               className={`parent-chat-message ${isSent ? 'sent' : 'received'}`}
             >
-              <div>{msg.content || msg.text}</div>
+              <div>{msg.text || msg.content}</div>
               <div className="parent-chat-message-time">
-                {formatTime(msg.createdAt || msg.timestamp)}
+                {formatTime(msg.createdAt)}
               </div>
             </div>
           )
