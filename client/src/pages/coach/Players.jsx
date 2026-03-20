@@ -16,7 +16,6 @@ const playerSchema = z.object({
   lastName: z.string().min(2, 'Nazwisko musi mieć min. 2 znaki'),
   dateOfBirth: z.string().min(1, 'Data urodzenia jest wymagana'),
   gender: z.enum(['M', 'F'], { required_error: 'Wybierz płeć' }),
-  monthlyRate: z.union([z.string(), z.number()]).optional().transform((v) => (v === '' || v === undefined ? undefined : Number(v))),
   parentEmail: z.union([z.string().email('Nieprawidłowy email'), z.literal('')]).optional(),
 })
 
@@ -40,7 +39,6 @@ export default function Players() {
       lastName: '',
       dateOfBirth: '',
       gender: '',
-      monthlyRate: '',
       parentEmail: '',
     },
   })
@@ -64,7 +62,6 @@ export default function Players() {
     setSubmitting(true)
     try {
       const payload = { ...data }
-      if (!payload.monthlyRate) delete payload.monthlyRate
       if (!payload.parentEmail) delete payload.parentEmail
 
       await api.post('/players', payload)
@@ -182,13 +179,6 @@ export default function Players() {
               )}
             </div>
           </div>
-          <Input
-            label="Stawka miesięczna (zł)"
-            type="number"
-            placeholder="500"
-            register={register('monthlyRate')}
-            error={errors.monthlyRate?.message}
-          />
           <Input
             label="Email rodzica (wyślemy zaproszenie)"
             type="email"
