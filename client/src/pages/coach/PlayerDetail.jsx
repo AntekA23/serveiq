@@ -60,6 +60,10 @@ export default function PlayerDetail() {
   const [skillNotes, setSkillNotes] = useState({})
   const [savingSkills, setSavingSkills] = useState(false)
 
+  const [rankingModalOpen, setRankingModalOpen] = useState(false)
+  const [rankingValues, setRankingValues] = useState({ pzt: '', te: '' })
+  const [savingRanking, setSavingRanking] = useState(false)
+
   const [goalModalOpen, setGoalModalOpen] = useState(false)
   const [savingGoal, setSavingGoal] = useState(false)
 
@@ -90,6 +94,10 @@ export default function PlayerDetail() {
       })
       setSkillValues(values)
       setSkillNotes(notes)
+      setRankingValues({
+        pzt: playerData.ranking?.pzt ?? '',
+        te: playerData.ranking?.te ?? '',
+      })
     } catch (err) {
       addToast('Nie udało się pobrać danych zawodnika', 'error')
     } finally {
@@ -119,6 +127,23 @@ export default function PlayerDetail() {
       addToast('Błąd podczas zapisywania umiejętności', 'error')
     } finally {
       setSavingSkills(false)
+    }
+  }
+
+  const handleRankingSave = async () => {
+    setSavingRanking(true)
+    try {
+      const ranking = {}
+      if (rankingValues.pzt !== '') ranking.pzt = Number(rankingValues.pzt)
+      if (rankingValues.te !== '') ranking.te = Number(rankingValues.te)
+      await api.put('/players/' + id, { ranking })
+      addToast('Ranking zaktualizowany', 'success')
+      setRankingModalOpen(false)
+      fetchPlayer()
+    } catch (err) {
+      addToast('Błąd podczas zapisywania rankingu', 'error')
+    } finally {
+      setSavingRanking(false)
     }
   }
 
@@ -187,7 +212,8 @@ export default function PlayerDetail() {
             {player.gender && (
               <span>{player.gender === 'M' ? 'Chłopiec' : 'Dziewczynka'}</span>
             )}
-            {player.ranking?.pzt && <span>PZT: {player.ranking.pzt}</span>}
+            {player.ranking?.pzt != null && <span>PZT: {player.ranking.pzt}</span>}
+            {player.ranking?.te != null && <span>TE: {player.ranking.te}</span>}
           </div>
         </div>
         {player.parentId && (
@@ -202,6 +228,26 @@ export default function PlayerDetail() {
       </div>
 
       <div className="player-detail-sections">
+        {/* Ranking */}
+        <div className="player-detail-section card">
+          <div className="player-detail-section-title">
+            <span><Trophy size={14} /> Ranking</span>
+            <Button size="sm" icon={Edit} onClick={() => setRankingModalOpen(true)}>
+              Edytuj
+            </Button>
+          </div>
+          <div className="ranking-grid">
+            <div className="ranking-item">
+              <div className="ranking-label">PZT</div>
+              <div className="ranking-value">{player.ranking?.pzt ?? '—'}</div>
+            </div>
+            <div className="ranking-item">
+              <div className="ranking-label">Tennis Europe</div>
+              <div className="ranking-value">{player.ranking?.te ?? '—'}</div>
+            </div>
+          </div>
+        </div>
+
         {/* Umiejętności */}
         <div className="player-detail-section card">
           <div className="player-detail-section-title">
@@ -389,6 +435,46 @@ export default function PlayerDetail() {
             error={goalForm.formState.errors.dueDate?.message}
           />
         </form>
+      </Modal>
+
+      {/* Modal edycji rankingu */}
+      <Modal
+        isOpen={rankingModalOpen}
+        onClose={() => setRankingModalOpen(false)}
+        title="Edytuj ranking"
+        footer={
+          <div className="modal-actions">
+            <Button onClick={() => setRankingModalOpen(false)}>Anuluj</Button>
+            <Button variant="primary" loading={savingRanking} onClick={handleRankingSave}>
+              Zapisz
+            </Button>
+          </div>
+        }
+      >
+        <div className="ranking-form">
+          <div className="input-group">
+            <label className="input-label">Ranking PZT</label>
+            <input
+              className="input"
+              type="number"
+              min="1"
+              placeholder="np. 1"
+              value={rankingValues.pzt}
+              onChange={(e) => setRankingValues((v) => ({ ...v, pzt: e.target.value }))}
+            />
+          </div>
+          <div className="input-group">
+            <label className="input-label">Ranking Tennis Europe</label>
+            <input
+              className="input"
+              type="number"
+              min="1"
+              placeholder="np. 15"
+              value={rankingValues.te}
+              onChange={(e) => setRankingValues((v) => ({ ...v, te: e.target.value }))}
+            />
+          </div>
+        </div>
       </Modal>
     </div>
   )

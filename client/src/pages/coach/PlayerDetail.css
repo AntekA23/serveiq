@@ -135,6 +135,39 @@
   color: var(--color-text-secondary);
 }
 
+/* Ranking */
+.ranking-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ranking-item {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+
+.ranking-label {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ranking-value {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-top: 2px;
+}
+
+.ranking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 /* Skill edit modal */
 .skill-edit-form {
   display: flex;

@@ -61,6 +61,7 @@ const playerSchema = new mongoose.Schema(
     ],
     ranking: {
       pzt: Number,
+      te: Number,
       wta: Number,
       atp: Number,
     },
