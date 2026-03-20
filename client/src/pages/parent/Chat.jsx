@@ -79,7 +79,8 @@ export default function Chat() {
 
   // Socket.io connection
   useEffect(() => {
-    const socket = io(window.location.origin, {
+    const socketUrl = import.meta.env.VITE_API_URL || window.location.origin
+    const socket = io(socketUrl, {
       auth: { token: accessToken },
     })
     socketRef.current = socket

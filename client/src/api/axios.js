@@ -2,7 +2,8 @@ import axios from 'axios'
 import useAuthStore from '../store/authStore'
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api',
+  withCredentials: true,
 })
 
 // Request interceptor — attach access token
@@ -50,7 +51,10 @@ api.interceptors.response.use(
       isRefreshing = true
 
       try {
-        const { data } = await axios.post('/api/auth/refresh', {}, {
+        const refreshURL = import.meta.env.VITE_API_URL
+          ? `${import.meta.env.VITE_API_URL}/api/auth/refresh`
+          : '/api/auth/refresh'
+        const { data } = await axios.post(refreshURL, {}, {
           withCredentials: true,
         })
 
