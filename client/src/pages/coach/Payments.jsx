@@ -101,8 +101,9 @@ export default function Payments() {
     return (order[a.status] || 1) - (order[b.status] || 1)
   })
 
-  const monthlyRevenue = stats?.monthly?.length
-    ? stats.monthly[stats.monthly.length - 1]?.amount || 0
+  const monthlyBreakdown = stats?.monthlyBreakdown || []
+  const monthlyRevenue = monthlyBreakdown.length
+    ? monthlyBreakdown[0]?.total || 0
     : 0
 
   if (loading) {
@@ -126,11 +127,11 @@ export default function Payments() {
       <div className="payments-stats">
         <div className="metric">
           <div className="metric-label">Opłacone</div>
-          <div className="metric-value payments-stat-green">{stats?.paid || 0}</div>
+          <div className="metric-value payments-stat-green">{stats?.totalPaid || 0} zł</div>
         </div>
         <div className="metric">
           <div className="metric-label">Oczekujące</div>
-          <div className="metric-value payments-stat-amber">{stats?.pending || 0}</div>
+          <div className="metric-value payments-stat-amber">{stats?.pending?.count || 0}</div>
         </div>
         <div className="metric">
           <div className="metric-label">Przychód miesiąca</div>

@@ -51,8 +51,9 @@ export default function Dashboard() {
     )
   }
 
-  const monthlyRevenue = paymentStats?.monthly?.length
-    ? paymentStats.monthly[paymentStats.monthly.length - 1]?.amount || 0
+  const monthlyBreakdown = paymentStats?.monthlyBreakdown || []
+  const monthlyRevenue = monthlyBreakdown.length
+    ? monthlyBreakdown[0]?.total || 0
     : 0
 
   return (
@@ -79,7 +80,7 @@ export default function Dashboard() {
         </div>
         <div className="metric">
           <div className="metric-label">Oczekujące płatności</div>
-          <div className="metric-value">{paymentStats?.pending || 0}</div>
+          <div className="metric-value">{paymentStats?.pending?.count || 0}</div>
         </div>
       </div>
 

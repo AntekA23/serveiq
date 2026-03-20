@@ -82,8 +82,8 @@ export default function NewSession() {
         const updates = {}
         Object.keys(skillLabels).forEach((key) => {
           updates[key] = {
-            before: player.skills[key] || 0,
-            after: player.skills[key] || 0,
+            before: typeof player.skills[key] === 'object' ? (player.skills[key]?.score ?? 0) : (player.skills[key] ?? 0),
+            after: typeof player.skills[key] === 'object' ? (player.skills[key]?.score ?? 0) : (player.skills[key] ?? 0),
           }
         })
         setSkillUpdates(updates)

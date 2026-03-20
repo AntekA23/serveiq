@@ -30,7 +30,7 @@ export default function PlayerCard({ player }) {
     .map(([key, label]) => ({
       key,
       label,
-      value: skills[key] || 0,
+      value: typeof skills[key] === 'object' ? (skills[key]?.score ?? 0) : (skills[key] ?? 0),
       color: skillColors[key],
     }))
     .slice(0, 3)

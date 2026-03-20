@@ -84,8 +84,9 @@ export default function PlayerDetail() {
       const values = {}
       const notes = {}
       skillDefs.forEach((s) => {
-        values[s.key] = skills[s.key] || 0
-        notes[s.key] = skills[s.key + 'Notes'] || ''
+        const skill = skills[s.key]
+        values[s.key] = typeof skill === 'object' ? (skill?.score ?? 0) : (skill ?? 0)
+        notes[s.key] = typeof skill === 'object' ? (skill?.notes ?? '') : ''
       })
       setSkillValues(values)
       setSkillNotes(notes)
@@ -105,9 +106,9 @@ export default function PlayerDetail() {
     try {
       const skills = {}
       skillDefs.forEach((s) => {
-        skills[s.key] = Number(skillValues[s.key])
-        if (skillNotes[s.key]) {
-          skills[s.key + 'Notes'] = skillNotes[s.key]
+        skills[s.key] = {
+          score: Number(skillValues[s.key]),
+          notes: skillNotes[s.key] || '',
         }
       })
       await api.put('/players/' + id, { skills })
@@ -186,7 +187,7 @@ export default function PlayerDetail() {
             {player.gender && (
               <span>{player.gender === 'M' ? 'Chłopiec' : 'Dziewczynka'}</span>
             )}
-            {player.ranking && <span>Ranking: {player.ranking}</span>}
+            {player.ranking?.pzt && <span>PZT: {player.ranking.pzt}</span>}
           </div>
         </div>
         {player.parentId && (
@@ -214,7 +215,7 @@ export default function PlayerDetail() {
               <ProgressBar
                 key={s.key}
                 label={s.label}
-                value={skills[s.key] || 0}
+                value={typeof skills[s.key] === 'object' ? (skills[s.key]?.score ?? 0) : (skills[s.key] ?? 0)}
                 color={s.color}
                 showValue
               />

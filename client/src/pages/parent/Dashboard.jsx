@@ -162,7 +162,7 @@ export default function Dashboard() {
                   <ProgressBar
                     key={key}
                     label={label}
-                    value={child.skills?.[key] || 0}
+                    value={child.skills?.[key]?.score ?? child.skills?.[key] ?? 0}
                     color={skillColors[key]}
                     showValue
                   />

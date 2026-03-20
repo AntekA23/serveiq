@@ -97,8 +97,9 @@ export default function Progress() {
 
             <div className="progress-skills">
               {Object.entries(skillLabels).map(([key, label]) => {
-                const value = child.skills?.[key] || 0
-                const notes = child.skillNotes?.[key]
+                const skillData = child.skills?.[key]
+                const value = typeof skillData === 'object' ? (skillData?.score ?? 0) : (skillData ?? 0)
+                const notes = typeof skillData === 'object' ? skillData?.notes : null
 
                 return (
                   <div key={key} className="progress-skill-item">
