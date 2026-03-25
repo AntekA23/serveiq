@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .payments-loading {
@@ -22,8 +22,8 @@
 .payments-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-bottom: 24px;
 }
 
 .payments-stat-green {
@@ -53,6 +53,7 @@
   font-size: 11px;
   color: var(--color-text-tertiary);
   margin-top: 4px;
+  font-weight: 500;
 }
 
 .modal-actions {

@@ -51,7 +51,7 @@ export default function AcceptInvite() {
   return (
     <div className="accept-invite-page">
       <div className="accept-invite-card">
-        <div className="accept-invite-logo">ServeIQ</div>
+        <div className="accept-invite-logo">SERVE<span style={{ color: 'var(--color-text)' }}>IQ</span></div>
         <div className="accept-invite-subtitle">
           Witaj! Trener zaprosił Cię do ServeIQ. Ustaw hasło, aby aktywować konto.
         </div>

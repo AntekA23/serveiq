@@ -3,31 +3,47 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg-secondary);
+  background: var(--color-bg);
   padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.register-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 80%, rgba(204,255,0,0.06), transparent),
+    radial-gradient(ellipse 500px 300px at 80% 20%, rgba(77,166,255,0.04), transparent);
+  pointer-events: none;
 }
 
 .register-card {
-  background: var(--color-bg);
-  border: 0.5px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-md);
   border-radius: var(--radius-lg);
-  padding: 40px;
+  padding: 44px;
   width: 100%;
-  max-width: 480px;
+  max-width: 500px;
+  position: relative;
+  z-index: 1;
+  box-shadow: var(--shadow-modal);
 }
 
 .register-logo {
-  font-family: 'DM Serif Display', serif;
-  font-size: 28px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
   text-align: center;
   margin-bottom: 4px;
+  letter-spacing: 3px;
+  color: var(--color-accent);
 }
 
 .register-subtitle {
   font-size: 13px;
   color: var(--color-text-secondary);
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 
 .register-form {
@@ -44,25 +60,27 @@
 
 .register-error {
   font-size: 13px;
-  color: var(--color-red-text);
+  color: var(--color-red);
   background: var(--color-red-bg);
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: var(--radius-md);
+  border: 1px solid rgba(239,68,68,0.2);
   margin-bottom: 8px;
 }
 
 .register-links {
   text-align: center;
-  margin-top: 16px;
+  margin-top: 20px;
   font-size: 13px;
 }
 
 .register-links a {
-  color: var(--color-blue-text);
+  color: var(--color-accent);
+  transition: opacity 0.15s;
 }
 
 .register-links a:hover {
-  text-decoration: underline;
+  opacity: 0.8;
 }
 
 @media (max-width: 480px) {

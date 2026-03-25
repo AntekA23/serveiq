@@ -1,6 +1,7 @@
 .app-shell {
   display: flex;
   min-height: 100vh;
+  background: var(--color-bg);
 }
 .app-shell-main {
   flex: 1;
@@ -10,11 +11,14 @@
 }
 .app-shell-content {
   flex: 1;
-  padding: 24px;
+  padding: 28px;
   overflow-y: auto;
 }
 @media (max-width: 768px) {
   .app-shell-main {
     margin-left: 0;
+  }
+  .app-shell-content {
+    padding: 20px;
   }
 }

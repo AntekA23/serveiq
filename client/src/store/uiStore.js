@@ -4,7 +4,7 @@ const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
 const useUiStore = create((set, get) => ({
   sidebarOpen: !isMobile,
-  theme: 'light',
+  theme: 'dark',
   toasts: [],
 
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),

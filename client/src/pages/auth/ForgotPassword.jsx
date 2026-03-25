@@ -43,7 +43,7 @@ export default function ForgotPassword() {
   return (
     <div className="forgot-page">
       <div className="forgot-card">
-        <div className="forgot-logo">ServeIQ</div>
+        <div className="forgot-logo">SERVE<span style={{ color: 'var(--color-text)' }}>IQ</span></div>
 
         {sent ? (
           <div className="forgot-success">

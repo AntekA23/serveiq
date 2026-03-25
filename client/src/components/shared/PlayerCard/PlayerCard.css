@@ -1,13 +1,16 @@
 .player-card {
   cursor: pointer;
-  transition: border-color 0.1s;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.player-card:hover {
+  transform: translateY(-1px);
 }
 
 .player-card-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
 .player-card-info {
@@ -16,8 +19,8 @@
 }
 
 .player-card-name {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .player-card-meta {
@@ -25,15 +28,20 @@
   color: var(--color-text-tertiary);
   display: flex;
   gap: 6px;
+  font-weight: 500;
 }
 
 .player-card-arrow {
   color: var(--color-text-tertiary);
   flex-shrink: 0;
+  transition: color 0.15s;
+}
+.player-card:hover .player-card-arrow {
+  color: var(--color-accent);
 }
 
 .player-card-skills {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }

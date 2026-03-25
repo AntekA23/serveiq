@@ -3,26 +3,36 @@
 }
 
 .new-session .card {
-  padding: 24px;
+  padding: 28px;
 }
 
 .new-session-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .new-session-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
 }
 
 .new-session-textarea {
   min-height: 80px;
   resize: vertical;
-  padding: 8px 12px;
+  padding: 10px 14px;
   font-family: inherit;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-md);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+}
+
+.new-session-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-muted);
 }
 
 .new-session-actions {
@@ -39,24 +49,26 @@
 }
 
 .focus-area-tag {
-  padding: 4px 12px;
-  border: 0.5px solid var(--color-border-md);
+  padding: 5px 14px;
+  border: 1px solid var(--color-border-md);
   border-radius: var(--radius-full);
   font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.1s;
-  background: var(--color-bg);
+  transition: all 0.15s;
+  background: var(--color-bg-secondary);
   color: var(--color-text);
 }
 
 .focus-area-tag:hover {
-  border-color: var(--color-blue);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .focus-area-tag.selected {
-  background: var(--color-blue-bg);
-  color: var(--color-blue-text);
-  border-color: var(--color-blue);
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+  border-color: rgba(204,255,0,0.3);
 }
 
 .skill-updates {
@@ -74,12 +86,13 @@
 
 .skill-update-label {
   font-size: 12px;
+  font-weight: 600;
   min-width: 80px;
 }
 
 .skill-update-slider {
   flex: 1;
-  accent-color: var(--color-blue);
+  accent-color: var(--color-accent);
 }
 
 .skill-update-values {
@@ -87,6 +100,7 @@
   color: var(--color-text-tertiary);
   min-width: 60px;
   text-align: right;
+  font-weight: 500;
 }
 
 @media (max-width: 640px) {

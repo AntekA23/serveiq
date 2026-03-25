@@ -3,34 +3,37 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg-secondary);
+  background: var(--color-bg);
   padding: 20px;
 }
 
 .payment-success-card {
-  background: var(--color-bg);
-  border: 0.5px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-md);
   border-radius: var(--radius-lg);
-  padding: 40px;
+  padding: 44px;
   width: 100%;
   max-width: 420px;
   text-align: center;
+  box-shadow: var(--shadow-modal);
 }
 
 .payment-success-icon {
-  color: var(--color-green);
-  margin-bottom: 16px;
+  color: var(--color-accent);
+  margin-bottom: 18px;
 }
 
 .payment-success-title {
-  font-size: 18px;
-  font-weight: 500;
-  margin-bottom: 8px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
 }
 
 .payment-success-text {
   font-size: 13px;
   color: var(--color-text-secondary);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   line-height: 1.5;
 }

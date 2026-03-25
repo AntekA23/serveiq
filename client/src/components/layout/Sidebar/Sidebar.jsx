@@ -57,7 +57,7 @@ export default function Sidebar() {
         <div className="sidebar-overlay" onClick={toggleSidebar} />
       )}
       <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
-        <div className="sidebar-logo">ServeIQ</div>
+        <div className="sidebar-logo">SERVE<span style={{ color: 'var(--color-text)' }}>IQ</span><span className="sidebar-logo-dot" /></div>
 
         <nav className="sidebar-nav">
           {navItems.map((item) => (

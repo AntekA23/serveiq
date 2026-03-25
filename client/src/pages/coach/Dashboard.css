@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .dashboard-loading {
@@ -15,29 +15,33 @@
 .dashboard-metrics {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 14px;
+  margin-bottom: 28px;
 }
 
 .dashboard-sections {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 20px;
 }
 
 .dashboard-section-title {
-  font-size: 13px;
-  font-weight: 500;
-  margin-bottom: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  color: var(--color-text-secondary);
 }
 
 .dashboard-players-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
 }
 
 .dashboard-sessions-list {
@@ -47,7 +51,7 @@
 
 .dashboard-empty {
   text-align: center;
-  padding: 24px;
+  padding: 28px;
   color: var(--color-text-tertiary);
   font-size: 13px;
 }

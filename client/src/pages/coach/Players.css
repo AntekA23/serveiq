@@ -2,12 +2,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .players-search {
-  margin-bottom: 16px;
-  max-width: 300px;
+  margin-bottom: 18px;
+  max-width: 320px;
 }
 
 .players-grid {

@@ -2,28 +2,29 @@
 }
 
 .parent-payments-section {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .parent-payments-section-title {
-  font-size: 13px;
-  font-weight: 500;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
   color: var(--color-text-secondary);
-  margin-bottom: 12px;
+  letter-spacing: 1.5px;
+  margin-bottom: 14px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .parent-payments-empty {
   text-align: center;
-  padding: 32px;
+  padding: 36px;
   color: var(--color-text-tertiary);
   font-size: 13px;
 }
 
 .parent-payments-error {
   text-align: center;
-  padding: 32px;
-  color: var(--color-red-text);
+  padding: 36px;
+  color: var(--color-red);
   font-size: 13px;
 }

@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .sessions-loading {
@@ -22,43 +22,46 @@
 .sessions-filters {
   display: flex;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .sessions-filters select {
-  padding: 6px 12px;
-  border: 0.5px solid var(--color-border-md);
+  padding: 8px 14px;
+  border: 1px solid var(--color-border-md);
   border-radius: var(--radius-md);
-  background: var(--color-bg);
+  background: var(--color-bg-secondary);
   font-size: 13px;
   color: var(--color-text);
   font-family: inherit;
+  cursor: pointer;
 }
 
 .sessions-filters select:focus {
   outline: none;
-  border-color: var(--color-blue);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-muted);
 }
 
 .sessions-list {
 }
 
 .session-expanded {
-  padding: 12px 16px;
+  padding: 14px 18px;
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
-  margin-top: 8px;
+  margin-top: 10px;
   font-size: 12px;
+  border: 1px solid var(--color-border);
 }
 
 .session-notes {
   color: var(--color-text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   white-space: pre-line;
 }
 
 .session-skill-updates {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .session-skill-update {
@@ -69,12 +72,12 @@
 }
 
 .session-skill-update-label {
-  font-weight: 500;
+  font-weight: 600;
   min-width: 70px;
 }
 
 .session-actions {
   display: flex;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 10px;
 }

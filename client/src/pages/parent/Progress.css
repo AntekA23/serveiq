@@ -11,7 +11,7 @@
 .progress-error {
   text-align: center;
   padding: 40px;
-  color: var(--color-red-text);
+  color: var(--color-red);
   font-size: 13px;
 }
 
@@ -23,26 +23,27 @@
 }
 
 .progress-child {
-  margin-bottom: 32px;
+  margin-bottom: 36px;
 }
 
 .progress-child-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-bottom: 24px;
 }
 
 .progress-child-name {
-  font-size: 22px;
-  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 1px;
 }
 
 .progress-skills {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 18px;
+  margin-bottom: 28px;
 }
 
 .progress-skill-item {
@@ -52,17 +53,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 
 .progress-skill-name {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .progress-skill-score {
-  font-size: 15px;
-  font-weight: 500;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--color-accent);
 }
 
 .progress-skill-notes {
@@ -73,27 +76,30 @@
 }
 
 .progress-goals-section {
-  margin-top: 24px;
+  margin-top: 28px;
 }
 
 .progress-goals-title {
-  font-size: 15px;
-  font-weight: 500;
-  margin-bottom: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.8px;
+  margin-bottom: 14px;
 }
 
 .progress-goal {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
   margin-bottom: 6px;
+  border: 1px solid var(--color-border);
 }
 
 .progress-goal-check {
-  color: var(--color-green);
+  color: var(--color-accent);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -117,4 +123,5 @@
   font-size: 11px;
   color: var(--color-text-tertiary);
   margin-top: 2px;
+  font-weight: 500;
 }

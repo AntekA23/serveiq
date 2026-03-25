@@ -1,13 +1,14 @@
 .player-detail-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 18px;
+  margin-bottom: 28px;
 }
 
 .player-detail-name {
-  font-size: 22px;
-  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 1px;
 }
 
 .player-detail-meta {
@@ -15,24 +16,29 @@
   color: var(--color-text-secondary);
   display: flex;
   gap: 12px;
+  font-weight: 500;
 }
 
 .player-detail-sections {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
 }
 
 .player-detail-section {
 }
 
 .player-detail-section-title {
-  font-size: 13px;
-  font-weight: 500;
-  margin-bottom: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  color: var(--color-text-secondary);
 }
 
 .player-detail-section-title > span {
@@ -43,7 +49,7 @@
 
 .player-detail-empty {
   text-align: center;
-  padding: 20px;
+  padding: 24px;
   color: var(--color-text-tertiary);
   font-size: 13px;
 }
@@ -58,7 +64,7 @@
 .skills-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
 }
 
 .goals-list {
@@ -71,9 +77,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
 }
 
 .goal-item-text {
@@ -84,6 +91,7 @@
 .goal-item-date {
   font-size: 11px;
   color: var(--color-text-tertiary);
+  font-weight: 500;
 }
 
 .goal-item.completed .goal-item-text {
@@ -95,7 +103,7 @@
   width: 16px;
   height: 16px;
   cursor: pointer;
-  accent-color: var(--color-green);
+  accent-color: var(--color-accent);
 }
 
 .tournaments-list {
@@ -108,9 +116,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
 }
 
 .tournament-mini-info {
@@ -120,7 +129,7 @@
 
 .tournament-mini-name {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   display: block;
 }
 
@@ -131,7 +140,7 @@
 
 .tournament-mini-result {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-text-secondary);
 }
 
@@ -139,27 +148,31 @@
 .ranking-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
 }
 
 .ranking-item {
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
-  padding: 12px 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
 }
 
 .ranking-label {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--color-text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  font-weight: 600;
 }
 
 .ranking-value {
-  font-size: 20px;
-  font-weight: 500;
-  color: var(--color-text);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--color-accent);
   margin-top: 2px;
+  letter-spacing: 0.5px;
 }
 
 .ranking-form {
@@ -189,26 +202,27 @@
 
 .skill-edit-label {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .skill-edit-value {
   font-size: 12px;
-  color: var(--color-text-tertiary);
+  color: var(--color-accent);
+  font-weight: 600;
 }
 
 .skill-edit-slider {
   width: 100%;
-  accent-color: var(--color-blue);
+  accent-color: var(--color-accent);
 }
 
 .skill-edit-notes {
   font-family: inherit;
   font-size: 12px;
-  padding: 6px 10px;
-  border: 0.5px solid var(--color-border-md);
+  padding: 8px 12px;
+  border: 1px solid var(--color-border-md);
   border-radius: var(--radius-sm);
-  background: var(--color-bg);
+  background: var(--color-bg-secondary);
   color: var(--color-text);
   resize: vertical;
   min-height: 32px;
@@ -216,7 +230,8 @@
 
 .skill-edit-notes:focus {
   outline: none;
-  border-color: var(--color-blue);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-muted);
 }
 
 /* Goal form */
@@ -234,6 +249,9 @@
 
 @media (max-width: 640px) {
   .skills-grid {
+    grid-template-columns: 1fr;
+  }
+  .ranking-grid {
     grid-template-columns: 1fr;
   }
 }

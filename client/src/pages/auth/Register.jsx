@@ -61,7 +61,7 @@ export default function Register() {
   return (
     <div className="register-page">
       <div className="register-card">
-        <div className="register-logo">ServeIQ</div>
+        <div className="register-logo">SERVE<span style={{ color: 'var(--color-text)' }}>IQ</span></div>
         <div className="register-subtitle">Utwórz konto trenera</div>
 
         {error && <div className="register-error">{error}</div>}

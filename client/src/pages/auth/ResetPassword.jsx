@@ -51,7 +51,7 @@ export default function ResetPassword() {
   return (
     <div className="reset-page">
       <div className="reset-card">
-        <div className="reset-logo">ServeIQ</div>
+        <div className="reset-logo">SERVE<span style={{ color: 'var(--color-text)' }}>IQ</span></div>
         <div className="reset-subtitle">Ustaw nowe hasło</div>
 
         {error && <div className="reset-error">{error}</div>}

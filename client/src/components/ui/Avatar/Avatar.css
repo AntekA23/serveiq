@@ -3,17 +3,21 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-weight: 500;
+  font-weight: 700;
   text-transform: uppercase;
   flex-shrink: 0;
+  letter-spacing: 0.5px;
+  font-family: 'Bebas Neue', sans-serif;
 }
 .avatar-coach {
-  background: var(--color-blue-bg);
-  color: var(--color-blue-text);
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+  border: 1px solid rgba(204,255,0,0.2);
 }
 .avatar-parent {
-  background: var(--color-green-bg);
-  color: var(--color-green-text);
+  background: var(--color-blue-bg);
+  color: var(--color-blue);
+  border: 1px solid rgba(77,166,255,0.2);
 }
 .avatar img {
   width: 100%;
