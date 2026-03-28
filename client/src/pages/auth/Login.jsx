@@ -3,9 +3,10 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate } from 'react-router-dom'
-import { Mail, Lock } from 'lucide-react'
+import { Mail, Lock, Play } from 'lucide-react'
 import useAuth from '../../hooks/useAuth'
 import useAuthStore from '../../store/authStore'
+import { getDemoUser, DEMO_TOKEN } from '../../services/demoData'
 import Button from '../../components/ui/Button/Button'
 import Input from '../../components/ui/Input/Input'
 import './Login.css'
@@ -47,6 +48,12 @@ export default function Login() {
     }
   }
 
+  const handleDemo = () => {
+    const demoUser = getDemoUser()
+    useAuthStore.getState().setAuth(demoUser, DEMO_TOKEN)
+    navigate('/parent/dashboard')
+  }
+
   return (
     <div className="login-page">
       <div className="login-card">
@@ -76,6 +83,15 @@ export default function Login() {
             Zaloguj się
           </Button>
         </form>
+
+        <div className="login-divider">
+          <span>lub</span>
+        </div>
+
+        <button className="login-demo-btn" onClick={handleDemo}>
+          <Play size={16} />
+          Tryb demo — zobacz dashboard
+        </button>
 
         <div className="login-links">
           <Link to="/forgot-password">Zapomniałeś hasła?</Link>

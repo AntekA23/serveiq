@@ -1,14 +1,36 @@
 import axios from 'axios'
 import useAuthStore from '../store/authStore'
+import { DEMO_TOKEN, matchDemoResponse } from '../services/demoData'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api',
   withCredentials: true,
 })
 
-// Request interceptor — attach access token
+// Request interceptor — attach access token + demo mode bypass
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken
+
+  // Demo mode: return mock data without hitting backend
+  if (token === DEMO_TOKEN) {
+    const method = (config.method || 'get').toUpperCase()
+    const url = (config.baseURL || '') + (config.url || '')
+    const demoResponse = matchDemoResponse(method, url)
+
+    if (demoResponse) {
+      const fakeAdapter = () =>
+        Promise.resolve({
+          data: demoResponse,
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          config,
+        })
+      config.adapter = fakeAdapter
+    }
+    return config
+  }
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
