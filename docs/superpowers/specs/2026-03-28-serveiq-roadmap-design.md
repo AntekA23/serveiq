@@ -1,11 +1,32 @@
 # ServeIQ - Roadmap Rozwoju Produktu SaaS
 
 **Data utworzenia:** 2026-03-28
+**Ostatnia aktualizacja:** 2026-03-28
 **Model biznesowy:** SaaS, trial 14 dni + subskrypcja miesięczna
 **Docelowy klient:** Rodzic mlodego tenisisty (B2C start, B2B skalowanie do klubow)
 **Core value:** Pelny obraz rozwoju dziecka + spokoj rodzica
 **Timeline:** ~8 tygodni do beta launch
-**Status:** Aktywny
+**Status:** WSZYSTKIE FAZY ZAIMPLEMENTOWANE
+
+## Status implementacji
+
+| Faza | Status | Commit |
+|------|--------|--------|
+| Faza 0 — Fundament SaaS | DONE | feat(phase-0) |
+| Faza 1 — Wearable infrastructure | DONE | feat(phase-1+2) |
+| Faza 2 — Health charts, timeline | DONE | feat(phase-1+2) |
+| Faza 3 — Alerts & notifications | DONE | feat(phase-3+4) |
+| Faza 4 — Subscriptions & billing | DONE | feat(phase-3+4) |
+| Faza 5 — Landing page & beta | DONE | feat(phase-5) |
+
+### Co wymaga jeszcze pracy (przed produkcja):
+1. **Prawdziwe klucze API** — Garmin Developer, WHOOP Developer, Stripe price IDs
+2. **MongoDB Atlas** — connection string w .env
+3. **Testowanie E2E** — przejscie pelnego flow z prawdziwym urzadzeniem
+4. **Konsultacja prawna** — regulamin i polityka prywatnosci do weryfikacji
+5. **Domena i deploy** — Railway + custom domain + SSL
+6. **Sentry** — error monitoring
+7. **PostHog/Mixpanel** — analytics events
 
 ---
 
