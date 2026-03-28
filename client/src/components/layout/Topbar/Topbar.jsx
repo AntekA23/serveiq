@@ -1,7 +1,8 @@
-import { Menu, Moon, Sun, Bell } from 'lucide-react'
+import { Menu, Moon, Sun } from 'lucide-react'
 import useUiStore from '../../../store/uiStore'
 import useAuthStore from '../../../store/authStore'
 import Avatar from '../../ui/Avatar'
+import NotificationBell from '../NotificationBell'
 import './Topbar.css'
 
 export default function Topbar() {
@@ -22,9 +23,7 @@ export default function Topbar() {
         <button className="topbar-icon-btn" onClick={toggleTheme} title="Zmien motyw">
           {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
         </button>
-        <button className="topbar-icon-btn" title="Powiadomienia">
-          <Bell size={18} />
-        </button>
+        <NotificationBell />
         <Avatar
           firstName={user?.firstName}
           lastName={user?.lastName}

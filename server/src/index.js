@@ -12,7 +12,7 @@ import connectDB from './config/db.js';
 import errorHandler from './middleware/errorHandler.js';
 import { generalLimiter } from './middleware/rateLimiter.js';
 import chatHandler from './socket/chatHandler.js';
-import { syncAllDevices } from './jobs/syncWearables.js';
+import { startJobs } from './jobs/index.js';
 
 // Routes
 import authRoutes from './routes/auth.js';
@@ -22,6 +22,8 @@ import paymentRoutes from './routes/payments.js';
 import tournamentRoutes from './routes/tournaments.js';
 import messageRoutes from './routes/messages.js';
 import wearableRoutes from './routes/wearables.js';
+import subscriptionRoutes from './routes/subscriptions.js';
+import notificationRoutes from './routes/notifications.js';
 
 // ====== Konfiguracja ======
 
@@ -65,7 +67,10 @@ app.use(generalLimiter);
 
 // Body parser - ale NIE dla Stripe webhook (wymaga raw body)
 app.use((req, res, next) => {
-  if (req.originalUrl === '/api/payments/webhook') {
+  if (
+    req.originalUrl === '/api/payments/webhook' ||
+    req.originalUrl === '/api/subscriptions/webhook'
+  ) {
     next();
   } else {
     express.json({ limit: '10mb' })(req, res, next);
@@ -88,6 +93,8 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/wearables', wearableRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
@@ -126,10 +133,8 @@ const startServer = async () => {
       console.log(`[ServeIQ] API: http://localhost:${PORT}/api`);
       console.log(`[ServeIQ] Klient: ${CLIENT_URL}`);
 
-      // Cykliczna synchronizacja urządzeń wearable co 15 minut
-      const SYNC_INTERVAL = 15 * 60 * 1000; // 15 minut
-      setInterval(syncAllDevices, SYNC_INTERVAL);
-      console.log(`[ServeIQ] Auto-sync wearables: co 15 minut\n`);
+      // Uruchom wszystkie zadania cykliczne
+      startJobs();
     });
   } catch (error) {
     console.error('[ServeIQ] Błąd uruchamiania serwera:', error.message);

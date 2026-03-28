@@ -389,7 +389,82 @@ export const DEMO_RESPONSES = {
   'GET /payments': { payments: [] },
 
   // GET /notifications
-  'GET /notifications': { notifications: [] },
+  'GET /notifications': {
+    notifications: [
+      {
+        _id: 'notif-1',
+        type: 'recovery_low',
+        title: 'Krytyczna regeneracja - Kacper Kowalski',
+        body: 'Wynik regeneracji: 28%. Zalecany odpoczynek i lzejszy trening.',
+        severity: 'critical',
+        read: false,
+        player: 'demo-player-001',
+        actionUrl: '/parent/player/demo-player-001/health',
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        _id: 'notif-2',
+        type: 'health_alert',
+        title: 'Za malo snu - Kacper Kowalski',
+        body: 'Czas snu: 5h 20min (minimum: 6h). Niewystarczajacy sen moze wplynac na regeneracje.',
+        severity: 'warning',
+        read: false,
+        player: 'demo-player-001',
+        actionUrl: '/parent/player/demo-player-001/health',
+        createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        _id: 'notif-3',
+        type: 'recovery_high',
+        title: 'Swietna regeneracja - Kacper Kowalski',
+        body: 'Wynik regeneracji: 92%. Organizm gotowy na intensywny trening!',
+        severity: 'info',
+        read: false,
+        player: 'demo-player-001',
+        actionUrl: '/parent/player/demo-player-001/health',
+        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        _id: 'notif-4',
+        type: 'milestone',
+        title: 'Cel osiagniety - Kacper Kowalski',
+        body: 'Kacper Kowalski osiagnal cel: "Opanowanie drop shota". Gratulacje!',
+        severity: 'info',
+        read: true,
+        player: 'demo-player-001',
+        actionUrl: '/parent/player/demo-player-001',
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        _id: 'notif-5',
+        type: 'device_disconnected',
+        title: 'Brak synchronizacji - WHOOP 4.0',
+        body: 'Urzadzenie WHOOP 4.0 (Kacper Kowalski) nie synchronizowalo sie od ponad 24 godzin. Sprawdz polaczenie.',
+        severity: 'warning',
+        read: true,
+        player: 'demo-player-001',
+        actionUrl: '/parent/devices',
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        _id: 'notif-6',
+        type: 'weekly_summary',
+        title: 'Tygodniowe podsumowanie',
+        body: 'Podsumowanie tygodnia zostalo wyslane na demo@serveiq.pl.',
+        severity: 'info',
+        read: true,
+        player: null,
+        actionUrl: '/parent/dashboard',
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+    ],
+    total: 6,
+    limit: 20,
+    offset: 0,
+  },
+
+  // GET /notifications/unread-count
+  'GET /notifications/unread-count': { count: 3 },
 
   // POST /wearables (connect)
   'POST /wearables': { message: 'Urzadzenie zostalo polaczone', device: DEMO_DEVICES[0] },
@@ -425,6 +500,34 @@ export const DEMO_RESPONSES = {
 
   // GET /messages/conversations
   'GET /messages/conversations': [],
+
+  // GET /subscriptions
+  'GET /subscriptions': {
+    subscription: {
+      plan: 'premium',
+      status: 'trialing',
+      trialEndsAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+      currentPeriodEnd: null,
+      cancelAtPeriodEnd: false,
+    },
+  },
+
+  // POST /subscriptions/checkout
+  'POST /subscriptions/checkout': { url: '#demo-checkout' },
+
+  // POST /subscriptions/portal
+  'POST /subscriptions/portal': { url: '#demo-portal' },
+
+  // POST /subscriptions/cancel
+  'POST /subscriptions/cancel': {
+    message: 'Subskrypcja zostanie anulowana na koniec okresu rozliczeniowego',
+    subscription: {
+      plan: 'premium',
+      status: 'trialing',
+      cancelAtPeriodEnd: true,
+      currentPeriodEnd: null,
+    },
+  },
 }
 
 export const DEMO_TOKEN = 'demo-token-serveiq'
@@ -523,9 +626,26 @@ export function matchDemoResponse(method, url) {
     return { sessions: DEMO_SESSIONS }
   }
 
+  // /notifications/unread-count
+  if (path === '/notifications/unread-count' && upperMethod === 'GET') {
+    return DEMO_RESPONSES['GET /notifications/unread-count']
+  }
+
+  // /notifications/:id/read (PUT)
+  const notifReadMatch = path.match(/^\/notifications\/([^/]+)\/read$/)
+  if (notifReadMatch && upperMethod === 'PUT') {
+    return { message: 'Oznaczono jako przeczytane' }
+  }
+
+  // /notifications/:id (DELETE)
+  const notifDeleteMatch = path.match(/^\/notifications\/([^/]+)$/)
+  if (notifDeleteMatch && upperMethod === 'DELETE') {
+    return { message: 'Powiadomienie zostalo usuniete' }
+  }
+
   // /notifications
   if (path === '/notifications' && upperMethod === 'GET') {
-    return { notifications: [] }
+    return DEMO_RESPONSES['GET /notifications']
   }
 
   // /notifications/read-all

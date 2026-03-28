@@ -23,6 +23,7 @@ import ParentPayments from './pages/parent/Payments'
 import ParentMessages from './pages/parent/Chat'
 import Onboarding from './pages/parent/Onboarding'
 import Settings from './pages/parent/Settings'
+import Pricing from './pages/parent/Pricing'
 
 // Payment pages
 import PaymentSuccess from './pages/parent/PaymentSuccess'
@@ -190,6 +191,15 @@ export default function App() {
           element={
             <ProtectedRoute role="parent">
               <AppShell><Settings /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/parent/pricing"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><Pricing /></AppShell>
             </ProtectedRoute>
           }
         />

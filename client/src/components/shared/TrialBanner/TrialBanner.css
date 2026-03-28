@@ -1,0 +1,69 @@
+/* ─── Trial Banner ─── */
+.trial-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.trial-banner.trialing {
+  background: rgba(var(--color-accent-rgb, 59, 130, 246), 0.1);
+  border: 1px solid rgba(var(--color-accent-rgb, 59, 130, 246), 0.25);
+  color: var(--color-accent);
+}
+
+.trial-banner.expired {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: var(--color-red, #ef4444);
+}
+
+.trial-banner span {
+  flex: 1;
+}
+
+.trial-banner strong {
+  font-weight: 700;
+}
+
+.trial-banner-cta {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+.trial-banner.trialing .trial-banner-cta {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.trial-banner.expired .trial-banner-cta {
+  background: var(--color-red, #ef4444);
+  color: #fff;
+}
+
+.trial-banner-cta:hover {
+  opacity: 0.85;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 600px) {
+  .trial-banner {
+    flex-wrap: wrap;
+    font-size: 12px;
+  }
+
+  .trial-banner-cta {
+    width: 100%;
+    text-align: center;
+    margin-top: 4px;
+  }
+}
