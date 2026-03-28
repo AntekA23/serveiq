@@ -32,6 +32,11 @@ import PaymentCancel from './pages/parent/PaymentCancel'
 // OAuth callback
 import DeviceCallback from './pages/parent/DeviceCallback'
 
+// Landing + Legal pages
+import Landing from './pages/Landing'
+import Terms from './pages/legal/Terms'
+import Privacy from './pages/legal/Privacy'
+
 // Coach disabled page
 import CoachDisabled from './pages/coach/CoachDisabled'
 
@@ -66,7 +71,7 @@ function RootRedirect() {
   const user = useAuthStore((s) => s.user)
   const accessToken = useAuthStore((s) => s.accessToken)
 
-  if (!accessToken) return <Navigate to="/login" replace />
+  if (!accessToken) return <Landing />
   if (user?.role === 'coach') return <Navigate to="/coach/disabled" replace />
   if (user?.role === 'parent' && !user?.onboardingCompleted) {
     return <Navigate to="/parent/onboarding" replace />
@@ -91,6 +96,10 @@ export default function App() {
       <Routes>
         {/* Root redirect */}
         <Route path="/" element={<RootRedirect />} />
+
+        {/* Public legal pages */}
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
 
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />

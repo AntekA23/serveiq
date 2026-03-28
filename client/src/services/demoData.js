@@ -518,6 +518,9 @@ export const DEMO_RESPONSES = {
   // POST /subscriptions/portal
   'POST /subscriptions/portal': { url: '#demo-portal' },
 
+  // POST /beta/signup
+  'POST /beta/signup': { message: 'Zapisano na liste' },
+
   // POST /subscriptions/cancel
   'POST /subscriptions/cancel': {
     message: 'Subskrypcja zostanie anulowana na koniec okresu rozliczeniowego',

@@ -24,6 +24,7 @@ import messageRoutes from './routes/messages.js';
 import wearableRoutes from './routes/wearables.js';
 import subscriptionRoutes from './routes/subscriptions.js';
 import notificationRoutes from './routes/notifications.js';
+import betaRoutes from './routes/beta.js';
 
 // ====== Konfiguracja ======
 
@@ -95,6 +96,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/wearables', wearableRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/beta', betaRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
