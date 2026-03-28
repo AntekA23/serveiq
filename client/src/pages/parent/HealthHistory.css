@@ -1,0 +1,353 @@
+/* ─── Health History Page ─── */
+.health-history {
+  max-width: 800px;
+}
+
+.health-history-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.health-history-back:hover {
+  color: var(--color-accent);
+}
+
+.health-history-header {
+  margin-bottom: 24px;
+}
+
+.health-history-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 1px;
+  color: var(--color-text);
+  margin: 0 0 4px;
+}
+
+.health-history-subtitle {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+}
+
+/* ─── Range Selector ─── */
+.health-range-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  margin-bottom: 24px;
+  width: fit-content;
+}
+
+.health-range-tab {
+  padding: 6px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: var(--color-text-secondary);
+  transition: all 0.15s ease;
+}
+
+.health-range-tab:hover {
+  color: var(--color-text);
+}
+
+.health-range-tab.active {
+  background: var(--color-accent);
+  color: #0B0E14;
+}
+
+/* ─── Chart Section ─── */
+.health-chart-section {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.health-chart-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.health-chart-section-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.health-chart-section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+  color: var(--color-text);
+  flex: 1;
+}
+
+.health-chart-section-trend {
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.health-chart-section-trend.positive {
+  color: var(--color-green);
+  background: var(--color-green-bg);
+}
+
+.health-chart-section-trend.negative {
+  color: var(--color-red);
+  background: var(--color-red-bg);
+}
+
+.health-chart-section-trend.neutral {
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-tertiary);
+}
+
+/* ─── SVG Line Chart ─── */
+.line-chart-container {
+  width: 100%;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.line-chart-container svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.line-chart-tooltip {
+  position: absolute;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-md);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--color-text);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+  transform: translateX(-50%);
+}
+
+/* ─── Stats Row ─── */
+.health-chart-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.health-chart-stat {
+  flex: 1;
+  text-align: center;
+  padding: 8px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+.health-chart-stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-tertiary);
+  margin-bottom: 2px;
+}
+
+.health-chart-stat-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--color-text);
+}
+
+/* ─── Sleep Bar Chart ─── */
+.sleep-legend {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.sleep-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.sleep-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+/* ─── Period Comparison ─── */
+.period-comparison {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-top: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.period-comparison-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+  color: var(--color-text);
+  margin: 0 0 16px;
+}
+
+.period-selectors {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.period-selector {
+  flex: 1;
+  min-width: 200px;
+}
+
+.period-selector-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-tertiary);
+  margin-bottom: 6px;
+}
+
+.period-selector select {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-md);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 13px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B92A5' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.period-selector select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.period-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.period-compare-card {
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: center;
+}
+
+.period-compare-card-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-tertiary);
+  margin-bottom: 8px;
+}
+
+.period-compare-values {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.period-compare-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--color-text);
+}
+
+.period-compare-vs {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+}
+
+.period-compare-delta {
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.period-compare-delta.positive {
+  color: var(--color-green);
+}
+
+.period-compare-delta.negative {
+  color: var(--color-red);
+}
+
+.period-compare-delta.neutral {
+  color: var(--color-text-tertiary);
+}
+
+/* ─── Loading ─── */
+.health-history-loading {
+  text-align: center;
+  padding: 60px;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .health-chart-stats {
+    flex-wrap: wrap;
+  }
+
+  .health-chart-stat {
+    min-width: calc(33% - 12px);
+  }
+
+  .period-selectors {
+    flex-direction: column;
+  }
+
+  .period-compare-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

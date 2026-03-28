@@ -194,9 +194,170 @@ function generateSessions() {
 
 const todayMetrics = generateDayMetrics(new Date().toISOString().split('T')[0])
 
+// --- Generate extended history (90 days) for trends ---
+function generateExtendedHistory(days = 90) {
+  const data = []
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    const dateStr = d.toISOString().split('T')[0]
+    const dayData = generateDayMetrics(dateStr)
+    // Add light/awake minutes for sleep detail
+    const sleep = dayData.metrics.sleep
+    const lightMin = Math.max(0, sleep.totalMinutes - sleep.deepMinutes - sleep.remMinutes - Math.round(sleep.totalMinutes * 0.05))
+    const awakeMin = Math.round(sleep.totalMinutes * 0.05)
+    sleep.lightMinutes = lightMin
+    sleep.awakeMinutes = awakeMin
+    data.push({ ...dayData, type: 'daily_summary', _id: `wd-${i}`, provider: 'whoop' })
+  }
+  return data
+}
+
+function generateTrendsData(range = 7) {
+  const allData = generateExtendedHistory(range * 2)
+  const currentData = allData.slice(range)
+  const prevData = allData.slice(0, range)
+
+  function avg(arr) { return arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length * 10) / 10 : 0 }
+  function min(arr) { return arr.length ? Math.min(...arr) : 0 }
+  function max(arr) { return arr.length ? Math.max(...arr) : 0 }
+  function delta(cur, prev) { return prev ? Math.round((cur - prev) / prev * 1000) / 10 : 0 }
+
+  function extract(data) {
+    const hr = [], hrv = [], sleep = [], recovery = [], strain = []
+    data.forEach(d => {
+      const m = d.metrics
+      if (m.heartRate?.resting) hr.push(m.heartRate.resting)
+      if (m.hrv?.value) hrv.push(m.hrv.value)
+      if (m.sleep?.quality) sleep.push(m.sleep.quality)
+      if (m.recovery?.score) recovery.push(m.recovery.score)
+      if (m.strain?.value) strain.push(m.strain.value)
+    })
+    return { hr, hrv, sleep, recovery, strain }
+  }
+
+  const cur = extract(currentData)
+  const prev = extract(prevData)
+
+  const chartData = currentData.map(d => ({
+    date: d.date,
+    hr: d.metrics?.heartRate?.resting || null,
+    hrv: d.metrics?.hrv?.value || null,
+    sleep: d.metrics?.sleep?.quality || null,
+    recovery: d.metrics?.recovery?.score || null,
+    strain: d.metrics?.strain?.value || null,
+  }))
+
+  const sleepDetail = currentData.map(d => ({
+    date: d.date,
+    deep: d.metrics?.sleep?.deepMinutes || 0,
+    rem: d.metrics?.sleep?.remMinutes || 0,
+    light: d.metrics?.sleep?.lightMinutes || 0,
+    awake: d.metrics?.sleep?.awakeMinutes || 0,
+  }))
+
+  return {
+    range,
+    chartData,
+    sleepDetail,
+    metrics: {
+      hr: { current: { min: min(cur.hr), avg: avg(cur.hr), max: max(cur.hr) }, previous: { min: min(prev.hr), avg: avg(prev.hr), max: max(prev.hr) }, delta: delta(avg(cur.hr), avg(prev.hr)) },
+      hrv: { current: { min: min(cur.hrv), avg: avg(cur.hrv), max: max(cur.hrv) }, previous: { min: min(prev.hrv), avg: avg(prev.hrv), max: max(prev.hrv) }, delta: delta(avg(cur.hrv), avg(prev.hrv)) },
+      sleep: { current: { min: min(cur.sleep), avg: avg(cur.sleep), max: max(cur.sleep) }, previous: { min: min(prev.sleep), avg: avg(prev.sleep), max: max(prev.sleep) }, delta: delta(avg(cur.sleep), avg(prev.sleep)) },
+      recovery: { current: { min: min(cur.recovery), avg: avg(cur.recovery), max: max(cur.recovery) }, previous: { min: min(prev.recovery), avg: avg(prev.recovery), max: max(prev.recovery) }, delta: delta(avg(cur.recovery), avg(prev.recovery)) },
+      strain: { current: { min: min(cur.strain), avg: avg(cur.strain), max: max(cur.strain) }, previous: { min: min(prev.strain), avg: avg(prev.strain), max: max(prev.strain) }, delta: delta(avg(cur.strain), avg(prev.strain)) },
+    },
+  }
+}
+
+function generateCompareData(p1From, p1To, p2From, p2To) {
+  function getMetrics(from, to) {
+    const start = new Date(from)
+    const end = new Date(to)
+    const hr = [], hrv = [], sleep = [], recovery = [], strain = []
+    let days = 0
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0]
+      const dayData = generateDayMetrics(dateStr)
+      const m = dayData.metrics
+      hr.push(m.heartRate.resting)
+      hrv.push(m.hrv.value)
+      sleep.push(m.sleep.quality)
+      recovery.push(m.recovery.score)
+      strain.push(m.strain.value)
+      days++
+    }
+    function avg(a) { return a.length ? Math.round(a.reduce((s,v)=>s+v,0)/a.length*10)/10 : 0 }
+    function mn(a) { return a.length ? Math.min(...a) : 0 }
+    function mx(a) { return a.length ? Math.max(...a) : 0 }
+    return {
+      hr: { min: mn(hr), avg: avg(hr), max: mx(hr) },
+      hrv: { min: mn(hrv), avg: avg(hrv), max: mx(hrv) },
+      sleep: { min: mn(sleep), avg: avg(sleep), max: mx(sleep) },
+      recovery: { min: mn(recovery), avg: avg(recovery), max: mx(recovery) },
+      strain: { min: mn(strain), avg: avg(strain), max: mx(strain) },
+      days,
+    }
+  }
+  const p1 = getMetrics(p1From, p1To)
+  const p2 = getMetrics(p2From, p2To)
+  function delta(cur, prev) { return prev ? Math.round((cur - prev) / prev * 1000) / 10 : 0 }
+  return {
+    period1: { from: p1From, to: p1To, ...p1 },
+    period2: { from: p2From, to: p2To, ...p2 },
+    deltas: {
+      hr: delta(p1.hr.avg, p2.hr.avg),
+      hrv: delta(p1.hrv.avg, p2.hrv.avg),
+      sleep: delta(p1.sleep.avg, p2.sleep.avg),
+      recovery: delta(p1.recovery.avg, p2.recovery.avg),
+      strain: delta(p1.strain.avg, p2.strain.avg),
+    },
+  }
+}
+
+function generateTimelineEvents() {
+  const events = []
+  const now = new Date()
+
+  // Skill updates
+  events.push({ type: 'skill_update', date: new Date(now - 2 * 86400000).toISOString(), title: 'Serwis: 72% -> 78%', description: 'Trening techniczny - praca nad drugim serwisem' })
+  events.push({ type: 'skill_update', date: new Date(now - 5 * 86400000).toISOString(), title: 'Forhend: 79% -> 82%', description: 'Sparing - intensywna praca z forhenda' })
+  events.push({ type: 'skill_update', date: new Date(now - 9 * 86400000).toISOString(), title: 'Kondycja: 82% -> 85%', description: 'Trening kondycyjny' })
+  events.push({ type: 'skill_update', date: new Date(now - 14 * 86400000).toISOString(), title: 'Taktyka: 67% -> 70%', description: 'Praca nad czytaniem gry przeciwnika' })
+  events.push({ type: 'skill_update', date: new Date(now - 21 * 86400000).toISOString(), title: 'Bekhend: 62% -> 65%', description: 'Bekhend jedoreczny - poprawa techniki' })
+
+  // Tournaments
+  events.push({ type: 'tournament', date: new Date(now - 7 * 86400000).toISOString(), title: 'Turniej Krakow Junior Open - #8', description: 'Krakow, nawierzchnia: clay' })
+  events.push({ type: 'tournament', date: new Date(now - 25 * 86400000).toISOString(), title: 'Turniej Wroclaw Cup - #12', description: 'Wroclaw, nawierzchnia: hard' })
+  events.push({ type: 'tournament', date: new Date(now - 45 * 86400000).toISOString(), title: 'Turniej Poznan Open Junior - #16', description: 'Poznan, nawierzchnia: clay' })
+
+  // Goals completed
+  events.push({ type: 'goal_completed', date: '2026-03-10T10:00:00.000Z', title: 'Cel osiagniety', description: 'Opanowanie drop shota' })
+  events.push({ type: 'goal_completed', date: '2026-02-20T10:00:00.000Z', title: 'Cel osiagniety', description: 'Poprawa backhanda do 60%' })
+
+  // Health trends
+  events.push({ type: 'health_trend', date: new Date(now - 3 * 86400000).toISOString(), title: 'HRV wzroslo o 12%', description: 'Srednie HRV: 78 ms (vs 69 ms tydzien wczesniej)' })
+  events.push({ type: 'health_trend', date: new Date(now - 12 * 86400000).toISOString(), title: 'Regeneracja poprawila sie o 8%', description: 'Sredni wynik regeneracji: 74% (vs 68% tydzien wczesniej)' })
+  events.push({ type: 'health_trend', date: new Date(now - 20 * 86400000).toISOString(), title: 'Jakosc snu spadla o 6%', description: 'Srednia jakosc snu: 71% (vs 76% tydzien wczesniej)' })
+
+  // Device connected
+  events.push({ type: 'device_connected', date: new Date(now - 30 * 86400000).toISOString(), title: 'Polaczono WHOOP 4.0', description: 'Urzadzenie rozpoczelo zbieranie danych' })
+  events.push({ type: 'device_connected', date: new Date(now - 28 * 86400000).toISOString(), title: 'Polaczono Garmin Forerunner 265', description: 'Urzadzenie rozpoczelo zbieranie danych' })
+
+  // More skill updates for richness
+  events.push({ type: 'skill_update', date: new Date(now - 35 * 86400000).toISOString(), title: 'Wolej: 50% -> 55%', description: 'Praca przy siatce z trenerem' })
+  events.push({ type: 'skill_update', date: new Date(now - 42 * 86400000).toISOString(), title: 'Serwis: 68% -> 72%', description: 'Pierwszy serwis - wieksza precyzja' })
+  events.push({ type: 'skill_update', date: new Date(now - 50 * 86400000).toISOString(), title: 'Forhend: 75% -> 79%', description: 'Forhend z rotacja - nowa technika' })
+
+  // Sort by date descending
+  events.sort((a, b) => new Date(b.date) - new Date(a.date))
+  return events
+}
+
 // --- Demo API response handlers ---
 const DEMO_HISTORY = generateHistory()
 const DEMO_SESSIONS = generateSessions()
+const DEMO_TIMELINE = generateTimelineEvents()
 
 export const DEMO_RESPONSES = {
   // GET /players
@@ -295,10 +456,42 @@ export function matchDemoResponse(method, url) {
     return DEMO_RESPONSES['GET /wearables/data/demo-player-001/latest']
   }
 
+  // /wearables/data/:playerId/trends
+  const trendsMatch = path.match(/^\/wearables\/data\/([^/]+)\/trends$/)
+  if (trendsMatch && upperMethod === 'GET') {
+    const params = new URLSearchParams(queryStr)
+    const range = parseInt(params.get('range')) || 7
+    return generateTrendsData(range)
+  }
+
+  // /wearables/data/:playerId/compare
+  const compareMatch = path.match(/^\/wearables\/data\/([^/]+)\/compare$/)
+  if (compareMatch && upperMethod === 'GET') {
+    const params = new URLSearchParams(queryStr)
+    const p1From = params.get('p1_from')
+    const p1To = params.get('p1_to')
+    const p2From = params.get('p2_from')
+    const p2To = params.get('p2_to')
+    if (p1From && p1To && p2From && p2To) {
+      return generateCompareData(p1From, p1To, p2From, p2To)
+    }
+    // Fallback defaults
+    const now = new Date()
+    const d7 = new Date(now - 7 * 86400000).toISOString().split('T')[0]
+    const d14 = new Date(now - 14 * 86400000).toISOString().split('T')[0]
+    return generateCompareData(d7, now.toISOString().split('T')[0], d14, d7)
+  }
+
   // /wearables/data/:playerId
   const dataMatch = path.match(/^\/wearables\/data\/([^/]+)$/)
   if (dataMatch) {
     return DEMO_RESPONSES['GET /wearables/data/demo-player-001']
+  }
+
+  // /players/:id/timeline (GET)
+  const timelineMatch = path.match(/^\/players\/([^/]+)\/timeline$/)
+  if (timelineMatch && upperMethod === 'GET') {
+    return { events: DEMO_TIMELINE }
   }
 
   // /players/:id (GET)

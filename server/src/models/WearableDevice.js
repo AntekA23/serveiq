@@ -41,6 +41,33 @@ const wearableDeviceSchema = new mongoose.Schema(
       min: [0, 'Poziom baterii nie może być mniejszy niż 0'],
       max: [100, 'Poziom baterii nie może być większy niż 100'],
     },
+    authState: {
+      type: String,
+      enum: {
+        values: ['pending', 'connected', 'expired', 'error'],
+        message: 'Stan autoryzacji musi być "pending", "connected", "expired" lub "error"',
+      },
+      default: 'connected',
+    },
+    accessToken: {
+      type: String, // W produkcji powinien być szyfrowany (AES-256)
+    },
+    refreshToken: {
+      type: String, // W produkcji powinien być szyfrowany (AES-256)
+    },
+    tokenExpiresAt: {
+      type: Date,
+    },
+    oauthState: {
+      type: String, // Ochrona CSRF podczas przepływu OAuth
+    },
+    codeVerifier: {
+      type: String, // PKCE code_verifier (dla WHOOP)
+    },
+    syncErrorCount: {
+      type: Number,
+      default: 0,
+    },
     settings: {
       syncInterval: {
         type: Number,

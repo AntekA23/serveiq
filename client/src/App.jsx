@@ -15,6 +15,8 @@ import AcceptInvite from './pages/auth/AcceptInvite'
 // Parent pages (PRIMARY)
 import ParentDashboard from './pages/parent/Dashboard'
 import ChildProfile from './pages/parent/ChildProfile'
+import HealthHistory from './pages/parent/HealthHistory'
+import Timeline from './pages/parent/Timeline'
 import Devices from './pages/parent/Devices'
 import TrainingPlan from './pages/parent/TrainingPlan'
 import ParentPayments from './pages/parent/Payments'
@@ -25,6 +27,9 @@ import Settings from './pages/parent/Settings'
 // Payment pages
 import PaymentSuccess from './pages/parent/PaymentSuccess'
 import PaymentCancel from './pages/parent/PaymentCancel'
+
+// OAuth callback
+import DeviceCallback from './pages/parent/DeviceCallback'
 
 // Coach disabled page
 import CoachDisabled from './pages/coach/CoachDisabled'
@@ -125,6 +130,22 @@ export default function App() {
           }
         />
         <Route
+          path="/parent/child/:id/health"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><HealthHistory /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/child/:id/timeline"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><Timeline /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/parent/devices"
           element={
             <ProtectedRoute role="parent">
@@ -176,6 +197,9 @@ export default function App() {
         {/* Payment callback routes */}
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/cancel" element={<PaymentCancel />} />
+
+        {/* OAuth callback — urządzenia wearable (publiczny, bez AppShell) */}
+        <Route path="/parent/devices/callback" element={<DeviceCallback />} />
       </Routes>
 
       <ToastContainer />

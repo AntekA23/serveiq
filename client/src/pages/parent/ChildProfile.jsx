@@ -11,6 +11,8 @@ import {
   ArrowLeft,
   Watch,
   Calendar,
+  BarChart3,
+  Clock,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -249,6 +251,24 @@ export default function ChildProfile() {
           </div>
         </div>
       )}
+
+      {/* Quick navigation links */}
+      <div className="child-profile-nav-links">
+        <button
+          className="child-profile-nav-link"
+          onClick={() => navigate(`/parent/child/${id}/health`)}
+        >
+          <BarChart3 size={16} />
+          Historia zdrowia
+        </button>
+        <button
+          className="child-profile-nav-link"
+          onClick={() => navigate(`/parent/child/${id}/timeline`)}
+        >
+          <Clock size={16} />
+          Historia postepu
+        </button>
+      </div>
 
       {wearableHistory.length === 0 && (
         <div className="child-profile-no-data">

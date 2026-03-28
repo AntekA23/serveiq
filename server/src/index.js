@@ -12,6 +12,7 @@ import connectDB from './config/db.js';
 import errorHandler from './middleware/errorHandler.js';
 import { generalLimiter } from './middleware/rateLimiter.js';
 import chatHandler from './socket/chatHandler.js';
+import { syncAllDevices } from './jobs/syncWearables.js';
 
 // Routes
 import authRoutes from './routes/auth.js';
@@ -123,7 +124,12 @@ const startServer = async () => {
       console.log(`\n[ServeIQ] Serwer uruchomiony na porcie ${PORT}`);
       console.log(`[ServeIQ] Środowisko: ${process.env.NODE_ENV || 'development'}`);
       console.log(`[ServeIQ] API: http://localhost:${PORT}/api`);
-      console.log(`[ServeIQ] Klient: ${CLIENT_URL}\n`);
+      console.log(`[ServeIQ] Klient: ${CLIENT_URL}`);
+
+      // Cykliczna synchronizacja urządzeń wearable co 15 minut
+      const SYNC_INTERVAL = 15 * 60 * 1000; // 15 minut
+      setInterval(syncAllDevices, SYNC_INTERVAL);
+      console.log(`[ServeIQ] Auto-sync wearables: co 15 minut\n`);
     });
   } catch (error) {
     console.error('[ServeIQ] Błąd uruchamiania serwera:', error.message);

@@ -1,0 +1,198 @@
+/* ─── Timeline Page ─── */
+.timeline-page {
+  max-width: 800px;
+}
+
+.timeline-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.timeline-back:hover {
+  color: var(--color-accent);
+}
+
+.timeline-header {
+  margin-bottom: 28px;
+}
+
+.timeline-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 1px;
+  color: var(--color-text);
+  margin: 0 0 4px;
+}
+
+.timeline-subtitle {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+}
+
+/* ─── Timeline List ─── */
+.timeline-list {
+  position: relative;
+  padding-left: 32px;
+}
+
+/* Vertical line */
+.timeline-list::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-border-md);
+}
+
+/* ─── Timeline Event ─── */
+.timeline-event {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding-bottom: 24px;
+}
+
+.timeline-event:last-child {
+  padding-bottom: 0;
+}
+
+/* Colored dot on the line */
+.timeline-event-dot {
+  position: absolute;
+  left: -27px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-bg);
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.timeline-event-content {
+  flex: 1;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.15s ease;
+}
+
+.timeline-event-content:hover {
+  border-color: var(--color-border-md);
+}
+
+.timeline-event-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.timeline-event-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.timeline-event-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  flex: 1;
+}
+
+.timeline-event-date {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.timeline-event-description {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-left: 36px;
+  line-height: 1.4;
+}
+
+/* ─── Event type colors ─── */
+.timeline-event--skill_update .timeline-event-dot {
+  background: var(--color-blue);
+}
+.timeline-event--skill_update .timeline-event-icon {
+  background: var(--color-blue-bg);
+  color: var(--color-blue);
+}
+
+.timeline-event--tournament .timeline-event-dot {
+  background: var(--color-amber);
+}
+.timeline-event--tournament .timeline-event-icon {
+  background: var(--color-amber-bg);
+  color: var(--color-amber);
+}
+
+.timeline-event--goal_completed .timeline-event-dot {
+  background: var(--color-green);
+}
+.timeline-event--goal_completed .timeline-event-icon {
+  background: var(--color-green-bg);
+  color: var(--color-green);
+}
+
+.timeline-event--health_trend .timeline-event-dot {
+  background: var(--color-sleep);
+}
+.timeline-event--health_trend .timeline-event-icon {
+  background: var(--color-sleep-bg);
+  color: var(--color-sleep);
+}
+
+.timeline-event--device_connected .timeline-event-dot {
+  background: var(--color-hrv);
+}
+.timeline-event--device_connected .timeline-event-icon {
+  background: var(--color-hrv-bg);
+  color: var(--color-hrv);
+}
+
+/* ─── Loading / Empty ─── */
+.timeline-loading,
+.timeline-empty {
+  text-align: center;
+  padding: 60px;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .timeline-list {
+    padding-left: 28px;
+  }
+
+  .timeline-event-dot {
+    left: -23px;
+    width: 10px;
+    height: 10px;
+  }
+
+  .timeline-event-description {
+    margin-left: 0;
+  }
+}
