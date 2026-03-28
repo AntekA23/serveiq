@@ -6,6 +6,7 @@ import {
   Calendar,
   CreditCard,
   MessageSquare,
+  Settings,
   LogOut,
 } from 'lucide-react'
 import useAuthStore from '../../../store/authStore'
@@ -20,6 +21,7 @@ const parentNav = [
   { to: '/parent/training-plan', label: 'Plan treningowy', icon: Calendar },
   { to: '/parent/payments', label: 'Platnosci', icon: CreditCard },
   { to: '/parent/messages', label: 'Wiadomosci', icon: MessageSquare },
+  { to: '/parent/settings', label: 'Ustawienia', icon: Settings },
 ]
 
 export default function Sidebar() {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import useAuthStore from './store/authStore'
 import useAuth from './hooks/useAuth'
 import AppShell from './components/layout/AppShell'
@@ -19,6 +19,8 @@ import Devices from './pages/parent/Devices'
 import TrainingPlan from './pages/parent/TrainingPlan'
 import ParentPayments from './pages/parent/Payments'
 import ParentMessages from './pages/parent/Chat'
+import Onboarding from './pages/parent/Onboarding'
+import Settings from './pages/parent/Settings'
 
 // Payment pages
 import PaymentSuccess from './pages/parent/PaymentSuccess'
@@ -31,6 +33,7 @@ function ProtectedRoute({ children, role }) {
   const user = useAuthStore((s) => s.user)
   const accessToken = useAuthStore((s) => s.accessToken)
   const isAuthenticated = !!accessToken
+  const location = useLocation()
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />
@@ -39,6 +42,15 @@ function ProtectedRoute({ children, role }) {
   if (role && user?.role !== role) {
     if (user?.role === 'coach') return <Navigate to="/coach/disabled" replace />
     return <Navigate to="/parent/dashboard" replace />
+  }
+
+  // Onboarding redirect for parents
+  if (
+    user?.role === 'parent' &&
+    !user?.onboardingCompleted &&
+    location.pathname !== '/parent/onboarding'
+  ) {
+    return <Navigate to="/parent/onboarding" replace />
   }
 
   return children
@@ -50,6 +62,9 @@ function RootRedirect() {
 
   if (!accessToken) return <Navigate to="/login" replace />
   if (user?.role === 'coach') return <Navigate to="/coach/disabled" replace />
+  if (user?.role === 'parent' && !user?.onboardingCompleted) {
+    return <Navigate to="/parent/onboarding" replace />
+  }
   return <Navigate to="/parent/dashboard" replace />
 }
 
@@ -81,6 +96,16 @@ export default function App() {
         {/* Coach disabled - all coach routes redirect here */}
         <Route path="/coach/disabled" element={<CoachDisabled />} />
         <Route path="/coach/*" element={<Navigate to="/coach/disabled" replace />} />
+
+        {/* Parent onboarding (no AppShell) */}
+        <Route
+          path="/parent/onboarding"
+          element={
+            <ProtectedRoute role="parent">
+              <Onboarding />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Parent routes (PRIMARY) */}
         <Route
@@ -136,6 +161,14 @@ export default function App() {
           element={
             <ProtectedRoute role="parent">
               <AppShell><ParentMessages /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/settings"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><Settings /></AppShell>
             </ProtectedRoute>
           }
         />

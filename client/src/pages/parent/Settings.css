@@ -1,0 +1,322 @@
+/* ─── Settings Page ─── */
+.settings-page {
+  max-width: 680px;
+}
+
+/* ─── Tabs ─── */
+.settings-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  background: var(--color-bg-tertiary);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.settings-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex: 1;
+  justify-content: center;
+}
+
+.settings-tab:hover {
+  color: var(--color-text);
+  background: var(--color-bg-secondary);
+}
+
+.settings-tab.active {
+  background: var(--color-bg-secondary);
+  color: var(--color-accent);
+  box-shadow: var(--shadow-card);
+}
+
+/* ─── Content ─── */
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-section {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.settings-section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.settings-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.settings-form-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  padding: 8px 0;
+}
+
+/* ─── Toggle Switch ─── */
+.settings-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 0;
+}
+
+.settings-toggle-info {
+  flex: 1;
+}
+
+.settings-toggle-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.settings-toggle-desc {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
+.settings-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary);
+  cursor: pointer;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.settings-toggle.active {
+  background: var(--color-green);
+}
+
+.settings-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.settings-toggle.active .settings-toggle-knob {
+  transform: translateX(20px);
+}
+
+/* ─── Divider ─── */
+.settings-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 4px 0;
+}
+
+/* ─── Sliders ─── */
+.settings-slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.settings-slider-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-slider-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  outline: none;
+  cursor: pointer;
+}
+
+.settings-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 6px rgba(204,255,0,0.3);
+}
+
+.settings-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: none;
+}
+
+.settings-slider-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-accent);
+  min-width: 40px;
+  text-align: right;
+}
+
+.settings-slider-value--red {
+  color: var(--color-red);
+}
+
+.settings-slider-value--amber {
+  color: var(--color-amber);
+}
+
+/* ─── Quiet Hours ─── */
+.settings-quiet-hours {
+  padding: 4px 0;
+}
+
+.settings-quiet-hours-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.settings-time-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ─── Danger Zone ─── */
+.settings-danger-zone {
+  border-color: rgba(239,68,68,0.2);
+}
+
+.settings-danger-title {
+  color: var(--color-red) !important;
+}
+
+.settings-danger-desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ─── Delete Account Modal ─── */
+.settings-delete-modal {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-md);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  text-align: center;
+  box-shadow: var(--shadow-modal);
+}
+
+.settings-delete-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.settings-delete-modal-close:hover {
+  color: var(--color-text);
+}
+
+.settings-delete-modal-icon {
+  color: var(--color-red);
+  margin-bottom: 12px;
+}
+
+.settings-delete-modal h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 8px;
+}
+
+.settings-delete-modal p {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+.settings-delete-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-delete-modal-actions .btn {
+  width: 100%;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+  .settings-tabs {
+    flex-direction: column;
+  }
+
+  .settings-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-quiet-hours-row {
+    grid-template-columns: 1fr;
+  }
+}

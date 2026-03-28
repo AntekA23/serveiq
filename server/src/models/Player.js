@@ -51,7 +51,6 @@ const playerSchema = new mongoose.Schema(
     coach: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'Trener jest wymagany'],
     },
     parents: [
       {
@@ -75,6 +74,18 @@ const playerSchema = new mongoose.Schema(
       fitness: skillSchema,
     },
     goals: [goalSchema],
+    trainingPlan: {
+      weeklyGoal: {
+        sessionsPerWeek: { type: Number, default: 5 },
+        hoursPerWeek: { type: Number, default: 8 },
+      },
+      focus: [String],
+      notes: String,
+      nextMilestone: {
+        text: String,
+        date: Date,
+      },
+    },
     monthlyRate: Number,
     active: {
       type: Boolean,

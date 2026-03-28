@@ -3,30 +3,29 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate } from 'react-router-dom'
-import { User, Mail, Lock, Phone } from 'lucide-react'
+import { User, Mail, Lock, Play } from 'lucide-react'
 import useAuth from '../../hooks/useAuth'
+import useAuthStore from '../../store/authStore'
+import { getDemoUser, DEMO_TOKEN } from '../../services/demoData'
 import useToast from '../../hooks/useToast'
 import Button from '../../components/ui/Button/Button'
 import Input from '../../components/ui/Input/Input'
 import './Register.css'
 
 const schema = z.object({
-  firstName: z.string().min(2, 'Imię musi mieć co najmniej 2 znaki'),
-  lastName: z.string().min(2, 'Nazwisko musi mieć co najmniej 2 znaki'),
-  email: z.string().min(1, 'Email jest wymagany').email('Nieprawidłowy adres email'),
-  phone: z.string().optional(),
-  password: z.string().min(6, 'Hasło musi mieć co najmniej 6 znaków'),
-  confirmPassword: z.string().min(1, 'Potwierdź hasło'),
-  club: z.string().optional(),
-  itfLevel: z.string().optional(),
+  firstName: z.string().min(2, 'Imie musi miec co najmniej 2 znaki'),
+  lastName: z.string().min(2, 'Nazwisko musi miec co najmniej 2 znaki'),
+  email: z.string().min(1, 'Email jest wymagany').email('Nieprawidlowy adres email'),
+  password: z.string().min(6, 'Haslo musi miec co najmniej 6 znakow'),
+  confirmPassword: z.string().min(1, 'Potwierdz haslo'),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: 'Hasła muszą się zgadzać',
+  message: 'Hasla musza sie zgadzac',
   path: ['confirmPassword'],
 })
 
 export default function Register() {
   const navigate = useNavigate()
-  const { register: registerUser } = useAuth()
+  const { register: registerUser, login } = useAuth()
   const toast = useToast()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -43,33 +42,40 @@ export default function Register() {
     setError('')
     setLoading(true)
     try {
-      const { confirmPassword, club, itfLevel, ...data } = formData
+      const { confirmPassword, ...data } = formData
       await registerUser({
         ...data,
-        role: 'coach',
-        coachProfile: { club: club || undefined, itfLevel: itfLevel || undefined },
+        role: 'parent',
       })
-      toast.success('Konto utworzone. Zaloguj się.')
-      navigate('/login')
+      // Auto-login after registration
+      const loginData = await login(data.email, data.password)
+      toast.success('Konto utworzone! Witamy w ServeIQ.')
+      navigate('/parent/onboarding')
     } catch (err) {
-      setError(err.response?.data?.message || 'Wystąpił błąd podczas rejestracji')
+      setError(err.response?.data?.message || 'Wystapil blad podczas rejestracji')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleDemo = () => {
+    const demoUser = getDemoUser()
+    useAuthStore.getState().setAuth(demoUser, DEMO_TOKEN)
+    navigate('/parent/dashboard')
   }
 
   return (
     <div className="register-page">
       <div className="register-card">
         <div className="register-logo">SERVE<span style={{ color: 'var(--color-text)' }}>IQ</span></div>
-        <div className="register-subtitle">Utwórz konto trenera</div>
+        <div className="register-subtitle">Utworz konto rodzica</div>
 
         {error && <div className="register-error">{error}</div>}
 
         <form className="register-form" onSubmit={handleSubmit(onSubmit)}>
           <div className="register-row">
             <Input
-              label="Imię"
+              label="Imie"
               placeholder="Jan"
               icon={User}
               register={register('firstName')}
@@ -93,58 +99,41 @@ export default function Register() {
             error={errors.email?.message}
           />
 
-          <Input
-            label="Telefon (opcjonalnie)"
-            type="tel"
-            placeholder="+48 123 456 789"
-            icon={Phone}
-            register={register('phone')}
-            error={errors.phone?.message}
-          />
-
           <div className="register-row">
             <Input
-              label="Hasło"
+              label="Haslo"
               type="password"
-              placeholder="Min. 6 znaków"
+              placeholder="Min. 6 znakow"
               icon={Lock}
               register={register('password')}
               error={errors.password?.message}
             />
             <Input
-              label="Potwierdź hasło"
+              label="Potwierdz haslo"
               type="password"
-              placeholder="Powtórz hasło"
+              placeholder="Powtorz haslo"
               icon={Lock}
               register={register('confirmPassword')}
               error={errors.confirmPassword?.message}
             />
           </div>
 
-          <div className="register-row">
-            <Input
-              label="Nazwa klubu (opcjonalnie)"
-              placeholder="Klub tenisowy"
-              register={register('club')}
-            />
-            <div className="input-group">
-              <label className="input-label">Poziom ITF (opcjonalnie)</label>
-              <select className="input" {...register('itfLevel')}>
-                <option value="">Wybierz poziom</option>
-                <option value="1">Poziom 1</option>
-                <option value="2">Poziom 2</option>
-                <option value="3">Poziom 3</option>
-              </select>
-            </div>
-          </div>
-
           <Button type="submit" variant="primary" loading={loading}>
-            Zarejestruj się
+            Zarejestruj sie
           </Button>
         </form>
 
+        <div className="register-divider">
+          <span>lub</span>
+        </div>
+
+        <button className="register-demo-btn" onClick={handleDemo}>
+          <Play size={16} />
+          Tryb demo — zobacz dashboard
+        </button>
+
         <div className="register-links">
-          <Link to="/login">Masz już konto? Zaloguj się</Link>
+          <Link to="/login">Masz juz konto? Zaloguj sie</Link>
         </div>
       </div>
     </div>

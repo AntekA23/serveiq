@@ -8,6 +8,12 @@ const DEMO_USER = {
   firstName: 'Anna',
   lastName: 'Kowalska',
   role: 'parent',
+  onboardingCompleted: true,
+  subscription: {
+    plan: 'premium',
+    status: 'trialing',
+    trialEndsAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+  },
   parentProfile: {
     children: ['demo-player-001'],
   },
@@ -221,6 +227,9 @@ export const DEMO_RESPONSES = {
   // GET /payments
   'GET /payments': { payments: [] },
 
+  // GET /notifications
+  'GET /notifications': { notifications: [] },
+
   // POST /wearables (connect)
   'POST /wearables': { message: 'Urzadzenie zostalo polaczone', device: DEMO_DEVICES[0] },
 
@@ -228,9 +237,30 @@ export const DEMO_RESPONSES = {
   'POST /wearables/demo-device-whoop/sync': { message: 'Synchronizacja zakonczona', lastSyncAt: new Date().toISOString(), battery: 70, recordsGenerated: 4 },
   'POST /wearables/demo-device-garmin/sync': { message: 'Synchronizacja zakonczona', lastSyncAt: new Date().toISOString(), battery: 83, recordsGenerated: 4 },
 
+  // POST /players/self (create child from onboarding)
+  'POST /players/self': DEMO_PLAYER,
+
+  // PUT /auth/profile
+  'PUT /auth/profile': { user: DEMO_USER },
+
+  // PUT /auth/onboarding
+  'PUT /auth/onboarding': { message: 'Onboarding zakończony' },
+
+  // PUT /auth/change-password
+  'PUT /auth/change-password': { message: 'Hasło zmienione' },
+
+  // PUT /auth/notification-settings
+  'PUT /auth/notification-settings': { message: 'Zapisano' },
+
+  // PUT /notifications/read-all
+  'PUT /notifications/read-all': { message: 'ok' },
+
   // DELETE /wearables/:id
   'DELETE /wearables/demo-device-whoop': { message: 'Urzadzenie zostalo odlaczone' },
   'DELETE /wearables/demo-device-garmin': { message: 'Urzadzenie zostalo odlaczone' },
+
+  // DELETE /auth/account
+  'DELETE /auth/account': { message: 'Konto usuniete' },
 
   // GET /messages/conversations
   'GET /messages/conversations': [],
@@ -249,8 +279,9 @@ export function matchDemoResponse(method, url) {
   // Strip /api prefix and query params for matching
   let path = url.replace(/^.*\/api/, '').split('?')[0]
   const queryStr = url.split('?')[1] || ''
+  const upperMethod = method.toUpperCase()
 
-  const key = `${method.toUpperCase()} ${path}`
+  const key = `${upperMethod} ${path}`
 
   // Exact match
   if (DEMO_RESPONSES[key]) {
@@ -270,10 +301,16 @@ export function matchDemoResponse(method, url) {
     return DEMO_RESPONSES['GET /wearables/data/demo-player-001']
   }
 
-  // /players/:id
+  // /players/:id (GET)
   const playerMatch = path.match(/^\/players\/([^/]+)$/)
-  if (playerMatch && method.toUpperCase() === 'GET') {
+  if (playerMatch && upperMethod === 'GET') {
     return DEMO_PLAYER
+  }
+
+  // /players/:id/avatar (PUT)
+  const avatarMatch = path.match(/^\/players\/([^/]+)\/avatar$/)
+  if (avatarMatch && upperMethod === 'PUT') {
+    return { avatarUrl: null, message: 'Avatar zaktualizowany' }
   }
 
   // /wearables/:id/sync
@@ -283,14 +320,49 @@ export function matchDemoResponse(method, url) {
   }
 
   // /wearables/:id (DELETE)
-  const deleteMatch = path.match(/^\/wearables\/([^/]+)$/)
-  if (deleteMatch && method.toUpperCase() === 'DELETE') {
+  const deleteWearableMatch = path.match(/^\/wearables\/([^/]+)$/)
+  if (deleteWearableMatch && upperMethod === 'DELETE') {
     return { message: 'Urzadzenie zostalo odlaczone' }
   }
 
   // /sessions with query
   if (path === '/sessions') {
     return { sessions: DEMO_SESSIONS }
+  }
+
+  // /notifications
+  if (path === '/notifications' && upperMethod === 'GET') {
+    return { notifications: [] }
+  }
+
+  // /notifications/read-all
+  if (path === '/notifications/read-all' && upperMethod === 'PUT') {
+    return { message: 'ok' }
+  }
+
+  // /auth/profile (PUT)
+  if (path === '/auth/profile' && upperMethod === 'PUT') {
+    return { user: DEMO_USER }
+  }
+
+  // /auth/onboarding (PUT)
+  if (path === '/auth/onboarding' && upperMethod === 'PUT') {
+    return { message: 'Onboarding zakończony' }
+  }
+
+  // /auth/change-password (PUT)
+  if (path === '/auth/change-password' && upperMethod === 'PUT') {
+    return { message: 'Hasło zmienione' }
+  }
+
+  // /auth/notification-settings (PUT)
+  if (path === '/auth/notification-settings' && upperMethod === 'PUT') {
+    return { message: 'Zapisano' }
+  }
+
+  // /auth/account (DELETE)
+  if (path === '/auth/account' && upperMethod === 'DELETE') {
+    return { message: 'Konto usuniete' }
   }
 
   return null

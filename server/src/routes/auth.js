@@ -8,6 +8,11 @@ import {
   resetPassword,
   getMe,
   acceptInvite,
+  updateProfile,
+  changePassword,
+  deleteAccount,
+  completeOnboarding,
+  updateNotificationSettings,
 } from '../controllers/authController.js';
 import { verifyToken } from '../middleware/auth.js';
 import { authLimiter } from '../middleware/rateLimiter.js';
@@ -25,5 +30,10 @@ router.post('/accept-invite', authLimiter, acceptInvite);
 
 // Endpointy wymagające autoryzacji
 router.get('/me', verifyToken, getMe);
+router.put('/profile', verifyToken, updateProfile);
+router.put('/change-password', verifyToken, changePassword);
+router.delete('/account', verifyToken, deleteAccount);
+router.put('/onboarding', verifyToken, completeOnboarding);
+router.put('/notification-settings', verifyToken, updateNotificationSettings);
 
 export default router;

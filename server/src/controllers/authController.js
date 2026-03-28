@@ -43,6 +43,28 @@ const acceptInviteSchema = z.object({
   phone: z.string().optional(),
 });
 
+const updateProfileSchema = z.object({
+  firstName: z.string().min(1, 'Imię jest wymagane').optional(),
+  lastName: z.string().min(1, 'Nazwisko jest wymagane').optional(),
+  phone: z.string().optional(),
+});
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Aktualne hasło jest wymagane'),
+  newPassword: z.string().min(6, 'Nowe hasło musi mieć minimum 6 znaków'),
+});
+
+const notificationSettingsSchema = z.object({
+  recoveryThresholdCritical: z.number().min(0).max(100).optional(),
+  recoveryThresholdWarning: z.number().min(0).max(100).optional(),
+  minSleepHours: z.number().min(0).max(24).optional(),
+  hrvDropThreshold: z.number().min(0).max(100).optional(),
+  weeklyEmail: z.boolean().optional(),
+  pushNotifications: z.boolean().optional(),
+  quietHoursStart: z.string().optional(),
+  quietHoursEnd: z.string().optional(),
+});
+
 // ====== Pomocnicze ======
 
 const generateAccessToken = (userId) => {
@@ -345,6 +367,148 @@ export const acceptInvite = async (req, res, next) => {
       message: 'Konto zostało aktywowane',
       user: user.toJSON(),
       accessToken,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/auth/profile
+ * Aktualizuj profil użytkownika (imię, nazwisko, telefon)
+ */
+export const updateProfile = async (req, res, next) => {
+  try {
+    const data = updateProfileSchema.parse(req.body);
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'Użytkownik nie znaleziony' });
+    }
+
+    if (data.firstName !== undefined) user.firstName = data.firstName;
+    if (data.lastName !== undefined) user.lastName = data.lastName;
+    if (data.phone !== undefined) user.phone = data.phone;
+
+    await user.save();
+
+    res.json({
+      message: 'Profil został zaktualizowany',
+      user: user.toJSON(),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/auth/change-password
+ * Zmień hasło (wymaga podania aktualnego hasła)
+ */
+export const changePassword = async (req, res, next) => {
+  try {
+    const data = changePasswordSchema.parse(req.body);
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'Użytkownik nie znaleziony' });
+    }
+
+    const isMatch = await user.comparePassword(data.currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Aktualne hasło jest nieprawidłowe' });
+    }
+
+    user.password = data.newPassword;
+    await user.save();
+
+    res.json({ message: 'Hasło zostało zmienione' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * DELETE /api/auth/account
+ * Soft delete konta (isActive: false)
+ */
+export const deleteAccount = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'Użytkownik nie znaleziony' });
+    }
+
+    user.isActive = false;
+    user.refreshToken = null;
+    await user.save();
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      path: '/',
+    });
+
+    res.json({ message: 'Konto zostało dezaktywowane' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/auth/onboarding
+ * Oznacz onboarding jako ukończony
+ */
+export const completeOnboarding = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'Użytkownik nie znaleziony' });
+    }
+
+    user.onboardingCompleted = true;
+    await user.save();
+
+    res.json({
+      message: 'Onboarding został ukończony',
+      user: user.toJSON(),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/auth/notification-settings
+ * Aktualizuj ustawienia powiadomień
+ */
+export const updateNotificationSettings = async (req, res, next) => {
+  try {
+    const data = notificationSettingsSchema.parse(req.body);
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'Użytkownik nie znaleziony' });
+    }
+
+    if (!user.notificationSettings) {
+      user.notificationSettings = {};
+    }
+
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined) {
+        user.notificationSettings[key] = value;
+      }
+    }
+    user.markModified('notificationSettings');
+
+    await user.save();
+
+    res.json({
+      message: 'Ustawienia powiadomień zostały zaktualizowane',
+      notificationSettings: user.notificationSettings,
     });
   } catch (error) {
     next(error);

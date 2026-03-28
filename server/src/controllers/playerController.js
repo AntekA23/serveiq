@@ -1,8 +1,50 @@
 import crypto from 'crypto';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { z } from 'zod';
+import multer from 'multer';
 import Player from '../models/Player.js';
 import User from '../models/User.js';
 import { sendInviteEmail } from '../services/emailService.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ====== Multer config for avatar uploads ======
+
+const avatarUploadDir = path.resolve(__dirname, '../../uploads/avatars');
+
+// Utwórz katalog jeśli nie istnieje
+if (!fs.existsSync(avatarUploadDir)) {
+  fs.mkdirSync(avatarUploadDir, { recursive: true });
+}
+
+const avatarStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, avatarUploadDir);
+  },
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const ext = path.extname(file.originalname);
+    cb(null, `avatar-${uniqueSuffix}${ext}`);
+  },
+});
+
+const avatarFileFilter = (_req, file, cb) => {
+  const allowedTypes = ['image/jpeg', 'image/png'];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Dozwolone są tylko pliki JPEG i PNG'), false);
+  }
+};
+
+export const uploadMiddleware = multer({
+  storage: avatarStorage,
+  fileFilter: avatarFileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+}).single('avatar');
 
 // ====== Zod Schemas ======
 
@@ -57,6 +99,13 @@ const updateGoalSchema = z.object({
   text: z.string().min(1).optional(),
   dueDate: z.string().optional(),
   completed: z.boolean().optional(),
+});
+
+const createPlayerSelfSchema = z.object({
+  firstName: z.string().min(1, 'Imię jest wymagane'),
+  lastName: z.string().min(1, 'Nazwisko jest wymagane'),
+  dateOfBirth: z.string().min(1, 'Data urodzenia jest wymagana'),
+  gender: z.enum(['M', 'F'], { message: 'Płeć musi być "M" lub "F"' }).optional(),
 });
 
 // ====== Kontrolery ======
@@ -332,6 +381,89 @@ export const updateGoal = async (req, res, next) => {
     res.json({
       message: 'Cel został zaktualizowany',
       goal,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/players/self
+ * Rodzic dodaje własne dziecko (bez trenera)
+ */
+export const createPlayerSelf = async (req, res, next) => {
+  try {
+    const data = createPlayerSelfSchema.parse(req.body);
+
+    const playerData = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      dateOfBirth: new Date(data.dateOfBirth),
+      coach: null,
+      parents: [req.user._id],
+    };
+
+    if (data.gender) playerData.gender = data.gender;
+
+    const player = await Player.create(playerData);
+
+    // Dodaj gracza do profilu rodzica
+    await User.findByIdAndUpdate(req.user._id, {
+      $addToSet: { 'parentProfile.children': player._id },
+    });
+
+    const populatedPlayer = await Player.findById(player._id).populate(
+      'parents',
+      'firstName lastName email phone'
+    );
+
+    res.status(201).json({
+      message: 'Zawodnik został dodany',
+      player: populatedPlayer,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/players/:id/avatar
+ * Upload avatara zawodnika
+ */
+export const uploadAvatar = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Plik jest wymagany' });
+    }
+
+    const player = await Player.findById(req.params.id);
+
+    if (!player) {
+      return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
+    }
+
+    // Sprawdź czy użytkownik ma dostęp (trener lub rodzic)
+    const isCoach = player.coach && player.coach.toString() === req.user._id.toString();
+    const isParent = player.parents.some((p) => p.toString() === req.user._id.toString());
+
+    if (!isCoach && !isParent) {
+      return res.status(403).json({ message: 'Brak uprawnień do tego zawodnika' });
+    }
+
+    // Usuń stary avatar jeśli istnieje
+    if (player.avatarUrl) {
+      const oldPath = path.resolve(__dirname, '../..', player.avatarUrl.replace(/^\//, ''));
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
+    }
+
+    player.avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    await player.save();
+
+    res.json({
+      message: 'Avatar został zaktualizowany',
+      player,
     });
   } catch (error) {
     next(error);

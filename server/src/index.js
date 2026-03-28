@@ -74,6 +74,10 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// ====== Statyczne pliki - uploads ======
+
+app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
+
 // ====== Routes ======
 
 app.use('/api/auth', authRoutes);

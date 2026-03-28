@@ -64,6 +64,43 @@ const userSchema = new mongoose.Schema(
     inviteToken: String,
     inviteExpires: Date,
 
+    onboardingCompleted: {
+      type: Boolean,
+      default: false,
+    },
+
+    subscription: {
+      plan: {
+        type: String,
+        enum: ['free', 'premium', 'family'],
+        default: 'premium',
+      },
+      status: {
+        type: String,
+        enum: ['trialing', 'active', 'past_due', 'cancelled', 'expired'],
+        default: 'trialing',
+      },
+      stripeCustomerId: String,
+      stripeSubscriptionId: String,
+      trialEndsAt: Date,
+      currentPeriodEnd: Date,
+      cancelAtPeriodEnd: {
+        type: Boolean,
+        default: false,
+      },
+    },
+
+    notificationSettings: {
+      recoveryThresholdCritical: { type: Number, default: 33 },
+      recoveryThresholdWarning: { type: Number, default: 50 },
+      minSleepHours: { type: Number, default: 6 },
+      hrvDropThreshold: { type: Number, default: 15 },
+      weeklyEmail: { type: Boolean, default: true },
+      pushNotifications: { type: Boolean, default: true },
+      quietHoursStart: { type: String, default: '22:00' },
+      quietHoursEnd: { type: String, default: '07:00' },
+    },
+
     isActive: {
       type: Boolean,
       default: true,
@@ -74,13 +111,23 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Pre-save hook: hashuj hasło jeśli zostało zmodyfikowane
+// Pre-save hook: hashuj hasło jeśli zostało zmodyfikowane + ustaw trial dla nowych rodziców
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-
   try {
-    const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
+    // Ustaw trial dla nowych rodziców
+    if (this.isNew && this.role === 'parent') {
+      this.subscription = {
+        plan: 'premium',
+        status: 'trialing',
+        trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      };
+    }
+
+    if (this.isModified('password')) {
+      const salt = await bcrypt.genSalt(12);
+      this.password = await bcrypt.hash(this.password, salt);
+    }
+
     next();
   } catch (error) {
     next(error);
