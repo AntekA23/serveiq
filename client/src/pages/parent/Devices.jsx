@@ -151,7 +151,7 @@ export default function Devices() {
     try {
       setLoading(true)
       const [{ data: devicesData }, { data: playersRaw }] = await Promise.all([
-        api.get('/wearables/devices'),
+        api.get('/wearables'),
         api.get('/players'),
       ])
       setDevices(Array.isArray(devicesData) ? devicesData : devicesData.devices || [])
@@ -176,7 +176,7 @@ export default function Devices() {
   const handleSync = async (deviceId) => {
     setSyncingId(deviceId)
     try {
-      await api.post(`/wearables/devices/${deviceId}/sync`)
+      await api.post(`/wearables/${deviceId}/sync`)
       await fetchData()
     } catch {
       // silent
@@ -187,7 +187,7 @@ export default function Devices() {
 
   const handleDisconnect = async (deviceId) => {
     try {
-      await api.delete(`/wearables/devices/${deviceId}`)
+      await api.delete(`/wearables/${deviceId}`)
       await fetchData()
     } catch {
       // silent
@@ -196,7 +196,7 @@ export default function Devices() {
 
   const handleConnect = async (provider, deviceName, playerId) => {
     try {
-      await api.post('/wearables/connect', { provider, deviceName, playerId })
+      await api.post('/wearables', { provider, deviceName, playerId })
       await fetchData()
     } catch {
       // silent

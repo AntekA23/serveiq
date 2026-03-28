@@ -201,10 +201,11 @@ export default function Dashboard() {
           try {
             const [{ data: latestData }, { data: devicesData }] = await Promise.all([
               api.get(`/wearables/data/${firstChild._id}/latest`),
-              api.get('/wearables/devices'),
+              api.get('/wearables'),
             ])
             setWearableData(latestData)
-            const childDevices = (Array.isArray(devicesData) ? devicesData : devicesData.devices || [])
+            const allDevices = Array.isArray(devicesData) ? devicesData : devicesData.devices || []
+            const childDevices = allDevices
               .filter(d => d.player === firstChild._id || d.player?._id === firstChild._id)
             setDevices(childDevices)
           } catch {
@@ -228,10 +229,11 @@ export default function Dashboard() {
     try {
       const [{ data: latestData }, { data: devicesData }] = await Promise.all([
         api.get(`/wearables/data/${child._id}/latest`),
-        api.get('/wearables/devices'),
+        api.get('/wearables'),
       ])
       setWearableData(latestData)
-      const childDevices = (Array.isArray(devicesData) ? devicesData : devicesData.devices || [])
+      const allDevices = Array.isArray(devicesData) ? devicesData : devicesData.devices || []
+      const childDevices = allDevices
         .filter(d => d.player === child._id || d.player?._id === child._id)
       setDevices(childDevices)
     } catch {
@@ -271,12 +273,16 @@ export default function Dashboard() {
     )
   }
 
-  const metrics = wearableData?.metrics || {}
-  const recovery = metrics.recovery || {}
-  const heartRate = metrics.heartRate || {}
-  const hrv = metrics.hrv || {}
-  const sleep = metrics.sleep || {}
-  const strain = metrics.strain || {}
+  // Latest data comes as { latest: { daily_summary, sleep, recovery, workout }, devices }
+  const latestRecovery = wearableData?.latest?.recovery?.metrics || {}
+  const latestSummary = wearableData?.latest?.daily_summary?.metrics || {}
+  const latestSleep = wearableData?.latest?.sleep?.metrics || {}
+
+  const recovery = latestRecovery.recovery || {}
+  const heartRate = latestSummary.heartRate || latestRecovery.heartRate || {}
+  const hrv = latestSummary.hrv || latestRecovery.hrv || {}
+  const sleep = latestSleep.sleep || latestRecovery.sleep || {}
+  const strain = latestSummary.strain || {}
 
   const childAge = selectedChild?.dateOfBirth
     ? Math.floor((Date.now() - new Date(selectedChild.dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))

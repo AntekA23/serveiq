@@ -20,6 +20,7 @@ import sessionRoutes from './routes/sessions.js';
 import paymentRoutes from './routes/payments.js';
 import tournamentRoutes from './routes/tournaments.js';
 import messageRoutes from './routes/messages.js';
+import wearableRoutes from './routes/wearables.js';
 
 // ====== Konfiguracja ======
 
@@ -81,6 +82,7 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/wearables', wearableRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

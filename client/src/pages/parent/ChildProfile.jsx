@@ -108,8 +108,8 @@ export default function ChildProfile() {
         setChild(playerData)
 
         try {
-          const { data: historyData } = await api.get(`/wearables/data/${id}?type=daily_summary`)
-          const history = Array.isArray(historyData) ? historyData : historyData.data || []
+          const { data: historyRaw } = await api.get(`/wearables/data/${id}?type=daily_summary`)
+          const history = Array.isArray(historyRaw) ? historyRaw : historyRaw.data || []
           setWearableHistory(history)
         } catch {
           setWearableHistory([])
