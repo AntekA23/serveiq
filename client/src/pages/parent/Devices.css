@@ -1,0 +1,321 @@
+/* ─── Devices Page ─── */
+.devices-page {
+  max-width: 800px;
+}
+
+.devices-loading {
+  text-align: center;
+  padding: 60px;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+.devices-section {
+  margin-bottom: 28px;
+}
+
+.devices-section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+/* ─── Device Cards ─── */
+.devices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.device-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.device-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.device-card-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.device-card-info {
+  flex: 1;
+}
+
+.device-card-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.device-card-provider {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.device-card-child {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+}
+
+.device-card-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+}
+
+.device-card-status.online {
+  background: var(--color-green-bg);
+  color: var(--color-green);
+}
+
+.device-card-status.offline {
+  background: var(--color-red-bg);
+  color: var(--color-red);
+}
+
+.device-card-meta {
+  display: flex;
+  gap: 20px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 14px;
+}
+
+.device-card-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.device-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.device-card-actions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ─── Add Device Grid ─── */
+.devices-add-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.device-add-card {
+  background: var(--color-bg-secondary);
+  border: 1px dashed var(--color-border-md);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.device-add-card:hover {
+  border-color: var(--provider-color);
+  border-style: solid;
+  box-shadow: 0 0 20px var(--provider-bg);
+}
+
+.device-add-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--provider-bg);
+  color: var(--provider-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.device-add-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.device-add-desc {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* ─── Connect Modal ─── */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.connect-modal {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-md);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  box-shadow: var(--shadow-modal);
+}
+
+.connect-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.connect-modal-close:hover {
+  color: var(--color-text);
+}
+
+.connect-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  color: var(--provider-color);
+}
+
+.connect-modal-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.connect-modal-desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 20px;
+}
+
+.connect-modal-section {
+  margin-bottom: 16px;
+}
+
+.connect-modal-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.connect-modal-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.connect-modal-option {
+  padding: 8px 14px;
+  border: 1px solid var(--color-border-md);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.connect-modal-option:hover {
+  border-color: var(--color-accent);
+}
+
+.connect-modal-option.active {
+  border-color: var(--color-accent);
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* ─── Modal Status States ─── */
+.connect-modal-status {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.connect-modal-status h3 {
+  font-size: 16px;
+  color: var(--color-text);
+  margin: 12px 0 4px;
+}
+
+.connect-modal-status p {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.connect-modal-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--color-border-md);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  margin: 0 auto;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.connect-modal-success {
+  color: var(--color-green);
+  margin-bottom: 4px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+  .devices-add-grid {
+    grid-template-columns: 1fr;
+  }
+}

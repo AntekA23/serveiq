@@ -1,41 +1,183 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Calendar, Target } from 'lucide-react'
+import {
+  Heart,
+  Activity,
+  Moon,
+  Zap,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Watch,
+  ChevronRight,
+  Calendar,
+  Target,
+  AlertCircle,
+} from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
 import Avatar from '../../components/ui/Avatar/Avatar'
-import ProgressBar from '../../components/ui/ProgressBar/ProgressBar'
 import Button from '../../components/ui/Button/Button'
-import SessionItem from '../../components/shared/SessionItem/SessionItem'
 import './Dashboard.css'
 
-const skillLabels = {
-  serve: 'Serwis',
-  forehand: 'Forhend',
-  backhand: 'Bekhend',
-  volley: 'Wolej',
-  tactics: 'Taktyka',
-  fitness: 'Kondycja',
+function RecoveryRing({ score, status }) {
+  const circumference = 2 * Math.PI * 54
+  const offset = circumference - (score / 100) * circumference
+  const statusColor =
+    status === 'green' ? 'var(--color-recovery-green)' :
+    status === 'yellow' ? 'var(--color-recovery-yellow)' :
+    'var(--color-recovery-red)'
+  const statusLabel =
+    status === 'green' ? 'Gotowy' :
+    status === 'yellow' ? 'Umiarkowany' :
+    'Potrzebna regeneracja'
+
+  return (
+    <div className="recovery-ring">
+      <svg viewBox="0 0 120 120" className="recovery-ring-svg">
+        <circle cx="60" cy="60" r="54" fill="none" stroke="var(--color-border)" strokeWidth="8" />
+        <circle
+          cx="60" cy="60" r="54" fill="none"
+          stroke={statusColor}
+          strokeWidth="8"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          transform="rotate(-90 60 60)"
+          style={{ transition: 'stroke-dashoffset 1s ease' }}
+        />
+      </svg>
+      <div className="recovery-ring-content">
+        <div className="recovery-ring-score" style={{ color: statusColor }}>{score}</div>
+        <div className="recovery-ring-label">Regeneracja</div>
+      </div>
+      <div className="recovery-ring-status" style={{ color: statusColor }}>{statusLabel}</div>
+    </div>
+  )
 }
 
-const skillColors = {
-  serve: 'blue',
-  forehand: 'green',
-  backhand: 'amber',
-  volley: 'blue',
-  tactics: 'green',
-  fitness: 'amber',
+function MetricCard({ icon: Icon, label, value, unit, trend, color, bgColor }) {
+  const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus
+
+  return (
+    <div className="metric-card" style={{ '--metric-color': color, '--metric-bg': bgColor }}>
+      <div className="metric-card-icon">
+        <Icon size={18} />
+      </div>
+      <div className="metric-card-value">
+        {value}
+        <span className="metric-card-unit">{unit}</span>
+      </div>
+      <div className="metric-card-label">{label}</div>
+      {trend && (
+        <div className={`metric-card-trend ${trend}`}>
+          <TrendIcon size={12} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DeviceStatusBar({ devices }) {
+  if (!devices || devices.length === 0) return null
+
+  return (
+    <div className="device-status-bar">
+      {devices.map((device) => (
+        <div key={device._id} className={`device-status-item ${device.connected ? 'connected' : 'disconnected'}`}>
+          <Watch size={14} />
+          <span className="device-status-name">{device.deviceName}</span>
+          <span className="device-status-dot" />
+          <span className="device-status-text">
+            {device.connected ? `Sync ${formatTimeAgo(device.lastSyncAt)}` : 'Rozlaczony'}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function PlanPreview({ child, navigate }) {
+  const plan = child?.trainingPlan
+  const goals = child?.goals || []
+  const activeGoals = goals.filter(g => !g.completed).slice(0, 2)
+
+  return (
+    <div className="plan-preview card">
+      <div className="plan-preview-header">
+        <Calendar size={16} />
+        <span>Plan na przyszlosc</span>
+        <button className="plan-preview-more" onClick={() => navigate('/parent/training-plan')}>
+          Zobacz wiecej <ChevronRight size={14} />
+        </button>
+      </div>
+      <div className="plan-preview-body">
+        {plan?.nextMilestone ? (
+          <div className="plan-milestone">
+            <Target size={16} className="plan-milestone-icon" />
+            <div>
+              <div className="plan-milestone-text">{plan.nextMilestone.text}</div>
+              {plan.nextMilestone.date && (
+                <div className="plan-milestone-date">
+                  {new Date(plan.nextMilestone.date).toLocaleDateString('pl-PL', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null}
+
+        {plan?.weeklyGoal && (
+          <div className="plan-weekly">
+            <div className="plan-weekly-label">Cel tygodniowy</div>
+            <div className="plan-weekly-value">
+              {plan.weeklyGoal.sessionsPerWeek || '—'} treningow / tydz
+            </div>
+          </div>
+        )}
+
+        {activeGoals.length > 0 && (
+          <div className="plan-goals-preview">
+            {activeGoals.map((goal, idx) => (
+              <div key={goal._id || idx} className="plan-goal-item">
+                <div className="plan-goal-dot" />
+                <span>{goal.text}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!plan?.nextMilestone && activeGoals.length === 0 && (
+          <div className="plan-empty">
+            Brak aktywnego planu treningowego
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function formatTimeAgo(dateStr) {
+  if (!dateStr) return ''
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'teraz'
+  if (mins < 60) return `${mins} min temu`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h temu`
+  return `${Math.floor(hours / 24)}d temu`
 }
 
 export default function Dashboard() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const [children, setChildren] = useState([])
-  const [sessions, setSessions] = useState({})
-  const [pendingPayment, setPendingPayment] = useState(null)
+  const [selectedChild, setSelectedChild] = useState(null)
+  const [wearableData, setWearableData] = useState(null)
+  const [devices, setDevices] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [payLoading, setPayLoading] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,32 +193,28 @@ export default function Dashboard() {
           : players
         setChildren(myChildren)
 
-        // Fetch sessions for each child
-        const sessionsMap = {}
-        for (const child of myChildren) {
+        if (myChildren.length > 0) {
+          const firstChild = myChildren[0]
+          setSelectedChild(firstChild)
+
+          // Fetch wearable data for first child
           try {
-            const { data } = await api.get(`/sessions?player=${child._id}`)
-            const sessionsArr = Array.isArray(data) ? data : data.sessions || []
-            sessionsMap[child._id] = sessionsArr.slice(0, 3)
+            const [{ data: latestData }, { data: devicesData }] = await Promise.all([
+              api.get(`/wearables/data/${firstChild._id}/latest`),
+              api.get('/wearables/devices'),
+            ])
+            setWearableData(latestData)
+            const childDevices = (Array.isArray(devicesData) ? devicesData : devicesData.devices || [])
+              .filter(d => d.player === firstChild._id || d.player?._id === firstChild._id)
+            setDevices(childDevices)
           } catch {
-            sessionsMap[child._id] = []
+            // Wearable data may not be available yet
+            setWearableData(null)
+            setDevices([])
           }
         }
-        setSessions(sessionsMap)
-
-        // Fetch pending payments
-        try {
-          const { data: paymentsRaw } = await api.get('/payments')
-          const paymentsArr = Array.isArray(paymentsRaw) ? paymentsRaw : paymentsRaw.payments || []
-          const pending = paymentsArr.find(
-            (p) => p.status === 'pending' || p.status === 'overdue'
-          )
-          setPendingPayment(pending || null)
-        } catch {
-          // payments may not be available
-        }
       } catch (err) {
-        setError('Nie udało się załadować danych')
+        setError('Nie udalo sie zaladowac danych')
       } finally {
         setLoading(false)
       }
@@ -85,14 +223,20 @@ export default function Dashboard() {
     fetchData()
   }, [user])
 
-  const handlePay = async (paymentId) => {
-    setPayLoading(true)
+  const handleChildSelect = async (child) => {
+    setSelectedChild(child)
     try {
-      const { data } = await api.post(`/payments/${paymentId}/checkout`)
-      window.location.href = data.url
+      const [{ data: latestData }, { data: devicesData }] = await Promise.all([
+        api.get(`/wearables/data/${child._id}/latest`),
+        api.get('/wearables/devices'),
+      ])
+      setWearableData(latestData)
+      const childDevices = (Array.isArray(devicesData) ? devicesData : devicesData.devices || [])
+        .filter(d => d.player === child._id || d.player?._id === child._id)
+      setDevices(childDevices)
     } catch {
-      setError('Nie udało się utworzyć sesji płatności')
-      setPayLoading(false)
+      setWearableData(null)
+      setDevices([])
     }
   }
 
@@ -100,7 +244,7 @@ export default function Dashboard() {
     return (
       <div className="parent-dashboard">
         <h1 className="page-title">Pulpit</h1>
-        <div className="parent-dashboard-loading">Ładowanie...</div>
+        <div className="parent-dashboard-loading">Ladowanie...</div>
       </div>
     )
   }
@@ -114,92 +258,143 @@ export default function Dashboard() {
     )
   }
 
+  if (children.length === 0) {
+    return (
+      <div className="parent-dashboard">
+        <h1 className="page-title">Pulpit</h1>
+        <div className="parent-dashboard-empty">
+          <AlertCircle size={32} />
+          <p>Brak przypisanych zawodnikow.</p>
+          <p className="parent-dashboard-empty-sub">Poprosu trenera o dolaczenie do platformy.</p>
+        </div>
+      </div>
+    )
+  }
+
+  const metrics = wearableData?.metrics || {}
+  const recovery = metrics.recovery || {}
+  const heartRate = metrics.heartRate || {}
+  const hrv = metrics.hrv || {}
+  const sleep = metrics.sleep || {}
+  const strain = metrics.strain || {}
+
+  const childAge = selectedChild?.dateOfBirth
+    ? Math.floor((Date.now() - new Date(selectedChild.dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+    : null
+
   return (
     <div className="parent-dashboard">
-      <h1 className="page-title">Pulpit</h1>
-
-      {pendingPayment && (
-        <div className="parent-dashboard-banner">
-          <span className="parent-dashboard-banner-text">
-            Masz oczekującą płatność: {pendingPayment.description} — {pendingPayment.amount} zł
-          </span>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => handlePay(pendingPayment._id)}
-            loading={payLoading}
-          >
-            Zapłać
-          </Button>
+      {/* Child selector (if multiple) */}
+      {children.length > 1 && (
+        <div className="child-selector">
+          {children.map((child) => (
+            <button
+              key={child._id}
+              className={`child-selector-btn ${selectedChild?._id === child._id ? 'active' : ''}`}
+              onClick={() => handleChildSelect(child)}
+            >
+              <Avatar firstName={child.firstName} lastName={child.lastName} size={28} role="player" />
+              <span>{child.firstName}</span>
+            </button>
+          ))}
         </div>
       )}
 
-      {children.length === 0 && (
-        <div className="parent-dashboard-empty">
-          Brak przypisanych zawodników.
-        </div>
-      )}
-
-      {children.map((child) => (
-        <div key={child._id} className="parent-child-card card">
-          <div className="parent-child-header">
-            <Avatar
-              firstName={child.firstName}
-              lastName={child.lastName}
-              size={40}
-              role="player"
-            />
-            <span className="parent-child-name">
-              {child.firstName} {child.lastName}
-            </span>
+      {/* Hero section: child info + recovery ring */}
+      <div className="dashboard-hero">
+        <div className="dashboard-hero-child" onClick={() => navigate(`/parent/child/${selectedChild._id}`)}>
+          <Avatar
+            firstName={selectedChild.firstName}
+            lastName={selectedChild.lastName}
+            size={72}
+            role="player"
+            src={selectedChild.avatarUrl}
+          />
+          <div className="dashboard-hero-info">
+            <h1 className="dashboard-hero-name">
+              {selectedChild.firstName} {selectedChild.lastName}
+            </h1>
+            <div className="dashboard-hero-details">
+              {childAge && <span>{childAge} lat</span>}
+              {selectedChild.ranking?.pzt && <span>Ranking PZT: #{selectedChild.ranking.pzt}</span>}
+            </div>
+            <button className="dashboard-hero-profile-btn">
+              Zobacz profil <ChevronRight size={14} />
+            </button>
           </div>
-
-          {child.skills && (
-            <>
-              <div className="parent-section-title">Umiejętności</div>
-              <div className="parent-skills-grid">
-                {Object.entries(skillLabels).map(([key, label]) => (
-                  <ProgressBar
-                    key={key}
-                    label={label}
-                    value={child.skills?.[key]?.score ?? child.skills?.[key] ?? 0}
-                    color={skillColors[key]}
-                    showValue
-                  />
-                ))}
-              </div>
-            </>
-          )}
-
-          {child.goals && child.goals.length > 0 && (
-            <>
-              <div className="parent-section-title">Cele</div>
-              <div className="parent-goals-list">
-                {child.goals.map((goal, idx) => (
-                  <div key={goal._id || idx} className="parent-goal-item">
-                    <input
-                      type="checkbox"
-                      checked={goal.completed || false}
-                      disabled
-                      readOnly
-                    />
-                    <span>{goal.text || goal.title}</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {sessions[child._id] && sessions[child._id].length > 0 && (
-            <>
-              <div className="parent-section-title">Ostatnie treningi</div>
-              {sessions[child._id].map((session) => (
-                <SessionItem key={session._id} session={session} />
-              ))}
-            </>
-          )}
         </div>
-      ))}
+
+        {recovery.score != null ? (
+          <RecoveryRing score={recovery.score} status={recovery.status || 'green'} />
+        ) : (
+          <div className="recovery-ring-empty">
+            <Watch size={24} />
+            <span>Polacz urzadzenie</span>
+          </div>
+        )}
+      </div>
+
+      {/* Health metrics grid */}
+      <div className="metrics-grid">
+        <MetricCard
+          icon={Heart}
+          label="Tetno spoczynkowe"
+          value={heartRate.resting || '—'}
+          unit="bpm"
+          trend={hrv.trend === 'up' ? 'up' : hrv.trend === 'down' ? 'down' : null}
+          color="var(--color-heart)"
+          bgColor="var(--color-heart-bg)"
+        />
+        <MetricCard
+          icon={Activity}
+          label="HRV"
+          value={hrv.value || '—'}
+          unit="ms"
+          trend={hrv.trend}
+          color="var(--color-hrv)"
+          bgColor="var(--color-hrv-bg)"
+        />
+        <MetricCard
+          icon={Moon}
+          label="Sen"
+          value={sleep.totalMinutes ? `${(sleep.totalMinutes / 60).toFixed(1)}` : '—'}
+          unit="h"
+          trend={sleep.quality >= 80 ? 'up' : sleep.quality < 60 ? 'down' : null}
+          color="var(--color-sleep)"
+          bgColor="var(--color-sleep-bg)"
+        />
+        <MetricCard
+          icon={Zap}
+          label="Obciazenie"
+          value={strain.value != null ? strain.value.toFixed(1) : '—'}
+          unit="/21"
+          trend={null}
+          color="var(--color-strain)"
+          bgColor="var(--color-strain-bg)"
+        />
+      </div>
+
+      {/* Device status */}
+      {devices.length > 0 ? (
+        <DeviceStatusBar devices={devices} />
+      ) : (
+        <div className="no-devices-banner" onClick={() => navigate('/parent/devices')}>
+          <Watch size={18} />
+          <span>Polacz WHOOP lub Garmin aby widziec dane zdrowotne</span>
+          <ChevronRight size={16} />
+        </div>
+      )}
+
+      {/* Recovery recommendation */}
+      {recovery.recommendation && (
+        <div className={`recovery-recommendation ${recovery.status || 'green'}`}>
+          <div className="recovery-recommendation-label">Rekomendacja</div>
+          <div className="recovery-recommendation-text">{recovery.recommendation}</div>
+        </div>
+      )}
+
+      {/* Plan preview */}
+      <PlanPreview child={selectedChild} navigate={navigate} />
     </div>
   )
 }

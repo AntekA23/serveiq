@@ -1,12 +1,11 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
-  Users,
+  User,
+  Watch,
   Calendar,
   CreditCard,
-  Trophy,
   MessageSquare,
-  TrendingUp,
   LogOut,
 } from 'lucide-react'
 import useAuthStore from '../../../store/authStore'
@@ -15,18 +14,10 @@ import useAuth from '../../../hooks/useAuth'
 import Avatar from '../../ui/Avatar'
 import './Sidebar.css'
 
-const coachNav = [
-  { to: '/coach/dashboard', label: 'Pulpit', icon: LayoutDashboard },
-  { to: '/coach/players', label: 'Zawodnicy', icon: Users },
-  { to: '/coach/sessions', label: 'Treningi', icon: Calendar },
-  { to: '/coach/payments', label: 'Platnosci', icon: CreditCard },
-  { to: '/coach/tournaments', label: 'Turnieje', icon: Trophy },
-  { to: '/coach/messages', label: 'Wiadomosci', icon: MessageSquare },
-]
-
 const parentNav = [
   { to: '/parent/dashboard', label: 'Pulpit', icon: LayoutDashboard },
-  { to: '/parent/progress', label: 'Postepy', icon: TrendingUp },
+  { to: '/parent/devices', label: 'Urzadzenia', icon: Watch },
+  { to: '/parent/training-plan', label: 'Plan treningowy', icon: Calendar },
   { to: '/parent/payments', label: 'Platnosci', icon: CreditCard },
   { to: '/parent/messages', label: 'Wiadomosci', icon: MessageSquare },
 ]
@@ -38,7 +29,7 @@ export default function Sidebar() {
   const { logout } = useAuth()
   const navigate = useNavigate()
 
-  const navItems = user?.role === 'parent' ? parentNav : coachNav
+  const navItems = parentNav
 
   const handleLogout = async () => {
     await logout()

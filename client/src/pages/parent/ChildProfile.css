@@ -1,0 +1,339 @@
+/* ─── Child Profile Page ─── */
+.child-profile {
+  max-width: 800px;
+}
+
+.child-profile-loading,
+.child-profile-error {
+  text-align: center;
+  padding: 60px;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+.child-profile-error {
+  color: var(--color-red);
+}
+
+.child-profile-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.child-profile-back:hover {
+  color: var(--color-accent);
+}
+
+/* ─── Hero ─── */
+.child-profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.child-profile-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.child-profile-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+.child-profile-meta span:not(:last-child)::after {
+  content: '·';
+  margin-left: 12px;
+  color: var(--color-text-tertiary);
+}
+
+.child-profile-rankings {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.child-profile-rank {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--color-accent-muted);
+  border-radius: var(--radius-sm);
+}
+
+.child-profile-rank-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-secondary);
+}
+
+.child-profile-rank-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+/* ─── Sections ─── */
+.child-profile-section {
+  margin-bottom: 24px;
+}
+
+.child-profile-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin: 0 0 14px;
+}
+
+.child-profile-section-title svg {
+  color: var(--color-accent);
+}
+
+/* ─── Health Charts ─── */
+.health-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.health-chart-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.health-chart-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.health-chart-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.health-chart-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  flex: 1;
+}
+
+.health-chart-trend.up {
+  color: var(--color-green);
+}
+
+.health-chart-trend.down {
+  color: var(--color-red);
+}
+
+.health-chart-trend.stable {
+  color: var(--color-text-tertiary);
+}
+
+.health-chart-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.health-chart-unit {
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+  margin-left: 2px;
+}
+
+.mini-sparkline {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.health-chart-range {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+}
+
+/* ─── No Data ─── */
+.child-profile-no-data {
+  text-align: center;
+  padding: 32px;
+  background: var(--color-bg-secondary);
+  border: 1px dashed var(--color-border-md);
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+  color: var(--color-text-tertiary);
+}
+
+.child-profile-no-data svg {
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.child-profile-no-data p {
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+
+.child-profile-connect-btn {
+  padding: 8px 18px;
+  background: var(--color-accent);
+  color: #0B0E14;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.child-profile-connect-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* ─── Skills ─── */
+.child-profile-skills {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.child-profile-skill {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+.child-profile-skill-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--color-text);
+}
+
+.child-profile-skill-score {
+  color: var(--color-text-secondary);
+}
+
+.child-profile-skill-notes {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  margin-top: 6px;
+  font-style: italic;
+}
+
+/* ─── Goals ─── */
+.child-profile-goals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.child-profile-goal {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.child-profile-goal-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.child-profile-goal-dot.active {
+  background: var(--color-accent);
+  box-shadow: 0 0 6px var(--color-accent);
+}
+
+.child-profile-goal-dot.completed {
+  background: var(--color-green);
+}
+
+.child-profile-goal-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.child-profile-goal-text.completed {
+  text-decoration: line-through;
+  color: var(--color-text-tertiary);
+}
+
+.child-profile-goal-date {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .child-profile-hero {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .child-profile-meta {
+    justify-content: center;
+  }
+
+  .child-profile-rankings {
+    justify-content: center;
+  }
+
+  .health-charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .child-profile-skills {
+    grid-template-columns: 1fr;
+  }
+}

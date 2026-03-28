@@ -12,25 +12,20 @@ import ForgotPassword from './pages/auth/ForgotPassword'
 import ResetPassword from './pages/auth/ResetPassword'
 import AcceptInvite from './pages/auth/AcceptInvite'
 
-// Coach pages
-import CoachDashboard from './pages/coach/Dashboard'
-import Players from './pages/coach/Players'
-import PlayerDetail from './pages/coach/PlayerDetail'
-import Sessions from './pages/coach/Sessions'
-import NewSession from './pages/coach/NewSession'
-import CoachPayments from './pages/coach/Payments'
-import Tournaments from './pages/coach/Tournaments'
-import CoachMessages from './pages/coach/Messages'
-
-// Parent pages
+// Parent pages (PRIMARY)
 import ParentDashboard from './pages/parent/Dashboard'
-import Progress from './pages/parent/Progress'
+import ChildProfile from './pages/parent/ChildProfile'
+import Devices from './pages/parent/Devices'
+import TrainingPlan from './pages/parent/TrainingPlan'
 import ParentPayments from './pages/parent/Payments'
 import ParentMessages from './pages/parent/Chat'
 
 // Payment pages
 import PaymentSuccess from './pages/parent/PaymentSuccess'
 import PaymentCancel from './pages/parent/PaymentCancel'
+
+// Coach disabled page
+import CoachDisabled from './pages/coach/CoachDisabled'
 
 function ProtectedRoute({ children, role }) {
   const user = useAuthStore((s) => s.user)
@@ -42,8 +37,8 @@ function ProtectedRoute({ children, role }) {
   }
 
   if (role && user?.role !== role) {
-    const redirect = user?.role === 'coach' ? '/coach/dashboard' : '/parent/dashboard'
-    return <Navigate to={redirect} replace />
+    if (user?.role === 'coach') return <Navigate to="/coach/disabled" replace />
+    return <Navigate to="/parent/dashboard" replace />
   }
 
   return children
@@ -54,8 +49,8 @@ function RootRedirect() {
   const accessToken = useAuthStore((s) => s.accessToken)
 
   if (!accessToken) return <Navigate to="/login" replace />
-  if (user?.role === 'parent') return <Navigate to="/parent/dashboard" replace />
-  return <Navigate to="/coach/dashboard" replace />
+  if (user?.role === 'coach') return <Navigate to="/coach/disabled" replace />
+  return <Navigate to="/parent/dashboard" replace />
 }
 
 export default function App() {
@@ -83,81 +78,11 @@ export default function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/accept-invite/:token" element={<AcceptInvite />} />
 
-        {/* Coach routes */}
-        <Route
-          path="/coach/dashboard"
-          element={
-            <ProtectedRoute role="coach">
-              <AppShell><CoachDashboard /></AppShell>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/coach/players"
-          element={
-            <ProtectedRoute role="coach">
-              <AppShell><Players /></AppShell>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/coach/players/:id"
-          element={
-            <ProtectedRoute role="coach">
-              <AppShell><PlayerDetail /></AppShell>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/coach/sessions"
-          element={
-            <ProtectedRoute role="coach">
-              <AppShell><Sessions /></AppShell>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/coach/sessions/new"
-          element={
-            <ProtectedRoute role="coach">
-              <AppShell><NewSession /></AppShell>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/coach/payments"
-          element={
-            <ProtectedRoute role="coach">
-              <AppShell><CoachPayments /></AppShell>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/coach/tournaments"
-          element={
-            <ProtectedRoute role="coach">
-              <AppShell><Tournaments /></AppShell>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/coach/messages"
-          element={
-            <ProtectedRoute role="coach">
-              <AppShell><CoachMessages /></AppShell>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/coach/messages/:userId"
-          element={
-            <ProtectedRoute role="coach">
-              <AppShell><CoachMessages /></AppShell>
-            </ProtectedRoute>
-          }
-        />
+        {/* Coach disabled - all coach routes redirect here */}
+        <Route path="/coach/disabled" element={<CoachDisabled />} />
+        <Route path="/coach/*" element={<Navigate to="/coach/disabled" replace />} />
 
-        {/* Parent routes */}
+        {/* Parent routes (PRIMARY) */}
         <Route
           path="/parent/dashboard"
           element={
@@ -167,10 +92,26 @@ export default function App() {
           }
         />
         <Route
-          path="/parent/progress"
+          path="/parent/child/:id"
           element={
             <ProtectedRoute role="parent">
-              <AppShell><Progress /></AppShell>
+              <AppShell><ChildProfile /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/devices"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><Devices /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/training-plan"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><TrainingPlan /></AppShell>
             </ProtectedRoute>
           }
         />
