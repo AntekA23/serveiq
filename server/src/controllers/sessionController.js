@@ -7,6 +7,8 @@ import Player from '../models/Player.js';
 const createSessionSchema = z.object({
   player: z.string().min(1, 'Zawodnik jest wymagany'),
   date: z.string().min(1, 'Data treningu jest wymagana'),
+  startTime: z.string().optional(),
+  sessionType: z.enum(['kort', 'sparing', 'kondycja', 'rozciaganie', 'mecz', 'inne']).optional(),
   durationMinutes: z.number().positive('Czas trwania musi być dodatni'),
   title: z.string().min(1, 'Tytuł treningu jest wymagany'),
   notes: z.string().optional(),
@@ -103,6 +105,8 @@ export const createSession = async (req, res, next) => {
     const sessionData = {
       player: data.player,
       date: new Date(data.date),
+      startTime: data.startTime,
+      sessionType: data.sessionType || 'kort',
       durationMinutes: data.durationMinutes,
       title: data.title,
       notes: data.notes,

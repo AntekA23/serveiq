@@ -174,32 +174,71 @@ const DEMO_DEVICES = [
   },
 ]
 
-// Generate sessions for the current month
+// Session templates for multi-entry days
+const SESSION_TEMPLATES = [
+  // Training day pattern A: kort + rozciąganie
+  [
+    { sessionType: 'kort', startTime: '10:00', duration: 90, title: 'Trening techniczny', notes: null },
+    { sessionType: 'rozciaganie', startTime: '11:45', duration: 30, title: 'Rozciaganie po treningu', notes: null },
+  ],
+  // Pattern B: kondycja + kort + rozciąganie
+  [
+    { sessionType: 'kondycja', startTime: '09:00', duration: 60, title: 'Silownia — gorne partie', notes: null },
+    { sessionType: 'kort', startTime: '14:00', duration: 90, title: 'Praca nad serwisem', notes: 'Fokus na drugim serwisie.' },
+    { sessionType: 'rozciaganie', startTime: '15:45', duration: 20, title: 'Mobilnosc', notes: null },
+  ],
+  // Pattern C: sparing
+  [
+    { sessionType: 'rozciaganie', startTime: '09:30', duration: 20, title: 'Rozgrzewka', notes: null },
+    { sessionType: 'sparing', startTime: '10:00', duration: 120, title: 'Sparing z Kubą', notes: 'Dobry mecz, Kacper gral agresywnie.' },
+  ],
+  // Pattern D: kort only
+  [
+    { sessionType: 'kort', startTime: '16:00', duration: 90, title: 'Trening z trenerem', notes: null },
+  ],
+  // Pattern E: kondycja + rozciąganie
+  [
+    { sessionType: 'kondycja', startTime: '10:00', duration: 60, title: 'Trening kondycyjny — nogi + agility', notes: null },
+    { sessionType: 'rozciaganie', startTime: '11:15', duration: 30, title: 'Stretching', notes: null },
+  ],
+  // Pattern F: mecz
+  [
+    { sessionType: 'rozciaganie', startTime: '08:00', duration: 15, title: 'Rozgrzewka przedmeczowa', notes: null },
+    { sessionType: 'mecz', startTime: '09:00', duration: 90, title: 'Turniej — runda 1', notes: 'Wygrana 6:3, 6:4' },
+  ],
+]
+
+// Generate sessions for the current month (multi-entry per day)
 function generateSessions() {
   const sessions = []
   const now = new Date()
-  const durations = [60, 90, 90, 120]
-  const titles = ['Trening techniczny', 'Sparing', 'Kondycja + kort', 'Praca nad serwisem']
-  const sources = ['coach', 'coach', 'coach', 'parent']
-  const focusOptions = [['Serwis', 'Forhend'], ['Bekhend', 'Taktyka'], ['Kondycja'], ['Serwis']]
+  let sessionCounter = 0
   for (let i = 30; i >= 0; i--) {
     const d = new Date()
     d.setDate(now.getDate() - i)
-    if (isTrainingDay(d)) {
-      const seed = hashSeed(`session-${d.toISOString().split('T')[0]}`)
-      const rng = seededRandom(seed)
-      const idx = rngInt(rng, 0, 3)
+    if (!isTrainingDay(d)) continue
+    // Future days get no sessions (only scheduled slots)
+    if (d > now) continue
+
+    const seed = hashSeed(`session-${d.toISOString().split('T')[0]}`)
+    const rng = seededRandom(seed)
+    const patternIdx = rngInt(rng, 0, SESSION_TEMPLATES.length - 1)
+    const pattern = SESSION_TEMPLATES[patternIdx]
+    const isCoach = rng() > 0.3
+
+    for (const tmpl of pattern) {
       sessions.push({
-        _id: `session-${i}`,
+        _id: `session-${sessionCounter++}`,
         player: { _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' },
-        coach: sources[idx] === 'coach' ? { _id: 'demo-coach-001', firstName: 'Tomasz', lastName: 'Nowak' } : null,
-        createdBy: sources[idx] === 'coach' ? 'demo-coach-001' : 'demo-parent-001',
-        source: sources[idx],
+        coach: isCoach ? { _id: 'demo-coach-001', firstName: 'Tomasz', lastName: 'Nowak' } : null,
+        createdBy: isCoach ? 'demo-coach-001' : 'demo-parent-001',
+        source: isCoach ? 'coach' : 'parent',
         date: d.toISOString(),
-        durationMinutes: durations[idx],
-        title: titles[idx],
-        focusAreas: focusOptions[idx],
-        notes: idx === 1 ? 'Dobry sparing, Kacper gral agresywnie.' : null,
+        startTime: tmpl.startTime,
+        sessionType: tmpl.sessionType,
+        durationMinutes: tmpl.duration,
+        title: tmpl.title,
+        notes: tmpl.notes,
         visibleToParent: true,
       })
     }

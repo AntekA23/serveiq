@@ -24,6 +24,15 @@ const sessionSchema = new mongoose.Schema(
       type: Date,
       required: [true, 'Data treningu jest wymagana'],
     },
+    startTime: {
+      type: String,
+      trim: true,
+    },
+    sessionType: {
+      type: String,
+      enum: ['kort', 'sparing', 'kondycja', 'rozciaganie', 'mecz', 'inne'],
+      default: 'kort',
+    },
     durationMinutes: {
       type: Number,
       required: [true, 'Czas trwania treningu jest wymagany'],
