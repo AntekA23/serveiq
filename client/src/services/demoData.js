@@ -53,12 +53,16 @@ const DEMO_PLAYER = {
       sessionsPerWeek: 5,
       hoursPerWeek: 8,
     },
+    scheduledDays: [1, 3, 4, 5, 6],
     focus: ['Serwis', 'Kondycja', 'Taktyka'],
     notes: 'Skupić się na drugim serwisie i grze przy siatce. Przygotowania do turnieju w Warszawie.',
-    nextMilestone: {
-      text: 'Turniej Warszawa Open Junior',
-      date: '2026-04-15',
-    },
+    milestones: [
+      { _id: 'ms1', text: 'Turniej Warszawa Open Junior', date: '2026-04-15', description: 'Cel: Top 16. Nawierzchnia clay.', completed: false },
+      { _id: 'ms2', text: 'Serwis na poziomie 85%', date: '2026-05-01', description: 'Poprawa drugiego serwisu — wiekszy spin i precyzja.', completed: false },
+      { _id: 'ms3', text: 'Ranking PZT top 40', date: '2026-12-31', description: null, completed: false },
+      { _id: 'ms4', text: 'Opanowanie kick serve', date: '2026-03-01', description: 'Nowy typ serwisu do arsenalu.', completed: true, completedAt: '2026-03-05T10:00:00.000Z' },
+      { _id: 'ms5', text: 'Poprawa woleja do 50%', date: '2026-02-15', description: null, completed: true, completedAt: '2026-02-18T10:00:00.000Z' },
+    ],
   },
 }
 
@@ -174,17 +178,28 @@ const DEMO_DEVICES = [
 function generateSessions() {
   const sessions = []
   const now = new Date()
+  const durations = [60, 90, 90, 120]
+  const titles = ['Trening techniczny', 'Sparing', 'Kondycja + kort', 'Praca nad serwisem']
+  const sources = ['coach', 'coach', 'coach', 'parent']
+  const focusOptions = [['Serwis', 'Forhend'], ['Bekhend', 'Taktyka'], ['Kondycja'], ['Serwis']]
   for (let i = 30; i >= 0; i--) {
     const d = new Date()
     d.setDate(now.getDate() - i)
     if (isTrainingDay(d)) {
+      const seed = hashSeed(`session-${d.toISOString().split('T')[0]}`)
+      const rng = seededRandom(seed)
+      const idx = rngInt(rng, 0, 3)
       sessions.push({
         _id: `session-${i}`,
-        player: 'demo-player-001',
-        coach: 'demo-coach-001',
+        player: { _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' },
+        coach: sources[idx] === 'coach' ? { _id: 'demo-coach-001', firstName: 'Tomasz', lastName: 'Nowak' } : null,
+        createdBy: sources[idx] === 'coach' ? 'demo-coach-001' : 'demo-parent-001',
+        source: sources[idx],
         date: d.toISOString(),
-        durationMinutes: [60, 90, 90, 120][Math.floor(Math.random() * 4)],
-        title: ['Trening techniczny', 'Sparing', 'Kondycja + kort', 'Praca nad serwisem'][Math.floor(Math.random() * 4)],
+        durationMinutes: durations[idx],
+        title: titles[idx],
+        focusAreas: focusOptions[idx],
+        notes: idx === 1 ? 'Dobry sparing, Kacper gral agresywnie.' : null,
         visibleToParent: true,
       })
     }
@@ -364,7 +379,7 @@ export const DEMO_RESPONSES = {
   'GET /players': { players: [DEMO_PLAYER] },
 
   // GET /players/:id
-  [`GET /players/demo-player-001`]: DEMO_PLAYER,
+  [`GET /players/demo-player-001`]: { player: DEMO_PLAYER },
 
   // GET /wearables
   'GET /wearables': { devices: DEMO_DEVICES },
@@ -386,7 +401,42 @@ export const DEMO_RESPONSES = {
   'GET /sessions': { sessions: DEMO_SESSIONS },
 
   // GET /payments
-  'GET /payments': { payments: [] },
+  'GET /payments': {
+    payments: [
+      {
+        _id: 'pay-1',
+        player: { _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' },
+        coach: { _id: 'demo-coach-001', firstName: 'Tomasz', lastName: 'Nowak' },
+        amount: 450,
+        month: '2026-03',
+        status: 'pending',
+        dueDate: new Date(Date.now() + 5 * 86400000).toISOString(),
+        createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+      },
+      {
+        _id: 'pay-2',
+        player: { _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' },
+        coach: { _id: 'demo-coach-001', firstName: 'Tomasz', lastName: 'Nowak' },
+        amount: 450,
+        month: '2026-02',
+        status: 'paid',
+        dueDate: '2026-02-28T23:59:59.000Z',
+        paidAt: '2026-02-25T14:30:00.000Z',
+        createdAt: '2026-02-01T10:00:00.000Z',
+      },
+      {
+        _id: 'pay-3',
+        player: { _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' },
+        coach: { _id: 'demo-coach-001', firstName: 'Tomasz', lastName: 'Nowak' },
+        amount: 450,
+        month: '2026-01',
+        status: 'paid',
+        dueDate: '2026-01-31T23:59:59.000Z',
+        paidAt: '2026-01-20T11:00:00.000Z',
+        createdAt: '2026-01-01T10:00:00.000Z',
+      },
+    ],
+  },
 
   // GET /notifications
   'GET /notifications': {
@@ -499,7 +549,23 @@ export const DEMO_RESPONSES = {
   'DELETE /auth/account': { message: 'Konto usuniete' },
 
   // GET /messages/conversations
-  'GET /messages/conversations': [],
+  'GET /messages/conversations': {
+    conversations: [
+      {
+        _id: 'conv-1',
+        userId: 'demo-coach-001',
+        firstName: 'Tomasz',
+        lastName: 'Nowak',
+        role: 'coach',
+        lastMessage: {
+          text: 'Super, widzimy sie w poniedzialek o 16:00!',
+          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+          sender: 'demo-coach-001',
+        },
+        unreadCount: 1,
+      },
+    ],
+  },
 
   // GET /subscriptions
   'GET /subscriptions': {
@@ -603,7 +669,30 @@ export function matchDemoResponse(method, url) {
   // /players/:id (GET)
   const playerMatch = path.match(/^\/players\/([^/]+)$/)
   if (playerMatch && upperMethod === 'GET') {
-    return DEMO_PLAYER
+    return { player: DEMO_PLAYER }
+  }
+
+  // /players/:id/training-plan (PUT)
+  const planMatch = path.match(/^\/players\/([^/]+)\/training-plan$/)
+  if (planMatch && upperMethod === 'PUT') {
+    return { message: 'Plan treningowy zaktualizowany', trainingPlan: DEMO_PLAYER.trainingPlan }
+  }
+
+  // /players/:id/milestones (POST)
+  const addMilestoneMatch = path.match(/^\/players\/([^/]+)\/milestones$/)
+  if (addMilestoneMatch && upperMethod === 'POST') {
+    return { message: 'Kamien milowy dodany', milestone: { _id: 'ms-new-' + Date.now(), text: 'Nowy cel', completed: false } }
+  }
+
+  // /players/:id/milestones/:mid (PUT)
+  const editMilestoneMatch = path.match(/^\/players\/([^/]+)\/milestones\/([^/]+)$/)
+  if (editMilestoneMatch && upperMethod === 'PUT') {
+    return { message: 'Kamien milowy zaktualizowany', milestone: { _id: editMilestoneMatch[2] } }
+  }
+
+  // /players/:id/milestones/:mid (DELETE)
+  if (editMilestoneMatch && upperMethod === 'DELETE') {
+    return { message: 'Kamien milowy usuniety' }
   }
 
   // /players/:id/avatar (PUT)
@@ -624,9 +713,47 @@ export function matchDemoResponse(method, url) {
     return { message: 'Urzadzenie zostalo odlaczone' }
   }
 
-  // /sessions with query
-  if (path === '/sessions') {
+  // POST /sessions (parent adds training)
+  if (path === '/sessions' && upperMethod === 'POST') {
+    return { message: 'Trening zostal dodany', session: { _id: 'session-new-' + Date.now(), source: 'parent' } }
+  }
+
+  // /sessions with query (GET)
+  if (path === '/sessions' && upperMethod === 'GET') {
     return { sessions: DEMO_SESSIONS }
+  }
+
+  // /messages/conversation/:userId (GET)
+  const convMatch = path.match(/^\/messages\/conversation\/([^/]+)$/)
+  if (convMatch && upperMethod === 'GET') {
+    return {
+      messages: [
+        { _id: 'msg-1', sender: 'demo-coach-001', text: 'Czesc Aniu! Kacper super sie dzis spisal na treningu.', createdAt: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString() },
+        { _id: 'msg-2', sender: 'demo-parent-001', text: 'Dziekuje! Cieszymy sie. Jak mu idzie serwis?', createdAt: new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString() },
+        { _id: 'msg-3', sender: 'demo-coach-001', text: 'Serwis coraz lepszy, szczegolnie pierwszy. Nad drugim jeszcze pracujemy - brakuje rotacji.', createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
+        { _id: 'msg-4', sender: 'demo-parent-001', text: 'Rozumiem. Czy mozemy zwiekszyc ilosc treningow w tym tygodniu? Kacper chce sie przygotowac do turnieju.', createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() },
+        { _id: 'msg-5', sender: 'demo-coach-001', text: 'Jasne, mozemy dodac czwartek o 15:00. Skupimy sie na sparingu.', createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() },
+        { _id: 'msg-6', sender: 'demo-parent-001', text: 'Swietnie, dziekujemy!', createdAt: new Date(Date.now() - 2.5 * 60 * 60 * 1000).toISOString() },
+        { _id: 'msg-7', sender: 'demo-coach-001', text: 'Super, widzimy sie w poniedzialek o 16:00!', createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
+      ],
+    }
+  }
+
+  // /messages/read/:userId (PUT)
+  const readMatch = path.match(/^\/messages\/read\/([^/]+)$/)
+  if (readMatch && upperMethod === 'PUT') {
+    return { message: 'ok' }
+  }
+
+  // /messages (POST)
+  if (path === '/messages' && upperMethod === 'POST') {
+    return { message: { _id: 'msg-new-' + Date.now(), sender: 'demo-parent-001', text: 'Demo', createdAt: new Date().toISOString() } }
+  }
+
+  // /payments/:id/checkout (POST)
+  const payCheckoutMatch = path.match(/^\/payments\/([^/]+)\/checkout$/)
+  if (payCheckoutMatch && upperMethod === 'POST') {
+    return { url: '#demo-checkout' }
   }
 
   // /notifications/unread-count
