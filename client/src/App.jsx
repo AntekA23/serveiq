@@ -19,6 +19,7 @@ import HealthHistory from './pages/parent/HealthHistory'
 import Timeline from './pages/parent/Timeline'
 import Devices from './pages/parent/Devices'
 import TrainingPlan from './pages/parent/TrainingPlan'
+import Tournaments from './pages/parent/Tournaments'
 import ParentPayments from './pages/parent/Payments'
 import ParentMessages from './pages/parent/Chat'
 import Onboarding from './pages/parent/Onboarding'
@@ -168,6 +169,14 @@ export default function App() {
           element={
             <ProtectedRoute role="parent">
               <AppShell><TrainingPlan /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/tournaments"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><Tournaments /></AppShell>
             </ProtectedRoute>
           }
         />

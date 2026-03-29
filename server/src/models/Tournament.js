@@ -10,7 +10,20 @@ const tournamentSchema = new mongoose.Schema(
     coach: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'Trener jest wymagany'],
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    source: {
+      type: String,
+      enum: ['coach', 'parent'],
+      default: 'coach',
+    },
+    status: {
+      type: String,
+      enum: ['planned', 'in-progress', 'completed', 'cancelled'],
+      default: 'planned',
     },
     name: {
       type: String,
@@ -23,10 +36,7 @@ const tournamentSchema = new mongoose.Schema(
     },
     surface: {
       type: String,
-      enum: {
-        values: ['hard', 'clay', 'grass', 'indoor'],
-        message: 'Nawierzchnia musi być: hard, clay, grass lub indoor',
-      },
+      enum: ['clay', 'hard', 'grass', 'carpet', 'indoor-hard'],
     },
     startDate: {
       type: Date,
@@ -39,6 +49,8 @@ const tournamentSchema = new mongoose.Schema(
       round: String,
       wins: Number,
       losses: Number,
+      scores: [String],
+      rating: Number,
     },
     notes: String,
   },

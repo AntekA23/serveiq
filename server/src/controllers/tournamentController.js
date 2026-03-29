@@ -8,34 +8,30 @@ const createTournamentSchema = z.object({
   player: z.string().min(1, 'Zawodnik jest wymagany'),
   name: z.string().min(1, 'Nazwa turnieju jest wymagana'),
   location: z.string().optional(),
-  surface: z.enum(['hard', 'clay', 'grass', 'indoor']).optional(),
+  surface: z.enum(['clay', 'hard', 'grass', 'carpet', 'indoor-hard']).optional(),
   startDate: z.string().min(1, 'Data rozpoczęcia jest wymagana'),
   endDate: z.string().optional(),
   category: z.string().optional(),
   drawSize: z.number().positive().optional(),
-  result: z
-    .object({
-      round: z.string().optional(),
-      wins: z.number().min(0).optional(),
-      losses: z.number().min(0).optional(),
-    })
-    .optional(),
   notes: z.string().optional(),
 });
 
 const updateTournamentSchema = z.object({
   name: z.string().min(1).optional(),
   location: z.string().optional().nullable(),
-  surface: z.enum(['hard', 'clay', 'grass', 'indoor']).optional().nullable(),
+  surface: z.enum(['clay', 'hard', 'grass', 'carpet', 'indoor-hard']).optional().nullable(),
   startDate: z.string().optional(),
   endDate: z.string().optional().nullable(),
   category: z.string().optional().nullable(),
   drawSize: z.number().positive().optional().nullable(),
+  status: z.enum(['planned', 'in-progress', 'completed', 'cancelled']).optional(),
   result: z
     .object({
       round: z.string().optional(),
       wins: z.number().min(0).optional(),
       losses: z.number().min(0).optional(),
+      scores: z.array(z.string()).optional(),
+      rating: z.number().min(1).max(5).optional(),
     })
     .optional(),
   notes: z.string().optional().nullable(),
@@ -45,8 +41,8 @@ const updateTournamentSchema = z.object({
 
 /**
  * GET /api/tournaments
- * Lista turniejów. Coach widzi swoje, parent widzi turnieje dzieci.
- * Query: ?player=id
+ * Coach widzi swoje, parent widzi turnieje dzieci.
+ * Query: ?player=id&status=planned
  */
 export const getTournaments = async (req, res, next) => {
   try {
@@ -66,6 +62,10 @@ export const getTournaments = async (req, res, next) => {
       filter.player = req.query.player;
     }
 
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+
     const tournaments = await Tournament.find(filter)
       .populate('player', 'firstName lastName')
       .populate('coach', 'firstName lastName')
@@ -79,38 +79,45 @@ export const getTournaments = async (req, res, next) => {
 
 /**
  * POST /api/tournaments
- * Utwórz nowy turniej (coach only)
+ * Coach lub parent tworzy turniej
  */
 export const createTournament = async (req, res, next) => {
   try {
     const data = createTournamentSchema.parse(req.body);
 
-    // Sprawdź czy zawodnik należy do trenera
-    const player = await Player.findOne({
-      _id: data.player,
-      coach: req.user._id,
-      active: true,
-    });
-
-    if (!player) {
-      return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
-    }
-
-    const tournament = await Tournament.create({
-      ...data,
-      coach: req.user._id,
+    let player;
+    const tournamentData = {
+      player: data.player,
+      name: data.name,
+      location: data.location,
+      surface: data.surface,
       startDate: new Date(data.startDate),
       endDate: data.endDate ? new Date(data.endDate) : undefined,
-    });
+      category: data.category,
+      drawSize: data.drawSize,
+      notes: data.notes,
+      status: 'planned',
+      createdBy: req.user._id,
+    };
 
-    const populatedTournament = await Tournament.findById(tournament._id)
+    if (req.user.role === 'coach') {
+      player = await Player.findOne({ _id: data.player, coach: req.user._id, active: true });
+      if (!player) return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
+      tournamentData.coach = req.user._id;
+      tournamentData.source = 'coach';
+    } else {
+      player = await Player.findOne({ _id: data.player, parents: req.user._id, active: true });
+      if (!player) return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
+      tournamentData.source = 'parent';
+    }
+
+    const tournament = await Tournament.create(tournamentData);
+
+    const populated = await Tournament.findById(tournament._id)
       .populate('player', 'firstName lastName')
       .populate('coach', 'firstName lastName');
 
-    res.status(201).json({
-      message: 'Turniej został dodany',
-      tournament: populatedTournament,
-    });
+    res.status(201).json({ message: 'Turniej został dodany', tournament: populated });
   } catch (error) {
     next(error);
   }
@@ -118,7 +125,6 @@ export const createTournament = async (req, res, next) => {
 
 /**
  * GET /api/tournaments/:id
- * Szczegóły turnieju
  */
 export const getTournament = async (req, res, next) => {
   try {
@@ -147,22 +153,25 @@ export const getTournament = async (req, res, next) => {
 
 /**
  * PUT /api/tournaments/:id
- * Aktualizuj turniej (coach only)
+ * Coach edytuje swoje, parent edytuje turnieje swoich dzieci
  */
 export const updateTournament = async (req, res, next) => {
   try {
     const data = updateTournamentSchema.parse(req.body);
 
-    const tournament = await Tournament.findOne({
-      _id: req.params.id,
-      coach: req.user._id,
-    });
+    const query = { _id: req.params.id };
+    if (req.user.role === 'coach') {
+      query.coach = req.user._id;
+    } else {
+      const childrenIds = req.user.parentProfile?.children || [];
+      query.player = { $in: childrenIds };
+    }
 
+    const tournament = await Tournament.findOne(query);
     if (!tournament) {
       return res.status(404).json({ message: 'Turniej nie znaleziony' });
     }
 
-    // Aktualizuj pola
     if (data.name !== undefined) tournament.name = data.name;
     if (data.location !== undefined) tournament.location = data.location;
     if (data.surface !== undefined) tournament.surface = data.surface;
@@ -170,19 +179,17 @@ export const updateTournament = async (req, res, next) => {
     if (data.endDate !== undefined) tournament.endDate = data.endDate ? new Date(data.endDate) : null;
     if (data.category !== undefined) tournament.category = data.category;
     if (data.drawSize !== undefined) tournament.drawSize = data.drawSize;
-    if (data.result !== undefined) tournament.result = data.result;
+    if (data.status !== undefined) tournament.status = data.status;
+    if (data.result !== undefined) tournament.result = { ...tournament.result?.toObject?.() || {}, ...data.result };
     if (data.notes !== undefined) tournament.notes = data.notes;
 
     await tournament.save();
 
-    const updatedTournament = await Tournament.findById(tournament._id)
+    const updated = await Tournament.findById(tournament._id)
       .populate('player', 'firstName lastName')
       .populate('coach', 'firstName lastName');
 
-    res.json({
-      message: 'Turniej został zaktualizowany',
-      tournament: updatedTournament,
-    });
+    res.json({ message: 'Turniej został zaktualizowany', tournament: updated });
   } catch (error) {
     next(error);
   }
@@ -190,15 +197,20 @@ export const updateTournament = async (req, res, next) => {
 
 /**
  * DELETE /api/tournaments/:id
- * Usuń turniej (coach only)
+ * Coach usuwa swoje, parent usuwa turnieje ktore sam stworzyl
  */
 export const deleteTournament = async (req, res, next) => {
   try {
-    const tournament = await Tournament.findOneAndDelete({
-      _id: req.params.id,
-      coach: req.user._id,
-    });
+    const query = { _id: req.params.id };
 
+    if (req.user.role === 'coach') {
+      query.coach = req.user._id;
+    } else {
+      query.createdBy = req.user._id;
+      query.source = 'parent';
+    }
+
+    const tournament = await Tournament.findOneAndDelete(query);
     if (!tournament) {
       return res.status(404).json({ message: 'Turniej nie znaleziony' });
     }

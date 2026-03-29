@@ -440,6 +440,74 @@ export const DEMO_RESPONSES = {
   // GET /sessions
   'GET /sessions': { sessions: DEMO_SESSIONS },
 
+  // GET /tournaments
+  'GET /tournaments': {
+    tournaments: [
+      // Upcoming
+      {
+        _id: 'tn-1', player: { _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' },
+        name: 'Warszawa Open Junior', location: 'KT Arkadia, Warszawa', surface: 'clay',
+        startDate: new Date(Date.now() + 12 * 86400000).toISOString(),
+        endDate: new Date(Date.now() + 14 * 86400000).toISOString(),
+        category: 'U14', drawSize: 32, status: 'planned', source: 'parent', notes: 'Cel: top 8',
+      },
+      {
+        _id: 'tn-2', player: { _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' },
+        name: 'Puchar Wisly U14', location: 'Tenis Krakow', surface: 'clay',
+        startDate: new Date(Date.now() + 28 * 86400000).toISOString(),
+        category: 'U14', drawSize: 16, status: 'planned', source: 'parent',
+      },
+      {
+        _id: 'tn-3', player: { _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' },
+        name: 'PZT Mistrzostwa Regionu', location: 'Hala Arena, Lodz', surface: 'indoor-hard',
+        startDate: new Date(Date.now() + 45 * 86400000).toISOString(),
+        endDate: new Date(Date.now() + 47 * 86400000).toISOString(),
+        category: 'U14', drawSize: 64, status: 'planned', source: 'parent',
+      },
+      // History
+      {
+        _id: 'tn-4', player: { _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' },
+        name: 'Krakow Junior Open', location: 'KS Olsza, Krakow', surface: 'clay',
+        startDate: new Date(Date.now() - 7 * 86400000).toISOString(),
+        endDate: new Date(Date.now() - 5 * 86400000).toISOString(),
+        category: 'U14', drawSize: 32, status: 'completed', source: 'parent',
+        result: { round: 'QF', wins: 2, losses: 1, scores: ['6-3', '4-6', '7-5'], rating: 4 },
+        notes: 'Swietna gra w cwiercfinale, przegrany tie-break w polfinale',
+      },
+      {
+        _id: 'tn-5', player: { _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' },
+        name: 'Wroclaw Cup', location: 'Tie Break, Wroclaw', surface: 'hard',
+        startDate: new Date(Date.now() - 25 * 86400000).toISOString(),
+        category: 'U14', drawSize: 16, status: 'completed', source: 'parent',
+        result: { round: 'SF', wins: 3, losses: 1, scores: ['6-2', '6-4'], rating: 4 },
+      },
+      {
+        _id: 'tn-6', player: { _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' },
+        name: 'Poznan Open Junior', location: 'KT Olimpia, Poznan', surface: 'clay',
+        startDate: new Date(Date.now() - 45 * 86400000).toISOString(),
+        category: 'U14', drawSize: 32, status: 'completed', source: 'parent',
+        result: { round: 'R2', wins: 1, losses: 1, scores: ['6-4', '3-6', '2-6'], rating: 2 },
+        notes: 'Slaby dzien, problemy z serwisem',
+      },
+      {
+        _id: 'tn-7', player: { _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' },
+        name: 'PZT Ranking U14 Katowice', location: 'Hala Spodek, Katowice', surface: 'indoor-hard',
+        startDate: new Date(Date.now() - 60 * 86400000).toISOString(),
+        endDate: new Date(Date.now() - 58 * 86400000).toISOString(),
+        category: 'U14', drawSize: 64, status: 'completed', source: 'parent',
+        result: { round: 'R3', wins: 2, losses: 1, scores: ['6-1', '6-3'], rating: 3 },
+      },
+      {
+        _id: 'tn-8', player: { _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' },
+        name: 'Zimowy Turniej Warszawa', location: 'Mera, Warszawa', surface: 'carpet',
+        startDate: new Date(Date.now() - 90 * 86400000).toISOString(),
+        category: 'U14', drawSize: 16, status: 'completed', source: 'parent',
+        result: { round: 'W', wins: 4, losses: 0, scores: ['6-2', '6-0'], rating: 5 },
+        notes: 'Pierwsze zwyciestwo w turnieju!',
+      },
+    ],
+  },
+
   // GET /payments
   'GET /payments': {
     payments: [
@@ -757,6 +825,27 @@ export function matchDemoResponse(method, url) {
   const deleteSessionMatch = path.match(/^\/sessions\/([^/]+)$/)
   if (deleteSessionMatch && upperMethod === 'DELETE') {
     return { message: 'Trening zostal usuniety' }
+  }
+
+  // /tournaments (GET with query)
+  if (path === '/tournaments' && upperMethod === 'GET') {
+    return DEMO_RESPONSES['GET /tournaments']
+  }
+
+  // POST /tournaments
+  if (path === '/tournaments' && upperMethod === 'POST') {
+    return { message: 'Turniej zostal dodany', tournament: { _id: 'tn-new-' + Date.now(), status: 'planned' } }
+  }
+
+  // /tournaments/:id (PUT)
+  const tournamentMatch = path.match(/^\/tournaments\/([^/]+)$/)
+  if (tournamentMatch && upperMethod === 'PUT') {
+    return { message: 'Turniej zostal zaktualizowany', tournament: { _id: tournamentMatch[1] } }
+  }
+
+  // /tournaments/:id (DELETE)
+  if (tournamentMatch && upperMethod === 'DELETE') {
+    return { message: 'Turniej zostal usuniety' }
   }
 
   // POST /sessions (parent adds training)

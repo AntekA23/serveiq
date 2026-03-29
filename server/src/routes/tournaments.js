@@ -17,9 +17,9 @@ router.use(verifyToken);
 router.get('/', getTournaments);
 router.get('/:id', getTournament);
 
-// POST/PUT/DELETE - tylko coach
-router.post('/', requireRole('coach'), createTournament);
-router.put('/:id', requireRole('coach'), updateTournament);
-router.delete('/:id', requireRole('coach'), deleteTournament);
+// POST/PUT/DELETE - coach i parent
+router.post('/', requireRole('coach', 'parent'), createTournament);
+router.put('/:id', requireRole('coach', 'parent'), updateTournament);
+router.delete('/:id', requireRole('coach', 'parent'), deleteTournament);
 
 export default router;
