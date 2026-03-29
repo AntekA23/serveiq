@@ -1,7 +1,9 @@
 import Stripe from 'stripe';
 import User from '../models/User.js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY)
+  : null;
 
 const PRICE_IDS = {
   premium: process.env.STRIPE_PREMIUM_PRICE_ID || 'price_premium_placeholder',
