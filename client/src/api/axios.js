@@ -57,7 +57,10 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Nie próbuj refresha dla endpointów auth (login/register zwracają 401 przy złych danych)
+    const isAuthEndpoint = originalRequest.url?.match(/\/auth\/(login|register|refresh|accept-invite)/)
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
