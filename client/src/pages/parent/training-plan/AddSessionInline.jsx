@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Save, X } from 'lucide-react'
 import api from '../../../api/axios'
 import Button from '../../../components/ui/Button/Button'
-import { SESSION_TYPES } from './constants'
+import { SESSION_TYPES, SURFACES, SURFACE_TYPES } from './constants'
 
 const DURATION_PRESETS = [
   { label: '30m', value: 30 },
@@ -26,6 +26,7 @@ const AUTO_DURATIONS = {
 
 export default function AddSessionInline({ childId, date, onSaved, onCancel }) {
   const [type, setType] = useState('kort')
+  const [surface, setSurface] = useState('clay')
   const [startTime, setStartTime] = useState('10:00')
   const [duration, setDuration] = useState(90)
   const [notes, setNotes] = useState('')
@@ -44,6 +45,7 @@ export default function AddSessionInline({ childId, date, onSaved, onCancel }) {
         date,
         startTime,
         sessionType: type,
+        surface: SURFACE_TYPES.includes(type) ? surface : '',
         durationMinutes: duration,
         title: AUTO_TITLES[type] || 'Trening',
         notes: notes || undefined,
@@ -76,6 +78,20 @@ export default function AddSessionInline({ childId, date, onSaved, onCancel }) {
           )
         })}
       </div>
+
+      {/* Surface — only for court types */}
+      {SURFACE_TYPES.includes(type) && (
+        <div className="tp-add-surfaces">
+          {Object.entries(SURFACES).map(([key, info]) => (
+            <button key={key}
+              className={`tp-surface-btn ${surface === key ? 'active' : ''}`}
+              onClick={() => setSurface(key)}
+            >
+              <span>{info.emoji}</span> {info.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Time + duration row */}
       <div className="tp-add-row">

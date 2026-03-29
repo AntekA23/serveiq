@@ -33,6 +33,11 @@ const sessionSchema = new mongoose.Schema(
       enum: ['kort', 'sparing', 'kondycja', 'rozciaganie', 'mecz', 'inne'],
       default: 'kort',
     },
+    surface: {
+      type: String,
+      enum: ['clay', 'hard', 'grass', 'carpet', 'indoor-hard', ''],
+      default: '',
+    },
     durationMinutes: {
       type: Number,
       required: [true, 'Czas trwania treningu jest wymagany'],

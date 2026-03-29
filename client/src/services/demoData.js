@@ -178,33 +178,33 @@ const DEMO_DEVICES = [
 const SESSION_TEMPLATES = [
   // Training day pattern A: kort + rozciąganie
   [
-    { sessionType: 'kort', startTime: '10:00', duration: 90, title: 'Trening techniczny', notes: null },
-    { sessionType: 'rozciaganie', startTime: '11:45', duration: 30, title: 'Rozciaganie po treningu', notes: null },
+    { sessionType: 'kort', surface: 'clay', startTime: '10:00', duration: 90, title: 'Trening techniczny', notes: null },
+    { sessionType: 'rozciaganie', surface: '', startTime: '11:45', duration: 30, title: 'Rozciaganie po treningu', notes: null },
   ],
   // Pattern B: kondycja + kort + rozciąganie
   [
-    { sessionType: 'kondycja', startTime: '09:00', duration: 60, title: 'Silownia — gorne partie', notes: null },
-    { sessionType: 'kort', startTime: '14:00', duration: 90, title: 'Praca nad serwisem', notes: 'Fokus na drugim serwisie.' },
-    { sessionType: 'rozciaganie', startTime: '15:45', duration: 20, title: 'Mobilnosc', notes: null },
+    { sessionType: 'kondycja', surface: '', startTime: '09:00', duration: 60, title: 'Silownia — gorne partie', notes: null },
+    { sessionType: 'kort', surface: 'hard', startTime: '14:00', duration: 90, title: 'Praca nad serwisem', notes: 'Fokus na drugim serwisie.' },
+    { sessionType: 'rozciaganie', surface: '', startTime: '15:45', duration: 20, title: 'Mobilnosc', notes: null },
   ],
   // Pattern C: sparing
   [
-    { sessionType: 'rozciaganie', startTime: '09:30', duration: 20, title: 'Rozgrzewka', notes: null },
-    { sessionType: 'sparing', startTime: '10:00', duration: 120, title: 'Sparing z Kubą', notes: 'Dobry mecz, Kacper gral agresywnie.' },
+    { sessionType: 'rozciaganie', surface: '', startTime: '09:30', duration: 20, title: 'Rozgrzewka', notes: null },
+    { sessionType: 'sparing', surface: 'clay', startTime: '10:00', duration: 120, title: 'Sparing z Kubą', notes: 'Dobry mecz, Kacper gral agresywnie.' },
   ],
   // Pattern D: kort only
   [
-    { sessionType: 'kort', startTime: '16:00', duration: 90, title: 'Trening z trenerem', notes: null },
+    { sessionType: 'kort', surface: 'indoor-hard', startTime: '16:00', duration: 90, title: 'Trening z trenerem', notes: null },
   ],
   // Pattern E: kondycja + rozciąganie
   [
-    { sessionType: 'kondycja', startTime: '10:00', duration: 60, title: 'Trening kondycyjny — nogi + agility', notes: null },
-    { sessionType: 'rozciaganie', startTime: '11:15', duration: 30, title: 'Stretching', notes: null },
+    { sessionType: 'kondycja', surface: '', startTime: '10:00', duration: 60, title: 'Trening kondycyjny — nogi + agility', notes: null },
+    { sessionType: 'rozciaganie', surface: '', startTime: '11:15', duration: 30, title: 'Stretching', notes: null },
   ],
   // Pattern F: mecz
   [
-    { sessionType: 'rozciaganie', startTime: '08:00', duration: 15, title: 'Rozgrzewka przedmeczowa', notes: null },
-    { sessionType: 'mecz', startTime: '09:00', duration: 90, title: 'Turniej — runda 1', notes: 'Wygrana 6:3, 6:4' },
+    { sessionType: 'rozciaganie', surface: '', startTime: '08:00', duration: 15, title: 'Rozgrzewka przedmeczowa', notes: null },
+    { sessionType: 'mecz', surface: 'clay', startTime: '09:00', duration: 90, title: 'Turniej — runda 1', notes: 'Wygrana 6:3, 6:4' },
   ],
 ]
 
@@ -236,6 +236,7 @@ function generateSessions() {
         date: d.toISOString(),
         startTime: tmpl.startTime,
         sessionType: tmpl.sessionType,
+        surface: tmpl.surface || '',
         durationMinutes: tmpl.duration,
         title: tmpl.title,
         notes: tmpl.notes,

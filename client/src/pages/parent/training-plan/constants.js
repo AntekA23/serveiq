@@ -9,6 +9,17 @@ export const SESSION_TYPES = {
   inne:        { label: 'Inne',        color: 'var(--color-text-tertiary)',   bg: 'var(--color-bg-tertiary)', icon: Circle },
 }
 
+export const SURFACES = {
+  clay:         { label: 'Maczka', emoji: '🟤' },
+  hard:         { label: 'Hard',   emoji: '🔵' },
+  grass:        { label: 'Trawa',  emoji: '🟢' },
+  carpet:       { label: 'Dywan',  emoji: '🟡' },
+  'indoor-hard': { label: 'Hala',  emoji: '⚪' },
+}
+
+// Typy sesji dla których nawierzchnia ma sens
+export const SURFACE_TYPES = ['kort', 'sparing', 'mecz']
+
 export const DAY_NAMES = ['Pon', 'Wt', 'Sr', 'Czw', 'Pt', 'Sb', 'Nd']
 export const DAY_NAMES_FULL = ['Poniedzialek', 'Wtorek', 'Sroda', 'Czwartek', 'Piatek', 'Sobota', 'Niedziela']
 export const DAY_NUMBERS = [1, 2, 3, 4, 5, 6, 7]
