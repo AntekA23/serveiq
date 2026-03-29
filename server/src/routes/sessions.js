@@ -19,8 +19,9 @@ router.get('/:id', getSession);
 
 // POST - coach i parent mogą tworzyć sesje
 router.post('/', requireRole('coach', 'parent'), createSession);
-// PUT/DELETE - tylko coach
+// PUT - tylko coach
 router.put('/:id', requireRole('coach'), updateSession);
-router.delete('/:id', requireRole('coach'), deleteSession);
+// DELETE - coach i parent (parent moze usuwac swoje)
+router.delete('/:id', requireRole('coach', 'parent'), deleteSession);
 
 export default router;

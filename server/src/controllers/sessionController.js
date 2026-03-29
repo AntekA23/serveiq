@@ -243,14 +243,20 @@ export const updateSession = async (req, res, next) => {
 
 /**
  * DELETE /api/sessions/:id
- * Usuń trening (tylko coach)
+ * Coach usuwa swoje sesje, parent usuwa sesje ktore sam stworzyl
  */
 export const deleteSession = async (req, res, next) => {
   try {
-    const session = await Session.findOneAndDelete({
-      _id: req.params.id,
-      coach: req.user._id,
-    });
+    const query = { _id: req.params.id };
+
+    if (req.user.role === 'coach') {
+      query.coach = req.user._id;
+    } else {
+      query.createdBy = req.user._id;
+      query.source = 'parent';
+    }
+
+    const session = await Session.findOneAndDelete(query);
 
     if (!session) {
       return res.status(404).json({ message: 'Trening nie znaleziony' });

@@ -47,8 +47,13 @@ export default function CalendarTab({ child, plan, onRefresh }) {
   }
 
   const handleDelete = async (session) => {
-    // Only allow delete of parent-created sessions (TODO: API needs DELETE for parent sessions)
-    await fetchSessions()
+    try {
+      await api.delete(`/sessions/${session._id}`)
+      toast.success('Trening usuniety')
+      await fetchSessions()
+    } catch {
+      toast.error('Nie udalo sie usunac treningu')
+    }
   }
 
   const handleAddClick = (ds) => {

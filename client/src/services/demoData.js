@@ -752,6 +752,12 @@ export function matchDemoResponse(method, url) {
     return { message: 'Urzadzenie zostalo odlaczone' }
   }
 
+  // DELETE /sessions/:id
+  const deleteSessionMatch = path.match(/^\/sessions\/([^/]+)$/)
+  if (deleteSessionMatch && upperMethod === 'DELETE') {
+    return { message: 'Trening zostal usuniety' }
+  }
+
   // POST /sessions (parent adds training)
   if (path === '/sessions' && upperMethod === 'POST') {
     return { message: 'Trening zostal dodany', session: { _id: 'session-new-' + Date.now(), source: 'parent' } }
