@@ -91,31 +91,45 @@ export const getSessions = async (req, res, next) => {
 
 /**
  * POST /api/sessions
- * Utwórz nowy trening. Opcjonalnie aktualizuj skills na Player.
+ * Utwórz nowy trening.
+ * Coach: wymaga player należącego do trenera, opcjonalnie skillUpdates.
+ * Parent: wymaga player będącego dzieckiem rodzica, prostsza walidacja.
  */
 export const createSession = async (req, res, next) => {
   try {
     const data = createSessionSchema.parse(req.body);
 
-    // Sprawdź czy zawodnik należy do trenera
-    const player = await Player.findOne({
-      _id: data.player,
-      coach: req.user._id,
-      active: true,
-    });
+    let player;
+    const sessionData = {
+      player: data.player,
+      date: new Date(data.date),
+      durationMinutes: data.durationMinutes,
+      title: data.title,
+      notes: data.notes,
+      focusAreas: data.focusAreas,
+      createdBy: req.user._id,
+    };
 
-    if (!player) {
-      return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
+    if (req.user.role === 'coach') {
+      player = await Player.findOne({ _id: data.player, coach: req.user._id, active: true });
+      if (!player) return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
+
+      sessionData.coach = req.user._id;
+      sessionData.source = 'coach';
+      sessionData.skillUpdates = data.skillUpdates;
+      sessionData.visibleToParent = data.visibleToParent;
+    } else {
+      player = await Player.findOne({ _id: data.player, parents: req.user._id, active: true });
+      if (!player) return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
+
+      sessionData.source = 'parent';
+      sessionData.visibleToParent = true;
     }
 
-    const session = await Session.create({
-      ...data,
-      date: new Date(data.date),
-      coach: req.user._id,
-    });
+    const session = await Session.create(sessionData);
 
-    // Aktualizuj skill scores na Player jeśli podano skillUpdates
-    if (data.skillUpdates && data.skillUpdates.length > 0) {
+    // Aktualizuj skill scores na Player jeśli podano skillUpdates (tylko coach)
+    if (req.user.role === 'coach' && data.skillUpdates && data.skillUpdates.length > 0) {
       for (const update of data.skillUpdates) {
         if (player.skills && player.skills[update.skill]) {
           player.skills[update.skill].score = update.scoreAfter;

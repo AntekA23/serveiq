@@ -10,6 +10,10 @@ import {
   createPlayerSelf,
   uploadAvatar,
   uploadMiddleware,
+  updateTrainingPlan,
+  addMilestone,
+  updateMilestone,
+  deleteMilestone,
 } from '../controllers/playerController.js';
 import { getTimeline } from '../controllers/healthController.js';
 import { verifyToken, requireRole } from '../middleware/auth.js';
@@ -20,6 +24,12 @@ const router = Router();
 router.post('/self', verifyToken, requireRole('parent'), createPlayerSelf);
 router.put('/:id/avatar', verifyToken, uploadMiddleware, uploadAvatar);
 router.get('/:id/timeline', verifyToken, getTimeline);
+
+// Plan treningowy (rodzic)
+router.put('/:id/training-plan', verifyToken, requireRole('parent'), updateTrainingPlan);
+router.post('/:id/milestones', verifyToken, requireRole('parent'), addMilestone);
+router.put('/:id/milestones/:mid', verifyToken, requireRole('parent'), updateMilestone);
+router.delete('/:id/milestones/:mid', verifyToken, requireRole('parent'), deleteMilestone);
 
 // Endpointy dostępne dla trenera i rodzica (dane filtrowane wg roli)
 router.get('/', verifyToken, requireRole('coach', 'parent'), getPlayers);

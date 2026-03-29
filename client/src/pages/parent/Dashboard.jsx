@@ -99,8 +99,8 @@ function DeviceStatusBar({ devices }) {
 
 function PlanPreview({ child, navigate }) {
   const plan = child?.trainingPlan
-  const goals = child?.goals || []
-  const activeGoals = goals.filter(g => !g.completed).slice(0, 2)
+  const milestones = plan?.milestones || []
+  const nextMilestone = milestones.find(m => !m.completed)
 
   return (
     <div className="plan-preview card">
@@ -112,14 +112,14 @@ function PlanPreview({ child, navigate }) {
         </button>
       </div>
       <div className="plan-preview-body">
-        {plan?.nextMilestone ? (
+        {nextMilestone ? (
           <div className="plan-milestone">
             <Target size={16} className="plan-milestone-icon" />
             <div>
-              <div className="plan-milestone-text">{plan.nextMilestone.text}</div>
-              {plan.nextMilestone.date && (
+              <div className="plan-milestone-text">{nextMilestone.text}</div>
+              {nextMilestone.date && (
                 <div className="plan-milestone-date">
-                  {new Date(plan.nextMilestone.date).toLocaleDateString('pl-PL', {
+                  {new Date(nextMilestone.date).toLocaleDateString('pl-PL', {
                     day: 'numeric', month: 'long', year: 'numeric'
                   })}
                 </div>
@@ -137,18 +137,16 @@ function PlanPreview({ child, navigate }) {
           </div>
         )}
 
-        {activeGoals.length > 0 && (
-          <div className="plan-goals-preview">
-            {activeGoals.map((goal, idx) => (
-              <div key={goal._id || idx} className="plan-goal-item">
-                <div className="plan-goal-dot" />
-                <span>{goal.text}</span>
-              </div>
-            ))}
+        {plan?.scheduledDays?.length > 0 && (
+          <div className="plan-weekly">
+            <div className="plan-weekly-label">Dni treningowe</div>
+            <div className="plan-weekly-value">
+              {plan.scheduledDays.map(d => ['', 'Pon', 'Wt', 'Sr', 'Czw', 'Pt', 'Sb', 'Nd'][d]).join(', ')}
+            </div>
           </div>
         )}
 
-        {!plan?.nextMilestone && activeGoals.length === 0 && (
+        {!nextMilestone && !plan?.weeklyGoal && (
           <div className="plan-empty">
             Brak aktywnego planu treningowego
           </div>

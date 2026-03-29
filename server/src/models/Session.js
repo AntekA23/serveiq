@@ -10,7 +10,15 @@ const sessionSchema = new mongoose.Schema(
     coach: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'Trener jest wymagany'],
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    source: {
+      type: String,
+      enum: ['coach', 'parent'],
+      default: 'coach',
     },
     date: {
       type: Date,

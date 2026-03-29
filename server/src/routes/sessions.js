@@ -17,8 +17,9 @@ router.use(verifyToken);
 router.get('/', getSessions);
 router.get('/:id', getSession);
 
-// POST/PUT/DELETE - tylko coach
-router.post('/', requireRole('coach'), createSession);
+// POST - coach i parent mogą tworzyć sesje
+router.post('/', requireRole('coach', 'parent'), createSession);
+// PUT/DELETE - tylko coach
 router.put('/:id', requireRole('coach'), updateSession);
 router.delete('/:id', requireRole('coach'), deleteSession);
 

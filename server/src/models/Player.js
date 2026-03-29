@@ -26,6 +26,23 @@ const goalSchema = new mongoose.Schema(
   { _id: true }
 );
 
+const milestoneSchema = new mongoose.Schema(
+  {
+    text: {
+      type: String,
+      required: [true, 'Treść kamienia milowego jest wymagana'],
+    },
+    date: Date,
+    description: String,
+    completed: {
+      type: Boolean,
+      default: false,
+    },
+    completedAt: Date,
+  },
+  { _id: true }
+);
+
 const playerSchema = new mongoose.Schema(
   {
     firstName: {
@@ -79,12 +96,13 @@ const playerSchema = new mongoose.Schema(
         sessionsPerWeek: { type: Number, default: 5 },
         hoursPerWeek: { type: Number, default: 8 },
       },
+      scheduledDays: {
+        type: [Number],
+        default: [],
+      },
       focus: [String],
       notes: String,
-      nextMilestone: {
-        text: String,
-        date: Date,
-      },
+      milestones: [milestoneSchema],
     },
     monthlyRate: Number,
     active: {

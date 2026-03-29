@@ -108,6 +108,29 @@ const createPlayerSelfSchema = z.object({
   gender: z.enum(['M', 'F'], { message: 'Płeć musi być "M" lub "F"' }).optional(),
 });
 
+const updateTrainingPlanSchema = z.object({
+  weeklyGoal: z.object({
+    sessionsPerWeek: z.number().min(0).max(14).optional(),
+    hoursPerWeek: z.number().min(0).max(40).optional(),
+  }).optional(),
+  scheduledDays: z.array(z.number().min(1).max(7)).optional(),
+  focus: z.array(z.string()).optional(),
+  notes: z.string().optional().nullable(),
+});
+
+const milestoneSchema = z.object({
+  text: z.string().min(1, 'Treść kamienia milowego jest wymagana'),
+  date: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+});
+
+const updateMilestoneSchema = z.object({
+  text: z.string().min(1).optional(),
+  date: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  completed: z.boolean().optional(),
+});
+
 // ====== Kontrolery ======
 
 /**
@@ -479,6 +502,145 @@ export const uploadAvatar = async (req, res, next) => {
       message: 'Avatar został zaktualizowany',
       player,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ====== Plan treningowy ======
+
+/**
+ * Sprawdza czy rodzic ma dostęp do zawodnika
+ */
+async function verifyParentPlayer(userId, playerId) {
+  return Player.findOne({ _id: playerId, parents: userId, active: true });
+}
+
+/**
+ * PUT /api/players/:id/training-plan
+ * Aktualizuj plan treningowy (cel, dni, fokus, notatki)
+ */
+export const updateTrainingPlan = async (req, res, next) => {
+  try {
+    const data = updateTrainingPlanSchema.parse(req.body);
+    const player = await verifyParentPlayer(req.user._id, req.params.id);
+
+    if (!player) {
+      return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
+    }
+
+    if (!player.trainingPlan) player.trainingPlan = {};
+
+    if (data.weeklyGoal) {
+      if (!player.trainingPlan.weeklyGoal) player.trainingPlan.weeklyGoal = {};
+      if (data.weeklyGoal.sessionsPerWeek !== undefined)
+        player.trainingPlan.weeklyGoal.sessionsPerWeek = data.weeklyGoal.sessionsPerWeek;
+      if (data.weeklyGoal.hoursPerWeek !== undefined)
+        player.trainingPlan.weeklyGoal.hoursPerWeek = data.weeklyGoal.hoursPerWeek;
+    }
+    if (data.scheduledDays !== undefined) player.trainingPlan.scheduledDays = data.scheduledDays;
+    if (data.focus !== undefined) player.trainingPlan.focus = data.focus;
+    if (data.notes !== undefined) player.trainingPlan.notes = data.notes;
+
+    player.markModified('trainingPlan');
+    await player.save();
+
+    res.json({ message: 'Plan treningowy zaktualizowany', trainingPlan: player.trainingPlan });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/players/:id/milestones
+ * Dodaj kamień milowy
+ */
+export const addMilestone = async (req, res, next) => {
+  try {
+    const data = milestoneSchema.parse(req.body);
+    const player = await verifyParentPlayer(req.user._id, req.params.id);
+
+    if (!player) {
+      return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
+    }
+
+    if (!player.trainingPlan) player.trainingPlan = {};
+    if (!player.trainingPlan.milestones) player.trainingPlan.milestones = [];
+
+    const milestone = {
+      text: data.text,
+      description: data.description || undefined,
+    };
+    if (data.date) milestone.date = new Date(data.date);
+
+    player.trainingPlan.milestones.push(milestone);
+    player.markModified('trainingPlan');
+    await player.save();
+
+    const added = player.trainingPlan.milestones[player.trainingPlan.milestones.length - 1];
+    res.status(201).json({ message: 'Kamień milowy dodany', milestone: added });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/players/:id/milestones/:mid
+ * Edytuj kamień milowy
+ */
+export const updateMilestone = async (req, res, next) => {
+  try {
+    const data = updateMilestoneSchema.parse(req.body);
+    const player = await verifyParentPlayer(req.user._id, req.params.id);
+
+    if (!player) {
+      return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
+    }
+
+    const milestone = player.trainingPlan?.milestones?.id(req.params.mid);
+    if (!milestone) {
+      return res.status(404).json({ message: 'Kamień milowy nie znaleziony' });
+    }
+
+    if (data.text !== undefined) milestone.text = data.text;
+    if (data.date !== undefined) milestone.date = data.date ? new Date(data.date) : null;
+    if (data.description !== undefined) milestone.description = data.description;
+    if (data.completed !== undefined) {
+      milestone.completed = data.completed;
+      milestone.completedAt = data.completed ? new Date() : null;
+    }
+
+    player.markModified('trainingPlan');
+    await player.save();
+
+    res.json({ message: 'Kamień milowy zaktualizowany', milestone });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * DELETE /api/players/:id/milestones/:mid
+ * Usuń kamień milowy
+ */
+export const deleteMilestone = async (req, res, next) => {
+  try {
+    const player = await verifyParentPlayer(req.user._id, req.params.id);
+
+    if (!player) {
+      return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
+    }
+
+    const milestone = player.trainingPlan?.milestones?.id(req.params.mid);
+    if (!milestone) {
+      return res.status(404).json({ message: 'Kamień milowy nie znaleziony' });
+    }
+
+    player.trainingPlan.milestones.pull(req.params.mid);
+    player.markModified('trainingPlan');
+    await player.save();
+
+    res.json({ message: 'Kamień milowy usunięty' });
   } catch (error) {
     next(error);
   }
