@@ -21,10 +21,12 @@ router.post('/self', verifyToken, requireRole('parent'), createPlayerSelf);
 router.put('/:id/avatar', verifyToken, uploadMiddleware, uploadAvatar);
 router.get('/:id/timeline', verifyToken, getTimeline);
 
-// Endpointy wymagające auth + rola coach
-router.get('/', verifyToken, requireRole('coach'), getPlayers);
+// Endpointy dostępne dla trenera i rodzica (dane filtrowane wg roli)
+router.get('/', verifyToken, requireRole('coach', 'parent'), getPlayers);
+router.get('/:id', verifyToken, requireRole('coach', 'parent'), getPlayer);
+
+// Endpointy tylko dla trenera
 router.post('/', verifyToken, requireRole('coach'), createPlayer);
-router.get('/:id', verifyToken, requireRole('coach'), getPlayer);
 router.put('/:id', verifyToken, requireRole('coach'), updatePlayer);
 router.delete('/:id', verifyToken, requireRole('coach'), deletePlayer);
 

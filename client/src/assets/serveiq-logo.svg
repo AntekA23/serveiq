@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Court-green background gradient -->
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1B5E3B"/>
+      <stop offset="100%" stop-color="#0A3D22"/>
+    </linearGradient>
+
+    <!-- Tennis ball gradient with highlight -->
+    <radialGradient id="ball" cx="0.38" cy="0.32" r="0.65" fx="0.38" fy="0.32">
+      <stop offset="0%" stop-color="#F4FF63"/>
+      <stop offset="45%" stop-color="#D4E52A"/>
+      <stop offset="100%" stop-color="#A8B820"/>
+    </radialGradient>
+
+    <!-- Ball shadow filter -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#041A0D" flood-opacity="0.45"/>
+    </filter>
+
+    <!-- Ball inner glow -->
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Serve arc gradient (fades in along path) -->
+    <linearGradient id="arc" x1="0" y1="1" x2="0.8" y2="0">
+      <stop offset="0%" stop-color="#C8E620" stop-opacity="0.0"/>
+      <stop offset="40%" stop-color="#C8E620" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#E8FF41" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <!-- Signal wave gradient -->
+    <linearGradient id="signal" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#F4FF63"/>
+      <stop offset="100%" stop-color="#FFFFFF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ===== BACKGROUND ===== -->
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+
+  <!-- Subtle court baseline texture -->
+  <line x1="64" y1="438" x2="448" y2="438" stroke="#297A50" stroke-width="2.5" opacity="0.25"/>
+  <line x1="64" y1="444" x2="448" y2="444" stroke="#297A50" stroke-width="1.5" opacity="0.15"/>
+  <line x1="256" y1="438" x2="256" y2="475" stroke="#297A50" stroke-width="2" opacity="0.2"/>
+
+  <!-- ===== SERVE ARC TRAIL ===== -->
+  <!-- Main arc - dynamic serve trajectory -->
+  <path d="M 108 410 C 78 275, 125 150, 300 108"
+        fill="none" stroke="url(#arc)" stroke-width="16" stroke-linecap="round"/>
+
+  <!-- Speed lines along arc -->
+  <path d="M 130 370 C 115 300, 140 230, 210 175"
+        fill="none" stroke="#C8E620" stroke-width="3" stroke-linecap="round" opacity="0.15"/>
+  <path d="M 148 345 C 135 285, 155 218, 230 165"
+        fill="none" stroke="#C8E620" stroke-width="2" stroke-linecap="round" opacity="0.1"/>
+
+  <!-- ===== TENNIS BALL ===== -->
+  <!-- Ball glow (behind) -->
+  <circle cx="265" cy="268" r="108" fill="#C8E620" opacity="0.08" filter="url(#glow)"/>
+
+  <!-- Main ball -->
+  <g filter="url(#shadow)">
+    <circle cx="265" cy="268" r="108" fill="url(#ball)"/>
+  </g>
+
+  <!-- Ball felt texture (subtle noise dots) -->
+  <g opacity="0.08">
+    <circle cx="225" cy="235" r="2.2" fill="#fff"/>
+    <circle cx="295" cy="245" r="1.8" fill="#fff"/>
+    <circle cx="250" cy="300" r="2" fill="#fff"/>
+    <circle cx="280" cy="228" r="1.5" fill="#fff"/>
+    <circle cx="235" cy="280" r="1.8" fill="#fff"/>
+    <circle cx="305" cy="275" r="2" fill="#fff"/>
+    <circle cx="260" cy="335" r="1.5" fill="#fff"/>
+    <circle cx="215" cy="310" r="1.8" fill="#fff"/>
+    <circle cx="310" cy="310" r="1.6" fill="#fff"/>
+    <circle cx="270" cy="210" r="1.8" fill="#fff"/>
+  </g>
+
+  <!-- Ball seam - left curve (classic tennis ball seam) -->
+  <path d="M 182 196 C 218 240, 218 296, 182 340"
+        fill="none" stroke="#FFFFFF" stroke-width="5.5" stroke-linecap="round" opacity="0.5"/>
+  <!-- Ball seam - right curve -->
+  <path d="M 348 196 C 312 240, 312 296, 348 340"
+        fill="none" stroke="#FFFFFF" stroke-width="5.5" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Ball highlight reflection (top-left) -->
+  <ellipse cx="230" cy="220" rx="28" ry="18" fill="#FFFFFF" opacity="0.12" transform="rotate(-30 230 220)"/>
+
+  <!-- ===== IQ SIGNAL WAVES ===== -->
+  <!-- Three concentric signal arcs emanating from serve direction = intelligence -->
+  <path d="M 338 138 C 354 122, 372 122, 388 138"
+        fill="none" stroke="url(#signal)" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+  <path d="M 328 115 C 350 92, 378 92, 400 115"
+        fill="none" stroke="url(#signal)" stroke-width="4.5" stroke-linecap="round" opacity="0.55"/>
+  <path d="M 318 92 C 346 62, 382 62, 410 92"
+        fill="none" stroke="url(#signal)" stroke-width="4" stroke-linecap="round" opacity="0.3"/>
+
+  <!-- Small dot at signal center (data point) -->
+  <circle cx="363" cy="148" r="5" fill="#F4FF63" opacity="0.7"/>
+</svg>

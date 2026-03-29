@@ -56,6 +56,7 @@ export default function Login() {
 
   return (
     <div className="login-page">
+      <div className="login-court-line" />
       <div className="login-card">
         <div className="login-logo">SERVE<span style={{ color: 'var(--color-text)' }}>IQ</span></div>
         <div className="login-subtitle">Zaloguj się do swojego konta</div>

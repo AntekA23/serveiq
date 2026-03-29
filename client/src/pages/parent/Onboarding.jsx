@@ -131,7 +131,7 @@ const childSchema = z.object({
   gender: z.enum(['M', 'F'], { required_error: 'Wybierz plec' }),
 })
 
-function StepChild({ onNext }) {
+function StepChild({ onNext, onChildCreated }) {
   const [loading, setLoading] = useState(false)
   const toast = useToast()
 
@@ -150,7 +150,9 @@ function StepChild({ onNext }) {
   const onSubmit = async (data) => {
     setLoading(true)
     try {
-      await api.post('/players/self', data)
+      const res = await api.post('/players/self', data)
+      const player = res.data.player || res.data
+      if (player?._id) onChildCreated(player._id)
       onNext()
     } catch (err) {
       toast.error('Nie udalo sie dodac dziecka')
@@ -238,15 +240,19 @@ const PROVIDERS = {
   },
 }
 
-function StepDevice({ onNext }) {
+function StepDevice({ onNext, childId }) {
   const [connecting, setConnecting] = useState(null)
   const [connected, setConnected] = useState([])
   const toast = useToast()
 
   const handleConnect = async (provider) => {
+    if (!childId) {
+      toast.error('Najpierw dodaj dziecko')
+      return
+    }
     setConnecting(provider)
     try {
-      await api.post('/wearables', { provider, deviceName: PROVIDERS[provider].name })
+      await api.post('/wearables', { provider, deviceName: PROVIDERS[provider].name, playerId: childId })
       setConnected((prev) => [...prev, provider])
       toast.success(`Polaczono z ${PROVIDERS[provider].name}`)
     } catch {
@@ -350,6 +356,7 @@ function StepComplete() {
 // --- Main Onboarding ---
 export default function Onboarding() {
   const [step, setStep] = useState(1)
+  const [childId, setChildId] = useState(null)
   const user = useAuthStore((s) => s.user)
 
   const handleNext = () => setStep((s) => Math.min(s + 1, 4))
@@ -362,8 +369,8 @@ export default function Onboarding() {
       <ProgressBar steps={4} current={step} />
       <div className="onboarding-content">
         {step === 1 && <StepProfile onNext={handleNext} user={user} />}
-        {step === 2 && <StepChild onNext={handleNext} />}
-        {step === 3 && <StepDevice onNext={handleNext} />}
+        {step === 2 && <StepChild onNext={handleNext} onChildCreated={setChildId} />}
+        {step === 3 && <StepDevice onNext={handleNext} childId={childId} />}
         {step === 4 && <StepComplete />}
       </div>
     </div>

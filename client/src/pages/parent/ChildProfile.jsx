@@ -107,7 +107,7 @@ export default function ChildProfile() {
       try {
         setLoading(true)
         const { data: playerData } = await api.get(`/players/${id}`)
-        setChild(playerData)
+        setChild(playerData.player || playerData)
 
         try {
           const { data: historyRaw } = await api.get(`/wearables/data/${id}?type=daily_summary`)

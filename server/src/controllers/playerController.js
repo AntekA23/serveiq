@@ -112,11 +112,20 @@ const createPlayerSelfSchema = z.object({
 
 /**
  * GET /api/players
- * Lista zawodników trenera
+ * Lista zawodników — trener widzi swoich podopiecznych, rodzic widzi swoje dzieci
  */
 export const getPlayers = async (req, res, next) => {
   try {
-    const players = await Player.find({ coach: req.user._id, active: true })
+    const query = { active: true };
+
+    if (req.user.role === 'coach') {
+      query.coach = req.user._id;
+    } else {
+      // Rodzic — pokaż dzieci przypisane do niego
+      query.parents = req.user._id;
+    }
+
+    const players = await Player.find(query)
       .populate('parents', 'firstName lastName email phone')
       .sort({ lastName: 1, firstName: 1 });
 
@@ -204,15 +213,20 @@ export const createPlayer = async (req, res, next) => {
 
 /**
  * GET /api/players/:id
- * Szczegóły zawodnika
+ * Szczegóły zawodnika — trener widzi swoich, rodzic widzi swoje dzieci
  */
 export const getPlayer = async (req, res, next) => {
   try {
-    const player = await Player.findOne({
-      _id: req.params.id,
-      coach: req.user._id,
-      active: true,
-    }).populate('parents', 'firstName lastName email phone');
+    const query = { _id: req.params.id, active: true };
+
+    if (req.user.role === 'coach') {
+      query.coach = req.user._id;
+    } else {
+      query.parents = req.user._id;
+    }
+
+    const player = await Player.findOne(query)
+      .populate('parents', 'firstName lastName email phone');
 
     if (!player) {
       return res.status(404).json({ message: 'Zawodnik nie znaleziony' });

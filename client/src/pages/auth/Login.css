@@ -22,11 +22,52 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 200%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-border-md), transparent);
+  width: 250%;
+  height: 120px;
+  background:
+    /* Top tape — biała taśma siatki, grubsza i jaśniejsza */
+    linear-gradient(180deg,
+      rgba(255,255,255,0.22) 0px,
+      rgba(255,255,255,0.18) 4px,
+      rgba(255,255,255,0.04) 6px,
+      transparent 8px),
+    /* Bottom cable — cienka linka dolna */
+    linear-gradient(0deg,
+      rgba(255,255,255,0.08) 0px,
+      rgba(255,255,255,0.08) 1px,
+      transparent 1px),
+    /* Horizontal strings — gęstsze, delikatne */
+    repeating-linear-gradient(180deg,
+      transparent 0px, transparent 7px,
+      rgba(255,255,255,0.05) 7px, rgba(255,255,255,0.05) 8px),
+    /* Vertical strings — wiszą prosto w dół */
+    repeating-linear-gradient(110deg,
+      transparent 0px, transparent 13px,
+      rgba(255,255,255,0.07) 13px, rgba(255,255,255,0.07) 14px);
   transform: translate(-50%, -50%) rotate(-20deg);
   pointer-events: none;
+  /* Zanikanie: boki + dół siatki */
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 5%, rgba(0,0,0,0.5) 20%, black 35%, black 65%, rgba(0,0,0,0.5) 80%, transparent 95%),
+    linear-gradient(180deg, black 0%, black 60%, rgba(0,0,0,0.3) 85%, transparent 100%);
+  -webkit-mask-composite: destination-in;
+  mask-image:
+    linear-gradient(90deg, transparent 5%, rgba(0,0,0,0.5) 20%, black 35%, black 65%, rgba(0,0,0,0.5) 80%, transparent 95%),
+    linear-gradient(180deg, black 0%, black 60%, rgba(0,0,0,0.3) 85%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.login-court-line {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 250%;
+  height: 6px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, transparent 10%, rgba(255,255,255,0.08) 30%, rgba(255,255,255,0.14) 50%, rgba(255,255,255,0.08) 70%, transparent 90%);
+  transform: translate(-50%, -50%) rotate(55deg);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .login-card {
