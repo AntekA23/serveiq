@@ -100,6 +100,16 @@ export default function CoachPayments() {
     setSaving(false)
   }
 
+  const handleMarkPaid = async (paymentId) => {
+    try {
+      await api.put(`/payments/${paymentId}/mark-paid`)
+      toast.success('Platnosc oznaczona jako oplacona')
+      fetchData()
+    } catch {
+      toast.error('Nie udalo sie oznaczyc platnosci')
+    }
+  }
+
   const filtered = filterStatus
     ? payments.filter((p) => p.status === filterStatus)
     : payments
@@ -233,6 +243,11 @@ export default function CoachPayments() {
                     {p.paidAt && <span>Oplacona: {new Date(p.paidAt).toLocaleDateString('pl-PL')}</span>}
                   </div>
                 </div>
+                {(p.status === 'pending' || p.status === 'overdue') && (
+                  <button className="coach-payment-mark-btn" onClick={() => handleMarkPaid(p._id)} title="Oznacz jako oplacona">
+                    <CheckCircle size={16} />
+                  </button>
+                )}
               </div>
             )
           })

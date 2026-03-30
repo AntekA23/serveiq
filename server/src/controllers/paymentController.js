@@ -195,6 +195,40 @@ export const webhook = async (req, res, next) => {
 };
 
 /**
+ * PUT /api/payments/:id/mark-paid
+ * Coach ręcznie oznacza płatność jako opłaconą
+ */
+export const markAsPaid = async (req, res, next) => {
+  try {
+    const payment = await Payment.findOne({
+      _id: req.params.id,
+      coach: req.user._id,
+      status: { $in: ['pending', 'overdue'] },
+    });
+
+    if (!payment) {
+      return res.status(404).json({ message: 'Płatność nie znaleziona' });
+    }
+
+    payment.status = 'paid';
+    payment.paidAt = new Date();
+    await payment.save();
+
+    const populated = await Payment.findById(payment._id)
+      .populate('player', 'firstName lastName')
+      .populate('coach', 'firstName lastName')
+      .populate('parent', 'firstName lastName email');
+
+    res.json({
+      message: 'Płatność oznaczona jako opłacona',
+      payment: populated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * GET /api/payments/stats
  * Statystyki przychodów trenera (suma, monthly breakdown)
  */

@@ -188,6 +188,8 @@
 .coach-payment-desc { font-size: 12px; color: var(--color-text-tertiary); margin-top: 2px; }
 .coach-payment-meta { display: flex; gap: 12px; font-size: 11px; color: var(--color-text-tertiary); margin-top: 4px; }
 .coach-payment-status-text { font-weight: 700; }
+.coach-payment-mark-btn { background: none; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); color: var(--color-text-tertiary); cursor: pointer; padding: 6px; flex-shrink: 0; align-self: center; transition: all 0.15s; }
+.coach-payment-mark-btn:hover { color: var(--color-green); border-color: var(--color-green); }
 
 /* ═══ Session detail clickable ═══ */
 .coach-session-detail-clickable { cursor: pointer; border-radius: var(--radius-sm); padding: 12px 8px; margin: 0 -8px; transition: background 0.15s; }
