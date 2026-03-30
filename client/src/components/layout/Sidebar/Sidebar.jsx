@@ -34,6 +34,7 @@ const coachNav = [
   { to: '/coach/players', label: 'Zawodnicy', icon: Users },
   { to: '/coach/sessions', label: 'Sesje', icon: ClipboardList },
   { to: '/coach/reviews', label: 'Oceny', icon: FileText },
+  { to: '/coach/payments', label: 'Platnosci', icon: CreditCard },
   { to: '/coach/messages', label: 'Wiadomosci', icon: MessageSquare },
   { to: '/coach/settings', label: 'Ustawienia', icon: Settings },
 ]

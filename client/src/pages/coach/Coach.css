@@ -170,6 +170,19 @@
 .coach-skill-update-name { font-weight: 600; min-width: 70px; }
 .coach-skill-remove { background: none; border: none; color: var(--color-heart); cursor: pointer; font-size: 16px; }
 
+/* ═══ Payments ═══ */
+.coach-payments-list { display: flex; flex-direction: column; gap: 4px; }
+.coach-payment-card { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); }
+.coach-payment-status { flex-shrink: 0; margin-top: 2px; }
+.coach-payment-body { flex: 1; min-width: 0; }
+.coach-payment-top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.coach-payment-amount { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--color-text); letter-spacing: 0.5px; }
+.coach-payment-player { font-size: 13px; font-weight: 600; color: var(--color-text-secondary); }
+.coach-payment-parent { font-size: 12px; color: var(--color-text-tertiary); }
+.coach-payment-desc { font-size: 12px; color: var(--color-text-tertiary); margin-top: 2px; }
+.coach-payment-meta { display: flex; gap: 12px; font-size: 11px; color: var(--color-text-tertiary); margin-top: 4px; }
+.coach-payment-status-text { font-weight: 700; }
+
 /* ═══ Session detail clickable ═══ */
 .coach-session-detail-clickable { cursor: pointer; border-radius: var(--radius-sm); padding: 12px 8px; margin: 0 -8px; transition: background 0.15s; }
 .coach-session-detail-clickable:hover { background: var(--color-bg-tertiary); }

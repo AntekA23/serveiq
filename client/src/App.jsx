@@ -36,6 +36,7 @@ import CoachEditSession from './pages/coach/CoachEditSession'
 import CoachNewPlayer from './pages/coach/CoachNewPlayer'
 import CoachReviews from './pages/coach/CoachReviews'
 import CoachNewReview from './pages/coach/CoachNewReview'
+import CoachPayments from './pages/coach/CoachPayments'
 
 // Parent extra pages
 import Reviews from './pages/parent/Reviews'
@@ -151,6 +152,9 @@ export default function App() {
         } />
         <Route path="/coach/reviews/:id/edit" element={
           <ProtectedRoute role="coach"><AppShell><CoachNewReview /></AppShell></ProtectedRoute>
+        } />
+        <Route path="/coach/payments" element={
+          <ProtectedRoute role="coach"><AppShell><CoachPayments /></AppShell></ProtectedRoute>
         } />
         <Route path="/coach/messages" element={
           <ProtectedRoute role="coach"><AppShell><ParentMessages /></AppShell></ProtectedRoute>
