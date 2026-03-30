@@ -11,6 +11,7 @@ import {
   LogOut,
   Users,
   ClipboardList,
+  FileText,
 } from 'lucide-react'
 import useAuthStore from '../../../store/authStore'
 import useUiStore from '../../../store/uiStore'
@@ -32,6 +33,7 @@ const coachNav = [
   { to: '/coach/dashboard', label: 'Pulpit', icon: LayoutDashboard },
   { to: '/coach/players', label: 'Zawodnicy', icon: Users },
   { to: '/coach/sessions', label: 'Sesje', icon: ClipboardList },
+  { to: '/coach/reviews', label: 'Oceny', icon: FileText },
   { to: '/coach/messages', label: 'Wiadomosci', icon: MessageSquare },
   { to: '/coach/settings', label: 'Ustawienia', icon: Settings },
 ]

@@ -14,6 +14,7 @@ import {
   addMilestone,
   updateMilestone,
   deleteMilestone,
+  getSkillHistory,
 } from '../controllers/playerController.js';
 import { getTimeline } from '../controllers/healthController.js';
 import { verifyToken, requireRole } from '../middleware/auth.js';
@@ -24,6 +25,7 @@ const router = Router();
 router.post('/self', verifyToken, requireRole('parent'), createPlayerSelf);
 router.put('/:id/avatar', verifyToken, uploadMiddleware, uploadAvatar);
 router.get('/:id/timeline', verifyToken, getTimeline);
+router.get('/:id/skill-history', verifyToken, getSkillHistory);
 
 // Plan treningowy (rodzic)
 router.put('/:id/training-plan', verifyToken, requireRole('parent'), updateTrainingPlan);

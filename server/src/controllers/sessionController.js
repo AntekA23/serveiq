@@ -28,6 +28,9 @@ const createSessionSchema = z.object({
 
 const updateSessionSchema = z.object({
   date: z.string().optional(),
+  startTime: z.string().optional(),
+  sessionType: z.enum(['kort', 'sparing', 'kondycja', 'rozciaganie', 'mecz', 'inne']).optional(),
+  surface: z.enum(['clay', 'hard', 'grass', 'carpet', 'indoor-hard', '']).optional(),
   durationMinutes: z.number().positive('Czas trwania musi być dodatni').optional(),
   title: z.string().min(1, 'Tytuł treningu jest wymagany').optional(),
   notes: z.string().optional().nullable(),
@@ -207,6 +210,9 @@ export const updateSession = async (req, res, next) => {
 
     // Aktualizuj pola
     if (data.date !== undefined) session.date = new Date(data.date);
+    if (data.startTime !== undefined) session.startTime = data.startTime;
+    if (data.sessionType !== undefined) session.sessionType = data.sessionType;
+    if (data.surface !== undefined) session.surface = data.surface;
     if (data.durationMinutes !== undefined) session.durationMinutes = data.durationMinutes;
     if (data.title !== undefined) session.title = data.title;
     if (data.notes !== undefined) session.notes = data.notes;

@@ -170,6 +170,37 @@
 .coach-skill-update-name { font-weight: 600; min-width: 70px; }
 .coach-skill-remove { background: none; border: none; color: var(--color-heart); cursor: pointer; font-size: 16px; }
 
+/* ═══ Session card clickable ═══ */
+.coach-session-card-clickable { cursor: pointer; transition: border-color 0.15s; }
+.coach-session-card-clickable:hover { border-color: var(--color-accent); }
+.coach-session-edit-icon { color: var(--color-text-tertiary); flex-shrink: 0; align-self: center; }
+.coach-session-card-clickable:hover .coach-session-edit-icon { color: var(--color-accent); }
+
+/* ═══ Reviews ═══ */
+.coach-reviews-list { display: flex; flex-direction: column; gap: 6px; }
+.coach-review-card { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); cursor: pointer; transition: border-color 0.15s; position: relative; }
+.coach-review-card:hover { border-color: var(--color-accent); }
+.coach-review-card-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.coach-review-player { font-size: 14px; font-weight: 600; color: var(--color-text); }
+.coach-review-type { font-size: 10px; padding: 2px 8px; border-radius: var(--radius-full); background: var(--color-bg-tertiary); color: var(--color-text-tertiary); }
+.coach-review-status { font-size: 10px; padding: 2px 8px; border-radius: var(--radius-full); font-weight: 600; }
+.coach-review-status.draft { background: var(--color-amber-bg, rgba(245,166,35,0.1)); color: var(--color-amber); }
+.coach-review-status.published { background: var(--color-green-bg); color: var(--color-green); }
+.coach-review-vis { color: var(--color-text-tertiary); }
+.coach-review-title { font-size: 13px; color: var(--color-text-secondary); }
+.coach-review-period { font-size: 11px; color: var(--color-text-tertiary); }
+.coach-review-rating { display: flex; gap: 1px; }
+.coach-review-arrow { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--color-text-tertiary); }
+
+/* Rating stars in form */
+.coach-rating-stars { display: flex; gap: 4px; }
+.coach-star-btn { background: none; border: none; cursor: pointer; padding: 2px; }
+
+/* Skill snapshot in form */
+.coach-skill-snapshot { display: flex; flex-direction: column; gap: 6px; }
+.coach-skill-snap-row { display: flex; align-items: center; gap: 10px; }
+.coach-skill-snap-name { font-size: 12px; color: var(--color-text-secondary); min-width: 70px; }
+
 /* ═══ Responsive ═══ */
 @media (max-width: 768px) {
   .coach-stats { grid-template-columns: repeat(2, 1fr); }

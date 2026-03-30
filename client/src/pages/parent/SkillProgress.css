@@ -1,0 +1,41 @@
+/* ═══ Skill Progress Visualization ═══ */
+.sp-page { max-width: 900px; }
+.sp-loading { text-align: center; padding: 60px; color: var(--color-text-tertiary); font-size: 13px; }
+
+.sp-back { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--color-text-tertiary); font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 16px; }
+.sp-back:hover { color: var(--color-accent); }
+
+.sp-section { margin-bottom: 32px; }
+.sp-section-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; text-transform: uppercase; color: var(--color-text-secondary); margin: 0 0 16px; }
+
+/* Radar chart */
+.sp-radar-container { display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap; }
+.sp-radar-wrap { width: 260px; height: 260px; flex-shrink: 0; }
+.sp-radar-svg { width: 100%; height: 100%; }
+
+.sp-avg { text-align: center; }
+.sp-avg-value { font-family: 'Bebas Neue', sans-serif; font-size: 56px; color: var(--color-accent); display: block; line-height: 1; letter-spacing: 2px; }
+.sp-avg-label { font-size: 12px; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 1px; }
+
+/* Skill charts grid */
+.sp-charts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+
+.sp-skill-card { background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px 16px; }
+.sp-skill-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.sp-skill-name { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.sp-skill-trend-wrap { display: flex; align-items: center; gap: 8px; }
+.sp-skill-current { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--color-text); letter-spacing: 1px; line-height: 1; }
+.sp-skill-change { display: flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 700; }
+.sp-skill-change.up { color: var(--color-green); }
+.sp-skill-change.down { color: var(--color-heart); }
+.sp-skill-change.stable { color: var(--color-text-tertiary); }
+
+.sp-chart-svg { width: 100%; height: auto; display: block; }
+
+.sp-skill-sessions { font-size: 11px; color: var(--color-text-tertiary); margin-top: 6px; }
+.sp-skill-empty { font-size: 12px; color: var(--color-text-tertiary); font-style: italic; padding: 20px 0; text-align: center; }
+
+@media (max-width: 600px) {
+  .sp-charts-grid { grid-template-columns: 1fr; }
+  .sp-radar-container { flex-direction: column; }
+}

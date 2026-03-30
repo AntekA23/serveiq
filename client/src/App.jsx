@@ -32,7 +32,14 @@ import CoachPlayers from './pages/coach/CoachPlayers'
 import CoachPlayerProfile from './pages/coach/CoachPlayerProfile'
 import CoachSessions from './pages/coach/CoachSessions'
 import CoachNewSession from './pages/coach/CoachNewSession'
+import CoachEditSession from './pages/coach/CoachEditSession'
 import CoachNewPlayer from './pages/coach/CoachNewPlayer'
+import CoachReviews from './pages/coach/CoachReviews'
+import CoachNewReview from './pages/coach/CoachNewReview'
+
+// Parent extra pages
+import Reviews from './pages/parent/Reviews'
+import SkillProgress from './pages/parent/SkillProgress'
 
 // Payment pages
 import PaymentSuccess from './pages/parent/PaymentSuccess'
@@ -133,6 +140,18 @@ export default function App() {
         <Route path="/coach/sessions/new" element={
           <ProtectedRoute role="coach"><AppShell><CoachNewSession /></AppShell></ProtectedRoute>
         } />
+        <Route path="/coach/sessions/:id/edit" element={
+          <ProtectedRoute role="coach"><AppShell><CoachEditSession /></AppShell></ProtectedRoute>
+        } />
+        <Route path="/coach/reviews" element={
+          <ProtectedRoute role="coach"><AppShell><CoachReviews /></AppShell></ProtectedRoute>
+        } />
+        <Route path="/coach/reviews/new" element={
+          <ProtectedRoute role="coach"><AppShell><CoachNewReview /></AppShell></ProtectedRoute>
+        } />
+        <Route path="/coach/reviews/:id/edit" element={
+          <ProtectedRoute role="coach"><AppShell><CoachNewReview /></AppShell></ProtectedRoute>
+        } />
         <Route path="/coach/messages" element={
           <ProtectedRoute role="coach"><AppShell><ParentMessages /></AppShell></ProtectedRoute>
         } />
@@ -162,6 +181,12 @@ export default function App() {
         } />
         <Route path="/parent/child/:id/health" element={
           <ProtectedRoute role="parent"><AppShell><HealthHistory /></AppShell></ProtectedRoute>
+        } />
+        <Route path="/parent/child/:id/progress" element={
+          <ProtectedRoute role="parent"><AppShell><SkillProgress /></AppShell></ProtectedRoute>
+        } />
+        <Route path="/parent/child/:id/reviews" element={
+          <ProtectedRoute role="parent"><AppShell><Reviews /></AppShell></ProtectedRoute>
         } />
         <Route path="/parent/child/:id/timeline" element={
           <ProtectedRoute role="parent"><AppShell><Timeline /></AppShell></ProtectedRoute>

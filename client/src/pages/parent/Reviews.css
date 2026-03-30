@@ -1,0 +1,47 @@
+/* ═══ Reviews (Parent) ═══ */
+.reviews-page { max-width: 800px; }
+.reviews-loading { text-align: center; padding: 60px; color: var(--color-text-tertiary); font-size: 13px; }
+.reviews-empty { text-align: center; padding: 60px 20px; color: var(--color-text-tertiary); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.reviews-empty p { margin: 0; font-size: 14px; }
+
+.reviews-back { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--color-text-tertiary); font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 16px; }
+.reviews-back:hover { color: var(--color-accent); }
+
+.reviews-player-name { font-size: 0.7em; color: var(--color-text-tertiary); font-weight: 400; }
+
+.reviews-list { display: flex; flex-direction: column; gap: 8px; }
+
+/* Review card */
+.review-card { background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; transition: border-color 0.15s; }
+.review-card:hover { border-color: var(--color-border-md); }
+.review-card.expanded { border-color: var(--color-accent); }
+
+.review-card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; gap: 12px; flex-wrap: wrap; }
+.review-card-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.review-card-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+
+.review-type-badge { font-size: 10px; padding: 3px 10px; border-radius: var(--radius-full); background: var(--color-accent-muted); color: var(--color-accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.review-title { font-size: 14px; font-weight: 600; color: var(--color-text); }
+.review-stars { display: flex; gap: 1px; }
+.review-date { font-size: 11px; color: var(--color-text-tertiary); white-space: nowrap; }
+
+/* Expanded body */
+.review-card-body { padding: 0 16px 16px; border-top: 1px solid var(--color-border); }
+.review-meta { font-size: 12px; color: var(--color-text-tertiary); padding: 12px 0; }
+
+.review-section { margin-top: 16px; }
+.review-section-header { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.review-section p { margin: 0; font-size: 14px; color: var(--color-text); line-height: 1.6; white-space: pre-wrap; }
+
+/* Skills in review */
+.review-skills { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.review-skill-row { display: flex; align-items: center; gap: 10px; }
+.review-skill-name { font-size: 12px; color: var(--color-text-secondary); min-width: 70px; }
+.review-skill-bar { flex: 1; height: 6px; background: var(--color-bg-tertiary); border-radius: var(--radius-full); overflow: hidden; }
+.review-skill-fill { height: 100%; background: var(--color-accent); border-radius: var(--radius-full); }
+.review-skill-val { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--color-text); min-width: 24px; text-align: right; }
+
+@media (max-width: 600px) {
+  .review-card-header { flex-direction: column; align-items: flex-start; }
+  .review-card-right { width: 100%; justify-content: space-between; }
+}

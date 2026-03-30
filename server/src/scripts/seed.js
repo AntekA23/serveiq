@@ -7,6 +7,7 @@ import Session from '../models/Session.js';
 import Payment from '../models/Payment.js';
 import Tournament from '../models/Tournament.js';
 import Message from '../models/Message.js';
+import Review from '../models/Review.js';
 
 /**
  * Seed script - wypełnia bazę danych przykładowymi danymi
@@ -35,6 +36,7 @@ const seed = async () => {
       Payment.deleteMany({}),
       Tournament.deleteMany({}),
       Message.deleteMany({}),
+      Review.deleteMany({}),
     ]);
     console.log('Kolekcje wyczyszczone.\n');
 
@@ -180,20 +182,72 @@ const seed = async () => {
         sessionType: 'kort',
         surface: 'clay',
         startTime: '16:00',
-        daysAgo: 5,
+        daysAgo: 21,
         durationMinutes: 60,
         notes: 'Ćwiczenie forehandu cross-court. Trzeba popracować nad footworkiem.',
         focusAreas: ['forehand', 'footwork'],
+        skillUpdates: [
+          { skill: 'forehand', scoreBefore: 38, scoreAfter: 42 },
+          { skill: 'fitness', scoreBefore: 35, scoreAfter: 37 },
+        ],
+      },
+      {
+        player: kacper._id,
+        title: 'Serwis i return',
+        sessionType: 'kort',
+        surface: 'clay',
+        startTime: '16:00',
+        daysAgo: 14,
+        durationMinutes: 75,
+        notes: 'Praca nad pierwszym serwisem — plaska pilka. Return z bekhendu.',
+        focusAreas: ['serwis', 'return'],
+        skillUpdates: [
+          { skill: 'serve', scoreBefore: 40, scoreAfter: 45 },
+          { skill: 'backhand', scoreBefore: 32, scoreAfter: 35 },
+        ],
+      },
+      {
+        player: kacper._id,
+        title: 'Gra z bazy + wolej',
+        sessionType: 'kort',
+        surface: 'clay',
+        startTime: '16:00',
+        daysAgo: 7,
+        durationMinutes: 90,
+        notes: 'Podejscia do siatki z forhandu. Dobre wyczucie woleja.',
+        focusAreas: ['forehand', 'volley'],
+        skillUpdates: [
+          { skill: 'forehand', scoreBefore: 42, scoreAfter: 46 },
+          { skill: 'volley', scoreBefore: 30, scoreAfter: 34 },
+        ],
       },
       {
         player: kacper._id,
         title: 'Trening kondycyjny',
         sessionType: 'kondycja',
         startTime: '18:00',
-        daysAgo: 2,
+        daysAgo: 5,
         durationMinutes: 45,
         notes: 'Szybkość i koordynacja. Drabinka, skakanki, sprint.',
         focusAreas: ['fitness', 'szybkosc'],
+        skillUpdates: [
+          { skill: 'fitness', scoreBefore: 37, scoreAfter: 42 },
+        ],
+      },
+      {
+        player: kacper._id,
+        title: 'Taktyka meczowa',
+        sessionType: 'sparing',
+        surface: 'clay',
+        startTime: '15:00',
+        daysAgo: 2,
+        durationMinutes: 90,
+        notes: 'Sparing z Antonim. Kacper lepiej czyta gre rywala.',
+        focusAreas: ['taktyka', 'gra meczowa'],
+        skillUpdates: [
+          { skill: 'tactics', scoreBefore: 33, scoreAfter: 38 },
+          { skill: 'serve', scoreBefore: 45, scoreAfter: 48 },
+        ],
       },
       {
         player: players[1]._id,
@@ -205,6 +259,9 @@ const seed = async () => {
         durationMinutes: 90,
         notes: 'Julia świetnie radzi sobie z wolej forehandowy. Backhand volley wymaga korekty.',
         focusAreas: ['wolej', 'siatka'],
+        skillUpdates: [
+          { skill: 'volley', scoreBefore: 50, scoreAfter: 55 },
+        ],
       },
       {
         player: players[1]._id,
@@ -216,6 +273,10 @@ const seed = async () => {
         durationMinutes: 120,
         notes: 'Symulacja meczowa. Julia powinna grać bardziej agresywnie na returnach.',
         focusAreas: ['taktyka', 'return'],
+        skillUpdates: [
+          { skill: 'tactics', scoreBefore: 45, scoreAfter: 49 },
+          { skill: 'forehand', scoreBefore: 55, scoreAfter: 58 },
+        ],
       },
       {
         player: players[2]._id,
@@ -226,6 +287,9 @@ const seed = async () => {
         durationMinutes: 60,
         notes: 'Praca nad koordynacją i szybkością. Antoni robi duże postępy w fitness.',
         focusAreas: ['fitness', 'koordynacja'],
+        skillUpdates: [
+          { skill: 'fitness', scoreBefore: 40, scoreAfter: 45 },
+        ],
       },
     ];
 
@@ -246,6 +310,7 @@ const seed = async () => {
         title: sData.title,
         notes: sData.notes,
         focusAreas: sData.focusAreas,
+        skillUpdates: sData.skillUpdates || [],
         visibleToParent: true,
       });
       console.log(`  ${sData.title} (${sData.daysAgo} dni temu)`);
@@ -358,6 +423,51 @@ const seed = async () => {
     }
     console.log(`  ${messagesData.length} wiadomosci miedzy trenerem a rodzicem\n`);
 
+    // ====== Tworzenie ocen ======
+
+    console.log('Tworzenie ocen...');
+
+    const review1 = await Review.create({
+      player: kacper._id,
+      coach: coach._id,
+      periodStart: new Date('2026-02-01'),
+      periodEnd: new Date('2026-02-28'),
+      type: 'monthly',
+      title: 'Ocena miesieczna — luty 2026',
+      strengths: 'Kacper robi swietne postepy w forhendzie. Uderzenie jest coraz bardziej stabilne, a rotacja pilki znacznie sie poprawila. Bardzo dobra postawa na korcie i zaangazowanie na treningach.',
+      areasToImprove: 'Drugi serwis wymaga wiecej pracy — za duzo podwojnych bledow w meczach treningowych. Bekhend jednoreczny jest slabszy przy pilkach nizszych.',
+      recommendations: 'Proponuje dodatkowe cwiczenia serwisowe 2x w tygodniu po 20 minut. Warto tez popracowac nad footworkiem przy bekhendie — cwiczenia z drabinka koordynacyjna.',
+      notes: 'Kacper jest bardzo zmotywowany i chetnie pracuje na treningach. Widze duzy potencjal na nadchodzacy sezon turniejowy.',
+      skillRatings: {
+        serve: kacper.skills.serve.score,
+        forehand: kacper.skills.forehand.score,
+        backhand: kacper.skills.backhand.score,
+        volley: kacper.skills.volley.score,
+        tactics: kacper.skills.tactics.score,
+        fitness: kacper.skills.fitness.score,
+      },
+      overallRating: 4,
+      visibleToParent: true,
+      status: 'published',
+    });
+    console.log(`  ${review1.title}`);
+
+    const review2 = await Review.create({
+      player: players[1]._id,
+      coach: coach._id,
+      periodStart: new Date('2026-01-01'),
+      periodEnd: new Date('2026-03-31'),
+      type: 'quarterly',
+      title: 'Ocena kwartalna Q1 2026 — Julia',
+      strengths: 'Julia ma bardzo dobre wyczucie pilki i naturalny talent do gry przy siatce. Jej woleje sa jedne z najlepszych w grupie wiekowej.',
+      areasToImprove: 'Kondycja fizyczna wymaga poprawy — meczy 3-setowych nie wytrzymuje na pełnej intensywnosci. Powinna wiecej pracowac nad wydolnoscia.',
+      recommendations: 'Dodac 2 sesje kondycyjne tygodniowo (bieganie interwałowe + cwiczenia core). Przygotowac sie mentalnie do turnieju w Krakowie.',
+      overallRating: 4,
+      visibleToParent: true,
+      status: 'published',
+    });
+    console.log(`  ${review2.title}\n`);
+
     // ====== Podsumowanie ======
 
     console.log('========================');
@@ -368,6 +478,7 @@ const seed = async () => {
     console.log(`  Płatności: ${await Payment.countDocuments()}`);
     console.log(`  Turnieje: ${await Tournament.countDocuments()}`);
     console.log(`  Wiadomości: ${await Message.countDocuments()}`);
+    console.log(`  Oceny: ${await Review.countDocuments()}`);
     console.log('========================\n');
     console.log('Seed zakończony pomyślnie!');
 

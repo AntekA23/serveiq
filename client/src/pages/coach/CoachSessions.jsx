@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Plus, ChevronLeft, ChevronRight, Filter } from 'lucide-react'
+import { Plus, ChevronLeft, ChevronRight, Edit3 } from 'lucide-react'
 import api from '../../api/axios'
 import Button from '../../components/ui/Button/Button'
 import './Coach.css'
@@ -113,7 +113,7 @@ export default function CoachSessions() {
                   {d.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </div>
                 {daySessions.map((s) => (
-                  <div key={s._id} className="coach-session-card">
+                  <div key={s._id} className="coach-session-card coach-session-card-clickable" onClick={() => navigate(`/coach/sessions/${s._id}/edit`)}>
                     <div className="coach-session-type-dot" style={{ background: TYPE_COLORS[s.sessionType] || TYPE_COLORS.inne }} />
                     <div className="coach-session-card-body">
                       <div className="coach-session-card-top">
@@ -124,6 +124,7 @@ export default function CoachSessions() {
                       </div>
                       {s.notes && <div className="coach-session-card-notes">{s.notes}</div>}
                     </div>
+                    <Edit3 size={14} className="coach-session-edit-icon" />
                   </div>
                 ))}
               </div>

@@ -13,6 +13,7 @@ import {
   Calendar,
   BarChart3,
   Clock,
+  FileText,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -286,6 +287,20 @@ export default function ChildProfile() {
         >
           <Clock size={16} />
           Historia postepu
+        </button>
+        <button
+          className="child-profile-nav-link"
+          onClick={() => navigate(`/parent/child/${id}/progress`)}
+        >
+          <TrendingUp size={16} />
+          Wykresy postepu
+        </button>
+        <button
+          className="child-profile-nav-link"
+          onClick={() => navigate(`/parent/child/${id}/reviews`)}
+        >
+          <FileText size={16} />
+          Oceny od trenera
         </button>
       </div>
 
