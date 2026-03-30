@@ -107,6 +107,13 @@ const playerSchema = new mongoose.Schema(
       atp: Number,
     },
     avatarUrl: String,
+    // Prośba o dołączenie do trenera
+    coachRequest: {
+      coach: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
+      message: String,
+      createdAt: { type: Date, default: Date.now },
+    },
     skills: {
       serve: skillSchema,
       forehand: skillSchema,

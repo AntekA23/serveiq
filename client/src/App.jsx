@@ -42,6 +42,7 @@ import CoachPayments from './pages/coach/CoachPayments'
 // Parent extra pages
 import Reviews from './pages/parent/Reviews'
 import SkillProgress from './pages/parent/SkillProgress'
+import FindCoach from './pages/parent/FindCoach'
 
 // Payment pages
 import PaymentSuccess from './pages/parent/PaymentSuccess'
@@ -201,6 +202,9 @@ export default function App() {
         } />
         <Route path="/parent/child/:id/timeline" element={
           <ProtectedRoute role="parent"><AppShell><Timeline /></AppShell></ProtectedRoute>
+        } />
+        <Route path="/parent/find-coach" element={
+          <ProtectedRoute role="parent"><AppShell><FindCoach /></AppShell></ProtectedRoute>
         } />
         <Route path="/parent/devices" element={
           <ProtectedRoute role="parent"><AppShell><Devices /></AppShell></ProtectedRoute>

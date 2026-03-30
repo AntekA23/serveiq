@@ -211,6 +211,19 @@
   flex-shrink: 0;
 }
 
+/* ─── Join Requests ─── */
+.cd-join-requests { margin-bottom: 20px; }
+.cd-join-title { display: flex; align-items: center; gap: 8px; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px; text-transform: uppercase; color: var(--color-accent); margin: 0 0 10px; }
+.cd-join-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--color-bg-secondary); border: 1px solid var(--color-accent-dim); border-radius: var(--radius-md); margin-bottom: 6px; }
+.cd-join-info { flex: 1; min-width: 0; }
+.cd-join-player { font-size: 14px; font-weight: 700; color: var(--color-text); display: block; }
+.cd-join-meta { font-size: 12px; color: var(--color-text-tertiary); display: block; margin-top: 2px; }
+.cd-join-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.cd-join-accept { background: var(--color-green-bg); border: 1px solid rgba(34,197,94,0.3); border-radius: var(--radius-sm); color: var(--color-green); cursor: pointer; padding: 8px; display: flex; transition: all 0.15s; }
+.cd-join-accept:hover { background: var(--color-green); color: #fff; }
+.cd-join-reject { background: var(--color-heart-bg); border: 1px solid rgba(255,71,87,0.3); border-radius: var(--radius-sm); color: var(--color-heart); cursor: pointer; padding: 8px; display: flex; transition: all 0.15s; }
+.cd-join-reject:hover { background: var(--color-heart); color: #fff; }
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   .cd-stats { grid-template-columns: repeat(2, 1fr); }

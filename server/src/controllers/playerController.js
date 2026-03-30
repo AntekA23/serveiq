@@ -805,3 +805,168 @@ export const getSkillHistory = async (req, res, next) => {
     next(error);
   }
 };
+
+// ====== Coach Join Requests ======
+
+/**
+ * GET /api/players/coaches/search?q=...
+ * Rodzic szuka trenera po nazwisku lub klubie
+ */
+export const searchCoaches = async (req, res, next) => {
+  try {
+    const q = (req.query.q || '').trim();
+    if (q.length < 2) {
+      return res.json({ coaches: [] });
+    }
+
+    const regex = new RegExp(q, 'i');
+    const coaches = await User.find({
+      role: 'coach',
+      isActive: true,
+      $or: [
+        { firstName: regex },
+        { lastName: regex },
+        { 'coachProfile.club': regex },
+      ],
+    }).select('firstName lastName coachProfile.club coachProfile.bio');
+
+    res.json({ coaches });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/players/:id/request-coach
+ * Rodzic wysyła prośbę o dołączenie dziecka do trenera
+ */
+export const requestCoach = async (req, res, next) => {
+  try {
+    const { coachId, message } = req.body;
+    if (!coachId) {
+      return res.status(400).json({ message: 'ID trenera jest wymagane' });
+    }
+
+    const player = await Player.findOne({
+      _id: req.params.id,
+      parents: req.user._id,
+      active: true,
+    });
+    if (!player) {
+      return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
+    }
+
+    if (player.coach) {
+      return res.status(400).json({ message: 'Zawodnik ma juz przypisanego trenera' });
+    }
+
+    if (player.coachRequest?.status === 'pending') {
+      return res.status(400).json({ message: 'Prosba o dolaczenie juz wyslana' });
+    }
+
+    const coach = await User.findOne({ _id: coachId, role: 'coach', isActive: true });
+    if (!coach) {
+      return res.status(404).json({ message: 'Trener nie znaleziony' });
+    }
+
+    player.coachRequest = {
+      coach: coachId,
+      status: 'pending',
+      message: message || '',
+      createdAt: new Date(),
+    };
+    await player.save();
+
+    // Powiadom trenera
+    await Notification.create({
+      user: coachId,
+      type: 'system',
+      title: 'Nowa prosba o dolaczenie',
+      body: `${req.user.firstName} ${req.user.lastName} chce dolaczyc ${player.firstName} ${player.lastName} do Twoich zawodnikow`,
+      severity: 'info',
+      player: player._id,
+    });
+
+    res.json({ message: 'Prosba wyslana do trenera' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/players/coach-requests
+ * Trener widzi oczekujące prośby
+ */
+export const getCoachRequests = async (req, res, next) => {
+  try {
+    const requests = await Player.find({
+      'coachRequest.coach': req.user._id,
+      'coachRequest.status': 'pending',
+      active: true,
+    })
+      .populate('parents', 'firstName lastName email phone')
+      .select('firstName lastName dateOfBirth gender coachRequest parents');
+
+    res.json({ requests });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/players/:id/coach-request
+ * Trener akceptuje lub odrzuca prośbę
+ */
+export const respondCoachRequest = async (req, res, next) => {
+  try {
+    const { action } = req.body; // 'accept' or 'reject'
+    if (!['accept', 'reject'].includes(action)) {
+      return res.status(400).json({ message: 'Akcja musi byc "accept" lub "reject"' });
+    }
+
+    const player = await Player.findOne({
+      _id: req.params.id,
+      'coachRequest.coach': req.user._id,
+      'coachRequest.status': 'pending',
+      active: true,
+    });
+    if (!player) {
+      return res.status(404).json({ message: 'Prosba nie znaleziona' });
+    }
+
+    if (action === 'accept') {
+      player.coach = req.user._id;
+      player.coachRequest.status = 'accepted';
+
+      // Powiadom rodzicow
+      for (const parentId of player.parents) {
+        await Notification.create({
+          user: parentId,
+          type: 'system',
+          title: 'Trener zaakceptowal prosbe!',
+          body: `${req.user.firstName} ${req.user.lastName} jest teraz trenerem ${player.firstName}`,
+          severity: 'info',
+          player: player._id,
+        });
+      }
+    } else {
+      player.coachRequest.status = 'rejected';
+
+      for (const parentId of player.parents) {
+        await Notification.create({
+          user: parentId,
+          type: 'system',
+          title: 'Prosba odrzucona',
+          body: `Trener odrzucil prosbe o dolaczenie ${player.firstName}`,
+          severity: 'info',
+          player: player._id,
+        });
+      }
+    }
+
+    await player.save();
+    res.json({ message: action === 'accept' ? 'Zawodnik dolaczony' : 'Prosba odrzucona' });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -13,6 +13,7 @@ import {
   ClipboardList,
   FileText,
   CalendarDays,
+  UserPlus,
 } from 'lucide-react'
 import useAuthStore from '../../../store/authStore'
 import useUiStore from '../../../store/uiStore'
@@ -25,6 +26,7 @@ const parentNav = [
   { to: '/parent/devices', label: 'Urzadzenia', icon: Watch },
   { to: '/parent/training-plan', label: 'Plan treningowy', icon: Calendar },
   { to: '/parent/tournaments', label: 'Turnieje', icon: Trophy },
+  { to: '/parent/find-coach', label: 'Znajdz trenera', icon: UserPlus },
   { to: '/parent/payments', label: 'Platnosci', icon: CreditCard },
   { to: '/parent/messages', label: 'Wiadomosci', icon: MessageSquare },
   { to: '/parent/settings', label: 'Ustawienia', icon: Settings },

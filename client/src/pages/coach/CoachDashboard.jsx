@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Users, Calendar, TrendingUp, Plus, ChevronRight, Clock,
-  FileText, CreditCard, Heart, Zap, Activity,
+  FileText, CreditCard, Heart, Zap, Activity, UserPlus, Check, X,
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -97,16 +97,19 @@ export default function CoachDashboard() {
   const [loading, setLoading] = useState(true)
   const [pendingPayments, setPendingPayments] = useState(0)
   const [draftReviews, setDraftReviews] = useState(0)
+  const [joinRequests, setJoinRequests] = useState([])
 
   useEffect(() => {
     const fetch = async () => {
       try {
-        const [playersRes, sessionsRes, paymentsRes, reviewsRes] = await Promise.all([
+        const [playersRes, sessionsRes, paymentsRes, reviewsRes, requestsRes] = await Promise.all([
           api.get('/players'),
           api.get('/sessions'),
           api.get('/payments').catch(() => ({ data: { payments: [] } })),
           api.get('/reviews').catch(() => ({ data: { reviews: [] } })),
+          api.get('/players/coach-requests').catch(() => ({ data: { requests: [] } })),
         ])
+        setJoinRequests(requestsRes.data.requests || [])
         const p = playersRes.data.players || playersRes.data || []
 
         const recoveryPromises = p.map((pl) =>
@@ -155,6 +158,18 @@ export default function CoachDashboard() {
     }, 0) / players.length
   ) : 0
 
+  const handleJoinRequest = async (playerId, action) => {
+    try {
+      await api.put(`/players/${playerId}/coach-request`, { action })
+      setJoinRequests((prev) => prev.filter((r) => r._id !== playerId))
+      if (action === 'accept') {
+        // Refresh players
+        const { data } = await api.get('/players')
+        setPlayers(data.players || data || [])
+      }
+    } catch { /* silent */ }
+  }
+
   if (loading) {
     return <div className="cd-page"><div className="cd-loading"><div className="cd-spinner" /></div></div>
   }
@@ -202,6 +217,36 @@ export default function CoachDashboard() {
               <ChevronRight size={14} />
             </div>
           )}
+        </div>
+      )}
+
+      {/* Join requests */}
+      {joinRequests.length > 0 && (
+        <div className="cd-join-requests">
+          <h3 className="cd-join-title"><UserPlus size={16} /> Prosby o dolaczenie</h3>
+          {joinRequests.map((req) => {
+            const parentName = req.parents?.[0] ? `${req.parents[0].firstName} ${req.parents[0].lastName}` : 'Rodzic'
+            const age = req.dateOfBirth ? new Date().getFullYear() - new Date(req.dateOfBirth).getFullYear() : null
+            return (
+              <div key={req._id} className="cd-join-card">
+                <div className="cd-join-info">
+                  <span className="cd-join-player">{req.firstName} {req.lastName}</span>
+                  <span className="cd-join-meta">
+                    {age && `${age} lat · `}{parentName}
+                    {req.coachRequest?.message && ` · "${req.coachRequest.message}"`}
+                  </span>
+                </div>
+                <div className="cd-join-actions">
+                  <button className="cd-join-accept" onClick={() => handleJoinRequest(req._id, 'accept')} title="Akceptuj">
+                    <Check size={16} />
+                  </button>
+                  <button className="cd-join-reject" onClick={() => handleJoinRequest(req._id, 'reject')} title="Odrzuc">
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
 

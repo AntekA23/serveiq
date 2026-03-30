@@ -15,6 +15,10 @@ import {
   updateMilestone,
   deleteMilestone,
   getSkillHistory,
+  searchCoaches,
+  requestCoach,
+  getCoachRequests,
+  respondCoachRequest,
 } from '../controllers/playerController.js';
 import { getTimeline } from '../controllers/healthController.js';
 import { verifyToken, requireRole } from '../middleware/auth.js';
@@ -32,6 +36,12 @@ router.put('/:id/training-plan', verifyToken, requireRole('coach', 'parent'), up
 router.post('/:id/milestones', verifyToken, requireRole('coach', 'parent'), addMilestone);
 router.put('/:id/milestones/:mid', verifyToken, requireRole('coach', 'parent'), updateMilestone);
 router.delete('/:id/milestones/:mid', verifyToken, requireRole('coach', 'parent'), deleteMilestone);
+
+// Coach join requests
+router.get('/coaches/search', verifyToken, requireRole('parent'), searchCoaches);
+router.get('/coach-requests', verifyToken, requireRole('coach'), getCoachRequests);
+router.post('/:id/request-coach', verifyToken, requireRole('parent'), requestCoach);
+router.put('/:id/coach-request', verifyToken, requireRole('coach'), respondCoachRequest);
 
 // Endpointy dostępne dla trenera i rodzica (dane filtrowane wg roli)
 router.get('/', verifyToken, requireRole('coach', 'parent'), getPlayers);
