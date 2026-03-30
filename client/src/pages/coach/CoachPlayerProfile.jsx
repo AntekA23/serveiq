@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare, FileText, Sparkles, Loader, ClipboardList, Trash2, Clock
+  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare, FileText, Sparkles, Loader, ClipboardList, Trash2, Clock, Heart
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -168,15 +168,17 @@ export default function CoachPlayerProfile() {
   const [aiRecs, setAiRecs] = useState(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [health, setHealth] = useState(null)
+  const [healthHistory, setHealthHistory] = useState([])
 
   useEffect(() => {
     const fetch = async () => {
       try {
-        const [playerRes, sessionsRes, reviewsRes, healthRes] = await Promise.all([
+        const [playerRes, sessionsRes, reviewsRes, healthRes, historyRes] = await Promise.all([
           api.get(`/players/${id}`),
           api.get(`/sessions?player=${id}`),
           api.get(`/reviews?player=${id}`),
           api.get(`/wearables/data/${id}/latest`).catch(() => ({ data: {} })),
+          api.get(`/wearables/data/${id}?type=daily_summary`).catch(() => ({ data: { data: [] } })),
         ])
         setPlayer(playerRes.data.player || playerRes.data)
         setSessions((sessionsRes.data.sessions || sessionsRes.data || []).sort((a, b) => new Date(b.date) - new Date(a.date)))
@@ -189,6 +191,8 @@ export default function CoachPlayerProfile() {
         if (recovery.score != null || sleep.quality != null) {
           setHealth({ recovery, sleep, hr: hrData, hrv: hrvData })
         }
+        const histData = historyRes.data?.data || []
+        setHealthHistory(Array.isArray(histData) ? histData.slice(0, 14).reverse() : [])
       } catch { /* silent */ }
       setLoading(false)
     }
@@ -350,6 +354,9 @@ export default function CoachPlayerProfile() {
         <button className={`coach-tab ${tab === 'plan' ? 'active' : ''}`} onClick={() => setTab('plan')}>
           <ClipboardList size={14} /> Plan
         </button>
+        <button className={`coach-tab ${tab === 'health' ? 'active' : ''}`} onClick={() => setTab('health')}>
+          <Heart size={14} /> Zdrowie
+        </button>
         <button className={`coach-tab ${tab === 'reviews' ? 'active' : ''}`} onClick={() => setTab('reviews')}>
           <FileText size={14} /> Oceny ({reviews.length})
         </button>
@@ -426,6 +433,56 @@ export default function CoachPlayerProfile() {
                 {g.completed && <span className="coach-goal-done">Ukonczony</span>}
               </div>
             ))
+          )}
+        </div>
+      )}
+
+      {/* Health tab */}
+      {tab === 'health' && (
+        <div className="coach-health-tab">
+          {healthHistory.length === 0 ? (
+            <div className="coach-empty">Brak danych zdrowotnych — wymagane polaczenie urzadzenia</div>
+          ) : (
+            <>
+              <div className="coach-health-charts">
+                {[
+                  { key: 'recovery', label: 'Regeneracja', unit: '%', color: 'var(--color-green)', extract: (d) => d.metrics?.recovery?.score },
+                  { key: 'hrv', label: 'HRV', unit: 'ms', color: 'var(--color-hrv)', extract: (d) => d.metrics?.hrv?.value },
+                  { key: 'hr', label: 'Tetno spocz.', unit: 'bpm', color: 'var(--color-heart)', extract: (d) => d.metrics?.heartRate?.resting },
+                  { key: 'sleep', label: 'Sen', unit: '%', color: 'var(--color-sleep)', extract: (d) => d.metrics?.sleep?.quality },
+                ].map(({ key, label, unit, color, extract }) => {
+                  const values = healthHistory.map(extract).filter((v) => v != null)
+                  if (values.length === 0) return null
+                  const latest = values[values.length - 1]
+                  const min = Math.min(...values)
+                  const max = Math.max(...values)
+                  const range = max - min || 1
+                  const w = 200, h = 50
+                  const points = values.map((v, i) => {
+                    const x = (i / Math.max(values.length - 1, 1)) * w
+                    const y = h - 4 - ((v - min) / range) * (h - 8)
+                    return `${x},${y}`
+                  }).join(' ')
+
+                  return (
+                    <div key={key} className="coach-health-chart-card">
+                      <div className="coach-health-chart-head">
+                        <span className="coach-health-chart-label">{label}</span>
+                        <span className="coach-health-chart-value" style={{ color }}>{latest}{unit}</span>
+                      </div>
+                      <svg viewBox={`0 0 ${w} ${h}`} className="coach-health-sparkline">
+                        <polyline points={points} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <div className="coach-health-chart-range">
+                        <span>Min: {min}</span>
+                        <span>{values.length}d</span>
+                        <span>Max: {max}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </>
           )}
         </div>
       )}

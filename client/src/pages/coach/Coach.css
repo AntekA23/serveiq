@@ -203,6 +203,16 @@
 .coach-payment-mark-btn { background: none; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); color: var(--color-text-tertiary); cursor: pointer; padding: 6px; flex-shrink: 0; align-self: center; transition: all 0.15s; }
 .coach-payment-mark-btn:hover { color: var(--color-green); border-color: var(--color-green); }
 
+/* ═══ Health Tab ═══ */
+.coach-health-tab { }
+.coach-health-charts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.coach-health-chart-card { background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px 16px; }
+.coach-health-chart-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.coach-health-chart-label { font-size: 12px; color: var(--color-text-secondary); font-weight: 600; }
+.coach-health-chart-value { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.5px; line-height: 1; }
+.coach-health-sparkline { width: 100%; height: auto; display: block; margin-bottom: 6px; }
+.coach-health-chart-range { display: flex; justify-content: space-between; font-size: 10px; color: var(--color-text-tertiary); }
+
 /* ═══ Training Plan Tab ═══ */
 .coach-plan-tab { }
 .coach-plan-summary { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
@@ -296,6 +306,7 @@
   .coach-payment-card { flex-wrap: wrap; }
   .coach-header { flex-direction: column; align-items: flex-start; gap: 8px; }
   .coach-plan-days { grid-template-columns: repeat(2, 1fr); }
+  .coach-health-charts { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
   .coach-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
