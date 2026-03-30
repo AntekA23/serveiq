@@ -1,16 +1,26 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, ChevronRight } from 'lucide-react'
+import { Plus, Search, ChevronRight, Users, TrendingUp, Target } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import Button from '../../components/ui/Button/Button'
 import './Coach.css'
+
+const SKILL_LABELS = {
+  serve: 'Serwis', forehand: 'Forhend', backhand: 'Bekhend',
+  volley: 'Wolej', tactics: 'Taktyka', fitness: 'Kondycja',
+}
+const SKILL_COLORS = {
+  serve: '#4DA6FF', forehand: '#22C55E', backhand: '#F59E0B',
+  volley: '#7C5CFC', tactics: '#1ABC9C', fitness: '#FF6B35',
+}
 
 export default function CoachPlayers() {
   const navigate = useNavigate()
   const [players, setPlayers] = useState([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [sortBy, setSortBy] = useState('name')
 
   useEffect(() => {
     const fetch = async () => {
@@ -28,6 +38,34 @@ export default function CoachPlayers() {
     return `${p.firstName} ${p.lastName}`.toLowerCase().includes(q)
   })
 
+  // Sort
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === 'name') return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)
+    if (sortBy === 'skill') {
+      const avgA = Object.values(a.skills || {}).reduce((s, v) => s + (v?.score || 0), 0) / Math.max(Object.keys(a.skills || {}).length, 1)
+      const avgB = Object.values(b.skills || {}).reduce((s, v) => s + (v?.score || 0), 0) / Math.max(Object.keys(b.skills || {}).length, 1)
+      return avgB - avgA
+    }
+    if (sortBy === 'ranking') return (a.ranking?.pzt || 999) - (b.ranking?.pzt || 999)
+    if (sortBy === 'age') return new Date(a.dateOfBirth || 0) - new Date(b.dateOfBirth || 0)
+    return 0
+  })
+
+  // Group stats
+  const avgSkillAll = players.length > 0 ? Math.round(
+    players.reduce((sum, p) => {
+      const sk = p.skills || {}
+      return sum + Object.values(sk).reduce((s, v) => s + (v?.score || 0), 0) / Math.max(Object.keys(sk).length, 1)
+    }, 0) / players.length
+  ) : 0
+
+  const avgAge = players.length > 0 ? Math.round(
+    players.reduce((sum, p) => {
+      if (!p.dateOfBirth) return sum
+      return sum + (new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear())
+    }, 0) / players.filter((p) => p.dateOfBirth).length
+  ) : 0
+
   if (loading) {
     return <div className="coach-page"><h1 className="page-title">Zawodnicy</h1><div className="coach-loading">Ladowanie...</div></div>
   }
@@ -35,24 +73,54 @@ export default function CoachPlayers() {
   return (
     <div className="coach-page">
       <div className="coach-header">
-        <h1 className="page-title">Zawodnicy ({players.length})</h1>
+        <h1 className="page-title">Zawodnicy</h1>
         <Button variant="primary" size="sm" onClick={() => navigate('/coach/players/new')}>
           <Plus size={14} /> Dodaj zawodnika
         </Button>
       </div>
 
-      {players.length > 3 && (
-        <div className="coach-search">
-          <Search size={14} />
-          <input placeholder="Szukaj zawodnika..." value={search} onChange={(e) => setSearch(e.target.value)} />
+      {/* Group stats */}
+      {players.length > 0 && (
+        <div className="cp-group-stats">
+          <div className="cp-group-stat">
+            <Users size={14} />
+            <span><strong>{players.length}</strong> zawodnikow</span>
+          </div>
+          <div className="cp-group-stat">
+            <TrendingUp size={14} />
+            <span>Sredni skill: <strong>{avgSkillAll}</strong></span>
+          </div>
+          <div className="cp-group-stat">
+            <Target size={14} />
+            <span>Sredni wiek: <strong>{avgAge}</strong> lat</span>
+          </div>
         </div>
       )}
 
+      {/* Search + sort */}
+      <div className="cp-controls">
+        {players.length > 2 && (
+          <div className="coach-search">
+            <Search size={14} />
+            <input placeholder="Szukaj zawodnika..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+        )}
+        <select className="cp-sort" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="name">Imie</option>
+          <option value="skill">Skill ↓</option>
+          <option value="ranking">Ranking</option>
+          <option value="age">Wiek</option>
+        </select>
+      </div>
+
       <div className="coach-players-list">
-        {filtered.map((p) => {
+        {sorted.map((p) => {
           const skills = p.skills || {}
           const skillEntries = Object.entries(skills).filter(([, v]) => v?.score > 0)
           const age = p.dateOfBirth ? new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear() : null
+          const avgSkill = skillEntries.length > 0
+            ? Math.round(skillEntries.reduce((s, [, v]) => s + v.score, 0) / skillEntries.length)
+            : 0
 
           return (
             <div key={p._id} className="coach-player-card" onClick={() => navigate(`/coach/player/${p._id}`)}>
@@ -65,11 +133,12 @@ export default function CoachPlayers() {
                 </div>
                 {skillEntries.length > 0 && (
                   <div className="coach-player-skills">
-                    {skillEntries.map(([name, data]) => (
-                      <span key={name} className="coach-skill-chip">
-                        {name.charAt(0).toUpperCase() + name.slice(1)}: {data.score}
+                    {skillEntries.slice(0, 4).map(([name, data]) => (
+                      <span key={name} className="coach-skill-chip" style={{ borderColor: SKILL_COLORS[name] || 'var(--color-text-tertiary)', color: SKILL_COLORS[name] }}>
+                        {SKILL_LABELS[name] || name}: {data.score}
                       </span>
                     ))}
+                    {skillEntries.length > 4 && <span className="coach-skill-chip">+{skillEntries.length - 4}</span>}
                   </div>
                 )}
                 {p.parents?.length > 0 && (
@@ -78,11 +147,24 @@ export default function CoachPlayers() {
                   </div>
                 )}
               </div>
+              <div className="cp-player-avg">
+                <svg viewBox="0 0 36 36" className="cp-avg-ring">
+                  <circle cx="18" cy="18" r="15" fill="none" stroke="var(--color-bg-tertiary)" strokeWidth="3" />
+                  <circle cx="18" cy="18" r="15" fill="none" stroke="var(--color-accent)" strokeWidth="3"
+                    strokeDasharray={`${avgSkill * 0.94} 100`} strokeLinecap="round" transform="rotate(-90 18 18)" />
+                </svg>
+                <span className="cp-avg-val">{avgSkill}</span>
+              </div>
               <ChevronRight size={16} className="coach-player-arrow" />
             </div>
           )
         })}
-        {filtered.length === 0 && <div className="coach-empty">Brak wynikow</div>}
+        {sorted.length === 0 && (
+          <div className="coach-empty">
+            <Users size={28} strokeWidth={1.5} />
+            {search ? 'Brak wynikow wyszukiwania' : 'Dodaj pierwszego zawodnika'}
+          </div>
+        )}
       </div>
     </div>
   )
