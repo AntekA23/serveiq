@@ -29,6 +29,7 @@ export default function Register() {
   const toast = useToast()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [role, setRole] = useState('parent')
 
   const {
     register,
@@ -45,12 +46,11 @@ export default function Register() {
       const { confirmPassword, ...data } = formData
       await registerUser({
         ...data,
-        role: 'parent',
+        role,
       })
-      // Auto-login after registration
-      const loginData = await login(data.email, data.password)
+      await login(data.email, data.password)
       toast.success('Konto utworzone! Witamy w ServeIQ.')
-      navigate('/parent/onboarding')
+      navigate(role === 'coach' ? '/coach/dashboard' : '/parent/onboarding')
     } catch (err) {
       setError(err.response?.data?.message || 'Wystapil blad podczas rejestracji')
     } finally {
@@ -68,7 +68,17 @@ export default function Register() {
     <div className="register-page">
       <div className="register-card">
         <div className="register-logo">SERVE<span style={{ color: 'var(--color-text)' }}>IQ</span></div>
-        <div className="register-subtitle">Utworz konto rodzica</div>
+        <div className="register-subtitle">Utworz konto</div>
+
+        {/* Role selector */}
+        <div className="register-role-selector">
+          <button type="button" className={`register-role-btn ${role === 'parent' ? 'active' : ''}`} onClick={() => setRole('parent')}>
+            Rodzic
+          </button>
+          <button type="button" className={`register-role-btn ${role === 'coach' ? 'active' : ''}`} onClick={() => setRole('coach')}>
+            Trener
+          </button>
+        </div>
 
         {error && <div className="register-error">{error}</div>}
 

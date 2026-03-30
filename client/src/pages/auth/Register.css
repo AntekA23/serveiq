@@ -136,6 +136,35 @@
   opacity: 0.8;
 }
 
+/* Role selector */
+.register-role-selector {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+}
+.register-role-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.register-role-btn.active {
+  background: var(--color-accent);
+  color: #0B0E14;
+}
+.register-role-btn:hover:not(.active) {
+  color: var(--color-text-secondary);
+}
+
 @media (max-width: 480px) {
   .register-row {
     grid-template-columns: 1fr;

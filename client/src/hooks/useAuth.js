@@ -57,8 +57,8 @@ export default function useAuth() {
     }
   }, [setUser, setAuth])
 
-  const acceptInvite = useCallback(async (token, password) => {
-    const { data } = await api.post(`/auth/accept-invite`, { token, password })
+  const acceptInvite = useCallback(async (inviteToken, password, firstName, lastName, phone) => {
+    const { data } = await api.post('/auth/accept-invite', { inviteToken, password, firstName, lastName, phone })
     return data
   }, [])
 
