@@ -38,15 +38,19 @@ const getPlayerDataSchema = z.object({
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
 /**
- * Sprawdza czy rodzic ma dostęp do danego zawodnika (jest w parents[])
+ * Sprawdza czy uzytkownik ma dostep do danego zawodnika
+ * Rodzic: jest w parents[]. Trener: jest coachem zawodnika.
  */
+async function verifyPlayerAccess(user, playerId) {
+  if (user.role === 'coach') {
+    return Player.findOne({ _id: playerId, coach: user._id, active: true });
+  }
+  return Player.findOne({ _id: playerId, parents: user._id, active: true });
+}
+
+// Legacy alias
 async function verifyParentAccess(parentId, playerId) {
-  const player = await Player.findOne({
-    _id: playerId,
-    parents: parentId,
-    active: true,
-  });
-  return player;
+  return Player.findOne({ _id: playerId, parents: parentId, active: true });
 }
 
 /**
@@ -257,8 +261,8 @@ export const getPlayerData = async (req, res, next) => {
   try {
     const { playerId } = req.params;
 
-    // Sprawdź dostęp rodzica
-    const player = await verifyParentAccess(req.user._id, playerId);
+    // Sprawdź dostęp (trener lub rodzic)
+    const player = await verifyPlayerAccess(req.user, playerId);
     if (!player) {
       return res.status(403).json({
         message: 'Brak dostępu do danych tego zawodnika',
@@ -298,8 +302,8 @@ export const getLatestData = async (req, res, next) => {
   try {
     const { playerId } = req.params;
 
-    // Sprawdź dostęp rodzica
-    const player = await verifyParentAccess(req.user._id, playerId);
+    // Sprawdź dostęp (trener lub rodzic)
+    const player = await verifyPlayerAccess(req.user, playerId);
     if (!player) {
       return res.status(403).json({
         message: 'Brak dostępu do danych tego zawodnika',
@@ -324,12 +328,11 @@ export const getLatestData = async (req, res, next) => {
       }
     });
 
-    // Pobierz też podłączone urządzenia zawodnika
-    const devices = await WearableDevice.find({
-      player: playerId,
-      parent: req.user._id,
-      connected: true,
-    }).select('provider deviceName deviceId battery lastSyncAt authState');
+    // Pobierz podłączone urządzenia zawodnika
+    const deviceFilter = { player: playerId, connected: true };
+    if (req.user.role === 'parent') deviceFilter.parent = req.user._id;
+    const devices = await WearableDevice.find(deviceFilter)
+      .select('provider deviceName deviceId battery lastSyncAt authState');
 
     res.json({ latest, devices });
   } catch (error) {

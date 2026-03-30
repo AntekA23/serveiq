@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import Session from '../models/Session.js';
 import Player from '../models/Player.js';
+import Notification from '../models/Notification.js';
 
 // ====== Zod Schemas ======
 
@@ -146,6 +147,23 @@ export const createSession = async (req, res, next) => {
       }
       player.markModified('skills');
       await player.save();
+    }
+
+    // Powiadom rodziców o nowej sesji (jeśli coach stworzył i widoczna)
+    if (req.user.role === 'coach' && sessionData.visibleToParent !== false) {
+      const parentIds = player.parents || [];
+      const typeLabel = { kort: 'Kort', sparing: 'Sparing', kondycja: 'Kondycja', rozciaganie: 'Rozciąganie', mecz: 'Mecz', inne: 'Inne' };
+      for (const parentId of parentIds) {
+        await Notification.create({
+          user: parentId,
+          type: 'system',
+          title: 'Nowa sesja treningowa',
+          body: `${typeLabel[data.sessionType] || 'Trening'} dla ${player.firstName} — ${new Date(data.date).toLocaleDateString('pl-PL')}`,
+          severity: 'info',
+          player: player._id,
+          actionUrl: `/parent/child/${player._id}/timeline`,
+        });
+      }
     }
 
     const populatedSession = await Session.findById(session._id)

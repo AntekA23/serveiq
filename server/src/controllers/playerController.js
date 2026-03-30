@@ -7,6 +7,7 @@ import multer from 'multer';
 import Player from '../models/Player.js';
 import Session from '../models/Session.js';
 import User from '../models/User.js';
+import Notification from '../models/Notification.js';
 import { sendInviteEmail } from '../services/emailService.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -305,15 +306,38 @@ export const updatePlayer = async (req, res, next) => {
 
     // Aktualizuj skills
     if (data.skills) {
+      const skillChanges = [];
       for (const [skillName, skillData] of Object.entries(data.skills)) {
         if (skillData) {
           if (!player.skills) player.skills = {};
           if (!player.skills[skillName]) player.skills[skillName] = {};
-          if (skillData.score !== undefined) player.skills[skillName].score = skillData.score;
+          const oldScore = player.skills[skillName].score;
+          if (skillData.score !== undefined) {
+            player.skills[skillName].score = skillData.score;
+            if (oldScore !== skillData.score) skillChanges.push(skillName);
+          }
           if (skillData.notes !== undefined) player.skills[skillName].notes = skillData.notes;
         }
       }
       player.markModified('skills');
+
+      // Powiadom rodzicow o zmianach umiejetnosci
+      if (skillChanges.length > 0) {
+        const parentIds = player.parents || [];
+        const skillLabels = { serve: 'serwis', forehand: 'forhend', backhand: 'bekhend', volley: 'wolej', tactics: 'taktyka', fitness: 'kondycja' };
+        const changedNames = skillChanges.map((s) => skillLabels[s] || s).join(', ');
+        for (const parentId of parentIds) {
+          await Notification.create({
+            user: parentId,
+            type: 'system',
+            title: 'Aktualizacja umiejetnosci',
+            body: `Trener zaktualizowal umiejetnosci ${player.firstName}: ${changedNames}`,
+            severity: 'info',
+            player: player._id,
+            actionUrl: `/parent/child/${player._id}`,
+          });
+        }
+      }
     }
 
     await player.save();
@@ -420,8 +444,25 @@ export const updateGoal = async (req, res, next) => {
     if (data.text !== undefined) goal.text = data.text;
     if (data.dueDate !== undefined) goal.dueDate = new Date(data.dueDate);
     if (data.completed !== undefined) {
+      const wasCompleted = goal.completed;
       goal.completed = data.completed;
       goal.completedAt = data.completed ? new Date() : null;
+
+      // Powiadom rodzicow o ukonczeniu celu
+      if (data.completed && !wasCompleted) {
+        const parentIds = player.parents || [];
+        for (const parentId of parentIds) {
+          await Notification.create({
+            user: parentId,
+            type: 'system',
+            title: 'Cel osiagniety!',
+            body: `${player.firstName} osiagnal cel: "${goal.text}"`,
+            severity: 'info',
+            player: player._id,
+            actionUrl: `/parent/child/${player._id}`,
+          });
+        }
+      }
     }
 
     await player.save();
@@ -577,6 +618,22 @@ export const updateTrainingPlan = async (req, res, next) => {
 
     player.markModified('trainingPlan');
     await player.save();
+
+    // Powiadom rodzicow gdy trener zmieni plan
+    if (req.user.role === 'coach' && data.weeklySchedule) {
+      const parentIds = player.parents || [];
+      for (const parentId of parentIds) {
+        await Notification.create({
+          user: parentId,
+          type: 'system',
+          title: 'Plan treningowy zaktualizowany',
+          body: `Trener zaktualizowal plan treningowy dla ${player.firstName} (${data.weeklySchedule.length} sesji/tydz)`,
+          severity: 'info',
+          player: player._id,
+          actionUrl: '/parent/training-plan',
+        });
+      }
+    }
 
     res.json({ message: 'Plan treningowy zaktualizowany', trainingPlan: player.trainingPlan });
   } catch (error) {

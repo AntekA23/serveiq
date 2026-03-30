@@ -5,13 +5,11 @@ import Tournament from '../models/Tournament.js';
 
 // ====== Helpers ======
 
-async function verifyParentAccess(parentId, playerId) {
-  const player = await Player.findOne({
-    _id: playerId,
-    parents: parentId,
-    active: true,
-  });
-  return player;
+async function verifyAccess(user, playerId) {
+  if (user.role === 'coach') {
+    return Player.findOne({ _id: playerId, coach: user._id, active: true });
+  }
+  return Player.findOne({ _id: playerId, parents: user._id, active: true });
 }
 
 function calcStats(values) {
@@ -39,7 +37,7 @@ export const getTrends = async (req, res, next) => {
     const { playerId } = req.params;
     const range = parseInt(req.query.range) || 7;
 
-    const player = await verifyParentAccess(req.user._id, playerId);
+    const player = await verifyAccess(req.user, playerId);
     if (!player) {
       return res.status(403).json({ message: 'Brak dostepu do danych tego zawodnika' });
     }
@@ -150,7 +148,7 @@ export const getTimeline = async (req, res, next) => {
     const { id: playerId } = req.params;
     const limit = parseInt(req.query.limit) || 50;
 
-    const player = await verifyParentAccess(req.user._id, playerId);
+    const player = await verifyAccess(req.user, playerId);
     if (!player) {
       return res.status(403).json({ message: 'Brak dostepu do tego zawodnika' });
     }
@@ -280,7 +278,7 @@ export const comparePeriods = async (req, res, next) => {
       return res.status(400).json({ message: 'Wymagane parametry: p1_from, p1_to, p2_from, p2_to' });
     }
 
-    const player = await verifyParentAccess(req.user._id, playerId);
+    const player = await verifyAccess(req.user, playerId);
     if (!player) {
       return res.status(403).json({ message: 'Brak dostepu do danych tego zawodnika' });
     }

@@ -31,6 +31,11 @@ function PlayerRow({ player, onClick }) {
           {player.ranking?.pzt && ` · PZT #${player.ranking.pzt}`}
         </span>
       </div>
+      {player._recovery != null && (
+        <span className={`coach-player-recovery ${player._recoveryStatus === 'green' ? 'good' : player._recoveryStatus === 'yellow' ? 'warn' : 'bad'}`}>
+          {player._recovery}%
+        </span>
+      )}
       <div className="coach-player-skill">
         <div className="coach-player-skill-bar">
           <div className="coach-player-skill-fill" style={{ width: `${avgSkill}%` }} />
@@ -88,7 +93,18 @@ export default function CoachDashboard() {
           api.get('/reviews').catch(() => ({ data: { reviews: [] } })),
         ])
         const p = playersRes.data.players || playersRes.data || []
-        setPlayers(p)
+
+        // Fetch recovery data for each player
+        const recoveryPromises = p.map((pl) =>
+          api.get(`/wearables/data/${pl._id}/latest`).catch(() => ({ data: {} }))
+        )
+        const recoveryResults = await Promise.all(recoveryPromises)
+        const enrichedPlayers = p.map((pl, i) => {
+          const latest = recoveryResults[i]?.data?.latest || {}
+          const recovery = latest.recovery?.metrics?.recovery || {}
+          return { ...pl, _recovery: recovery.score, _recoveryStatus: recovery.status }
+        })
+        setPlayers(enrichedPlayers)
 
         // Count pending/overdue payments
         const allPayments = paymentsRes.data.payments || []

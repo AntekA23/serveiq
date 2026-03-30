@@ -167,18 +167,28 @@ export default function CoachPlayerProfile() {
   const [tab, setTab] = useState('skills')
   const [aiRecs, setAiRecs] = useState(null)
   const [aiLoading, setAiLoading] = useState(false)
+  const [health, setHealth] = useState(null)
 
   useEffect(() => {
     const fetch = async () => {
       try {
-        const [playerRes, sessionsRes, reviewsRes] = await Promise.all([
+        const [playerRes, sessionsRes, reviewsRes, healthRes] = await Promise.all([
           api.get(`/players/${id}`),
           api.get(`/sessions?player=${id}`),
           api.get(`/reviews?player=${id}`),
+          api.get(`/wearables/data/${id}/latest`).catch(() => ({ data: {} })),
         ])
         setPlayer(playerRes.data.player || playerRes.data)
         setSessions((sessionsRes.data.sessions || sessionsRes.data || []).sort((a, b) => new Date(b.date) - new Date(a.date)))
         setReviews((reviewsRes.data.reviews || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)))
+        const latest = healthRes.data?.latest || {}
+        const recovery = latest.recovery?.metrics?.recovery || {}
+        const sleep = latest.sleep?.metrics?.sleep || {}
+        const hrData = latest.daily_summary?.metrics?.heartRate || {}
+        const hrvData = latest.daily_summary?.metrics?.hrv || {}
+        if (recovery.score != null || sleep.quality != null) {
+          setHealth({ recovery, sleep, hr: hrData, hrv: hrvData })
+        }
       } catch { /* silent */ }
       setLoading(false)
     }
@@ -256,6 +266,30 @@ export default function CoachPlayerProfile() {
             {player.ranking?.pzt && <span>PZT #{player.ranking.pzt}</span>}
             {player.monthlyRate && <span>{player.monthlyRate} PLN/mies</span>}
           </div>
+          {health && (
+            <div className="coach-health-badges">
+              {health.recovery?.score != null && (
+                <span className={`coach-health-badge ${health.recovery.status === 'green' ? 'good' : health.recovery.status === 'yellow' ? 'warn' : 'bad'}`}>
+                  Regeneracja: {health.recovery.score}%
+                </span>
+              )}
+              {health.sleep?.quality != null && (
+                <span className="coach-health-badge neutral">
+                  Sen: {health.sleep.quality}%
+                </span>
+              )}
+              {health.hrv?.value != null && (
+                <span className="coach-health-badge neutral">
+                  HRV: {health.hrv.value}ms
+                </span>
+              )}
+              {health.hr?.resting != null && (
+                <span className="coach-health-badge neutral">
+                  HR: {health.hr.resting}bpm
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <div className="coach-profile-actions">
           <Button variant="primary" size="sm" onClick={() => navigate(`/coach/sessions/new?player=${id}`)}>

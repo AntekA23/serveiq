@@ -40,6 +40,10 @@
 .coach-player-skill-fill { height: 100%; background: var(--color-accent); border-radius: var(--radius-full); }
 .coach-player-skill-val { font-size: 11px; font-weight: 700; color: var(--color-text-secondary); min-width: 20px; }
 .coach-player-arrow { color: var(--color-text-tertiary); flex-shrink: 0; }
+.coach-player-recovery { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-full); flex-shrink: 0; }
+.coach-player-recovery.good { background: var(--color-green-bg); color: var(--color-green); }
+.coach-player-recovery.warn { background: rgba(245,166,35,0.15); color: var(--color-amber); }
+.coach-player-recovery.bad { background: var(--color-heart-bg); color: var(--color-heart); }
 
 /* Session row (dashboard) */
 .coach-session-row { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
@@ -72,6 +76,14 @@
 .coach-profile-name { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; color: var(--color-text); margin: 0; }
 .coach-profile-meta { display: flex; gap: 12px; font-size: 12px; color: var(--color-text-tertiary); flex-wrap: wrap; }
 .coach-profile-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Health badges */
+.coach-health-badges { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.coach-health-badge { font-size: 11px; padding: 3px 10px; border-radius: var(--radius-full); font-weight: 600; }
+.coach-health-badge.good { background: var(--color-green-bg); color: var(--color-green); }
+.coach-health-badge.warn { background: rgba(245,166,35,0.15); color: var(--color-amber); }
+.coach-health-badge.bad { background: var(--color-heart-bg); color: var(--color-heart); }
+.coach-health-badge.neutral { background: var(--color-bg-tertiary); color: var(--color-text-secondary); }
 
 /* Tabs */
 .coach-tabs { display: flex; border-bottom: 2px solid var(--color-border); margin-bottom: 20px; }
