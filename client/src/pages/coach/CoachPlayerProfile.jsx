@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare, FileText
+  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare, FileText, Sparkles, Loader
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import Button from '../../components/ui/Button/Button'
+import useToast from '../../hooks/useToast'
 import './Coach.css'
 
 const SKILL_NAMES = {
@@ -67,11 +68,14 @@ function SkillBar({ name, label, score, notes, onUpdate }) {
 export default function CoachPlayerProfile() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const toast = useToast()
   const [player, setPlayer] = useState(null)
   const [sessions, setSessions] = useState([])
   const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState('skills')
+  const [aiRecs, setAiRecs] = useState(null)
+  const [aiLoading, setAiLoading] = useState(false)
 
   useEffect(() => {
     const fetch = async () => {
@@ -107,6 +111,18 @@ export default function CoachPlayerProfile() {
       const { data } = await api.get(`/players/${id}`)
       setPlayer(data.player || data)
     } catch { /* silent */ }
+  }
+
+  const handleAiRecommendations = async () => {
+    setAiLoading(true)
+    try {
+      const { data } = await api.post(`/ai/recommendations/${id}`)
+      setAiRecs(data.result)
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Nie udalo sie wygenerowac rekomendacji'
+      toast.error(msg)
+    }
+    setAiLoading(false)
   }
 
   const handleToggleGoal = async (goalId, completed) => {
@@ -157,14 +173,43 @@ export default function CoachPlayerProfile() {
           <Button size="sm" onClick={() => navigate(`/coach/reviews/new?player=${id}`)}>
             <FileText size={14} /> Ocena
           </Button>
+          <Button size="sm" onClick={handleAiRecommendations} loading={aiLoading}>
+            <Sparkles size={14} /> AI
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => {
             const parentId = player.parents?.[0]?._id || player.parents?.[0]
             if (parentId) navigate(`/coach/messages/${parentId}`)
           }}>
-            <MessageSquare size={14} /> Napisz do rodzica
+            <MessageSquare size={14} /> Rodzic
           </Button>
         </div>
       </div>
+
+      {/* AI Recommendations */}
+      {aiRecs && (
+        <div className="coach-ai-section">
+          <div className="coach-ai-header">
+            <Sparkles size={14} />
+            <span>Rekomendacje AI</span>
+            <button className="coach-ai-close" onClick={() => setAiRecs(null)}>×</button>
+          </div>
+          {aiRecs.weekSummary && (
+            <div className="coach-ai-summary">{aiRecs.weekSummary}</div>
+          )}
+          <div className="coach-ai-recs">
+            {(aiRecs.recommendations || []).map((rec, i) => (
+              <div key={i} className={`coach-ai-rec coach-ai-rec-${rec.priority || 'medium'}`}>
+                <div className="coach-ai-rec-title">{rec.title}</div>
+                <div className="coach-ai-rec-desc">{rec.description}</div>
+                <div className="coach-ai-rec-meta">
+                  <span className={`coach-ai-priority ${rec.priority}`}>{rec.priority === 'high' ? 'Wysoki' : rec.priority === 'low' ? 'Niski' : 'Sredni'}</span>
+                  <span className="coach-ai-category">{rec.category}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="coach-tabs">

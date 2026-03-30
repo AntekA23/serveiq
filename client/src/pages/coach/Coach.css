@@ -191,6 +191,29 @@
 .coach-payment-mark-btn { background: none; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); color: var(--color-text-tertiary); cursor: pointer; padding: 6px; flex-shrink: 0; align-self: center; transition: all 0.15s; }
 .coach-payment-mark-btn:hover { color: var(--color-green); border-color: var(--color-green); }
 
+/* ═══ AI Recommendations ═══ */
+.coach-ai-section { background: var(--color-bg-secondary); border: 1px solid var(--color-accent-dim); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; }
+.coach-ai-header { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.coach-ai-close { background: none; border: none; color: var(--color-text-tertiary); cursor: pointer; font-size: 18px; margin-left: auto; }
+.coach-ai-summary { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px; padding: 10px; background: var(--color-bg-tertiary); border-radius: var(--radius-sm); line-height: 1.5; }
+.coach-ai-recs { display: flex; flex-direction: column; gap: 8px; }
+.coach-ai-rec { padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--color-text-tertiary); background: var(--color-bg-tertiary); }
+.coach-ai-rec-high { border-left-color: var(--color-heart); }
+.coach-ai-rec-medium { border-left-color: var(--color-amber); }
+.coach-ai-rec-low { border-left-color: var(--color-green); }
+.coach-ai-rec-title { font-size: 13px; font-weight: 700; color: var(--color-text); margin-bottom: 4px; }
+.coach-ai-rec-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
+.coach-ai-rec-meta { display: flex; gap: 8px; margin-top: 6px; }
+.coach-ai-priority { font-size: 10px; padding: 2px 8px; border-radius: var(--radius-full); font-weight: 600; }
+.coach-ai-priority.high { background: rgba(231,76,60,0.15); color: var(--color-heart); }
+.coach-ai-priority.medium { background: rgba(245,166,35,0.15); color: var(--color-amber); }
+.coach-ai-priority.low { background: var(--color-green-bg); color: var(--color-green); }
+.coach-ai-category { font-size: 10px; padding: 2px 8px; border-radius: var(--radius-full); background: var(--color-bg-secondary); color: var(--color-text-tertiary); }
+
+/* AI Generate in form */
+.coach-ai-generate { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--color-accent-muted); border: 1px dashed var(--color-accent-dim); border-radius: var(--radius-sm); margin-bottom: 16px; }
+.coach-ai-hint { font-size: 12px; color: var(--color-text-tertiary); }
+
 /* ═══ Session detail clickable ═══ */
 .coach-session-detail-clickable { cursor: pointer; border-radius: var(--radius-sm); padding: 12px 8px; margin: 0 -8px; transition: background 0.15s; }
 .coach-session-detail-clickable:hover { background: var(--color-bg-tertiary); }

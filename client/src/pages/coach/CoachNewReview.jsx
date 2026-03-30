@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Save, Send, Star, Trash2 } from 'lucide-react'
+import { ArrowLeft, Save, Send, Star, Trash2, Sparkles } from 'lucide-react'
 import api from '../../api/axios'
 import Button from '../../components/ui/Button/Button'
 import useToast from '../../hooks/useToast'
@@ -29,6 +29,7 @@ export default function CoachNewReview() {
   const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [aiGenerating, setAiGenerating] = useState(false)
 
   const today = new Date().toISOString().split('T')[0]
   const monthAgo = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString().split('T')[0]
@@ -99,6 +100,35 @@ export default function CoachNewReview() {
       }
     }
   }, [form.player, players])
+
+  const handleAiGenerate = async () => {
+    if (!form.player) {
+      toast.error('Najpierw wybierz zawodnika')
+      return
+    }
+    setAiGenerating(true)
+    try {
+      const { data } = await api.post(`/ai/review-draft/${form.player}`, {
+        periodStart: form.periodStart,
+        periodEnd: form.periodEnd,
+      })
+      const r = data.result
+      setForm((prev) => ({
+        ...prev,
+        title: r.title || prev.title,
+        strengths: r.strengths || prev.strengths,
+        areasToImprove: r.areasToImprove || prev.areasToImprove,
+        recommendations: r.recommendations || prev.recommendations,
+        notes: r.notes || prev.notes,
+        overallRating: r.overallRating || prev.overallRating,
+      }))
+      toast.success('Szkic wygenerowany przez AI')
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Nie udalo sie wygenerowac szkicu'
+      toast.error(msg)
+    }
+    setAiGenerating(false)
+  }
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -206,6 +236,16 @@ export default function CoachNewReview() {
             <input type="date" value={form.periodEnd} onChange={(e) => handleChange('periodEnd', e.target.value)} />
           </div>
         </div>
+
+        {/* AI Generate */}
+        {!isEdit && (
+          <div className="coach-ai-generate">
+            <Button size="sm" onClick={handleAiGenerate} loading={aiGenerating}>
+              <Sparkles size={14} /> Generuj z AI
+            </Button>
+            <span className="coach-ai-hint">AI wygeneruje szkic na podstawie danych zawodnika</span>
+          </div>
+        )}
 
         {/* Title */}
         <div className="coach-form-group">

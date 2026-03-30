@@ -26,6 +26,7 @@ import subscriptionRoutes from './routes/subscriptions.js';
 import notificationRoutes from './routes/notifications.js';
 import betaRoutes from './routes/beta.js';
 import reviewRoutes from './routes/reviews.js';
+import aiRoutes from './routes/ai.js';
 
 // ====== Konfiguracja ======
 
@@ -99,6 +100,7 @@ app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/beta', betaRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
