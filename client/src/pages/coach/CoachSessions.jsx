@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Plus, ChevronLeft, ChevronRight, Edit3 } from 'lucide-react'
+import { Plus, ChevronLeft, ChevronRight, Edit3, Clock, Users, Target } from 'lucide-react'
 import api from '../../api/axios'
 import Button from '../../components/ui/Button/Button'
 import './Coach.css'
@@ -99,6 +99,16 @@ export default function CoachSessions() {
           </select>
         )}
       </div>
+
+      {/* Monthly stats */}
+      {filtered.length > 0 && (
+        <div className="cs-month-stats">
+          <span><strong>{filtered.length}</strong> sesji</span>
+          <span><strong>{Math.round(filtered.reduce((s, sess) => s + (sess.durationMinutes || 0), 0) / 60)}</strong>h lacznie</span>
+          <span><strong>{new Set(filtered.map((s) => s.playerId)).size}</strong> zawodnikow</span>
+          <span><strong>{Object.keys(grouped).length}</strong> dni treningowych</span>
+        </div>
+      )}
 
       {/* Session list grouped by date */}
       <div className="coach-sessions-grouped">
