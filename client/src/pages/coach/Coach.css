@@ -14,6 +14,12 @@
 .coach-stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--color-text); letter-spacing: 1px; line-height: 1; }
 .coach-stat-label { font-size: 11px; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
+/* Alert badges */
+.coach-alerts { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+.coach-alert { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--color-accent-muted); border: 1px solid var(--color-accent-dim); border-radius: var(--radius-sm); color: var(--color-accent); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.coach-alert:hover { background: var(--color-accent-dim); }
+.coach-alert span { flex: 1; }
+
 /* Grid layout */
 .coach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 

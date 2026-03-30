@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, Calendar, TrendingUp, Plus, ChevronRight, Clock } from 'lucide-react'
+import { Users, Calendar, TrendingUp, Plus, ChevronRight, Clock, FileText, CreditCard } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -75,15 +75,28 @@ export default function CoachDashboard() {
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
 
+  const [pendingPayments, setPendingPayments] = useState(0)
+  const [draftReviews, setDraftReviews] = useState(0)
+
   useEffect(() => {
     const fetch = async () => {
       try {
-        const [playersRes, sessionsRes] = await Promise.all([
+        const [playersRes, sessionsRes, paymentsRes, reviewsRes] = await Promise.all([
           api.get('/players'),
           api.get('/sessions'),
+          api.get('/payments').catch(() => ({ data: { payments: [] } })),
+          api.get('/reviews').catch(() => ({ data: { reviews: [] } })),
         ])
         const p = playersRes.data.players || playersRes.data || []
         setPlayers(p)
+
+        // Count pending/overdue payments
+        const allPayments = paymentsRes.data.payments || []
+        setPendingPayments(allPayments.filter((py) => py.status === 'pending' || py.status === 'overdue').length)
+
+        // Count draft reviews
+        const allReviews = reviewsRes.data.reviews || []
+        setDraftReviews(allReviews.filter((r) => r.status === 'draft').length)
 
         const s = sessionsRes.data.sessions || sessionsRes.data || []
         // Enrich sessions with player names
@@ -138,6 +151,26 @@ export default function CoachDashboard() {
           ) : 0
         } color="var(--color-amber)" />
       </div>
+
+      {/* Quick action alerts */}
+      {(pendingPayments > 0 || draftReviews > 0) && (
+        <div className="coach-alerts">
+          {pendingPayments > 0 && (
+            <div className="coach-alert" onClick={() => navigate('/coach/payments')}>
+              <CreditCard size={14} />
+              <span>{pendingPayments} oczekujac{pendingPayments === 1 ? 'a' : pendingPayments < 5 ? 'e' : 'ych'} platnosc{pendingPayments === 1 ? '' : 'i'}</span>
+              <ChevronRight size={14} />
+            </div>
+          )}
+          {draftReviews > 0 && (
+            <div className="coach-alert" onClick={() => navigate('/coach/reviews')}>
+              <FileText size={14} />
+              <span>{draftReviews} szkic{draftReviews === 1 ? '' : draftReviews < 5 ? 'y' : 'ow'} ocen do opublikowania</span>
+              <ChevronRight size={14} />
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="coach-grid">
         {/* Players */}
