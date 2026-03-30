@@ -1,0 +1,341 @@
+================================================================================
+                        SERVEIQ — STAN APLIKACJI
+                        Data: 30 marca 2026
+================================================================================
+
+1. CO TO JEST SERVEIQ?
+================================================================================
+
+ServeIQ to platforma do rozwoju mlodych tenisistow, laczaca trenerow i rodzicow.
+Glowny workflow: Plan → Komunikacja → Monitoring → Ocena → Rekomendacje
+
+Komercyjny punkt wejscia: Tennis 10 / junior club (dzieci 8-16 lat).
+Architektura projektowana pod sciezke zaawansowanego zawodnika.
+
+Model biznesowy:
+  - 14-dniowy trial automatyczny
+  - Free (ograniczone funkcje)
+  - Premium: 39 PLN/mies
+  - Family: 59 PLN/mies
+
+
+2. CO APLIKACJA OFERUJE — LISTA FUNKCJI
+================================================================================
+
+AUTORYZACJA I KONTA:
+  ✅ Rejestracja (trener / rodzic)
+  ✅ Logowanie z JWT (access + refresh tokeny)
+  ✅ Odswiezanie tokenow automatyczne (axios interceptor)
+  ✅ Persystencja w localStorage (przezywa odswiezenie strony)
+  ✅ Reset hasla (email link)
+  ✅ System zaproszen (trener zaprasza rodzica)
+  ✅ Onboarding dla rodzicow (dodaj dziecko, avatar, plan treningowy)
+
+ZARZADZANIE ZAWODNIKAMI:
+  ✅ Dodawanie zawodnikow (trener lub rodzic)
+  ✅ Profil zawodnika z avatarem (upload pliku)
+  ✅ 6 umiejetnosci tenisowych (serwis, forhend, bekhend, wolej, taktyka, kondycja)
+     — kazda oceniana 0-100 z notatkami
+  ✅ Cele zawodnika (tworzenie, termin, ukonczone/aktywne)
+  ✅ Rankingi (PZT, TE, WTA, ATP)
+  ✅ Kamienie milowe w planie treningowym
+  ✅ Miesieczna stawka treningowa
+
+SESJE TRENINGOWE:
+  ✅ Tworzenie sesji (trener lub rodzic)
+  ✅ 6 typow sesji: kort, sparing, kondycja, rozciaganie, mecz, inne
+  ✅ Wybor nawierzchni: maczka, hard, trawa, dywan, hala
+  ✅ Aktualizacje umiejetnosci podczas sesji (wynik przed/po)
+  ✅ Notatki, obszary fokusa, czas trwania
+  ✅ Widocznosc dla rodzica (toggle)
+  ✅ Edycja istniejacych sesji (trener)
+  ✅ Usuwanie sesji (trener swoje, rodzic swoje)
+
+PLAN TRENINGOWY:
+  ✅ Tygodniowy harmonogram (dzien, typ, czas, godzina, notatki)
+  ✅ Automatyczne wyliczanie: sesje/tydzien, godziny/tydzien, aktywne dni
+  ✅ Kalendarz z planowanymi sesjami (ghost items)
+  ✅ Sledzenie adherence (realizacja planu)
+  ✅ Widok tygodniowy i miesieczny
+  ✅ Edycja interaktywna (drag & arrange)
+
+TURNIEJE:
+  ✅ Dodawanie turniejow (trener lub rodzic)
+  ✅ Status: planowany, w trakcie, zakonczony
+  ✅ Wyniki: runda, wygrane, przegrane, sety, rating
+  ✅ Lokalizacja, nawierzchnia, kategoria, wielkosc drabinki
+  ✅ Walidacja dat (koniec nie moze byc przed poczatkiem)
+
+OCENY I REKOMENDACJE (Reviews):
+  ✅ Trener pisze okresowe oceny (miesieczna, kwartalna, turniejowa, ogolna)
+  ✅ Strukturalna ocena: mocne strony, obszary do poprawy, rekomendacje
+  ✅ Ocena gwiazdkowa 1-5
+  ✅ Snapshot umiejetnosci w momencie oceny
+  ✅ Workflow szkic → publikacja
+  ✅ Powiadomienie dla rodzica przy publikacji
+  ✅ Widok dla rodzicow — rozwijalne karty z pelna ocena
+  ✅ Generowanie szkicu przez AI (Claude API)
+
+WIZUALIZACJA POSTEPU:
+  ✅ Radar chart profilu umiejetnosci (6 osi)
+  ✅ Wykresy liniowe zmian w czasie (per umiejetnosc)
+  ✅ Trend indicators (w gore/w dol/stabilny)
+  ✅ Historia z sesji treningowych z aktualizacjami umiejetnosci
+
+PANEL TRENERA (10 stron):
+  ✅ Dashboard — statystyki, lista zawodnikow, ostatnie sesje, alerty
+  ✅ Zawodnicy — wyszukiwanie, chipy umiejetnosci, rankingi, rodzice
+  ✅ Profil zawodnika — 4 taby (umiejetnosci, sesje, cele, oceny)
+  ✅ Sesje — widok miesieczny, filtr po zawodniku, klikalne karty
+  ✅ Nowa sesja — pelny formularz z aktualizacjami umiejetnosci
+  ✅ Edycja sesji — edycja istniejacych + usuwanie
+  ✅ Oceny — lista z filtrem, statusy, gwiazdki
+  ✅ Nowa ocena — formularz z AI generowaniem
+  ✅ Platnosci — stats dashboard, tworzenie, mark-as-paid
+  ✅ Wiadomosci — chat z rodzicami
+
+PANEL RODZICA (12+ stron):
+  ✅ Dashboard — metryki zdrowotne, recovery ring, podglad planu
+  ✅ Profil dziecka — umiejetnosci, cele, ostatnie sesje, nawigacja
+  ✅ Wykresy postepu — radar + linie
+  ✅ Oceny od trenera — rozwijalne karty
+  ✅ Historia postepu (timeline) — filtry po typie, grupowanie miesieczne
+  ✅ Plan treningowy — harmonogram, kalendarz, adherence
+  ✅ Turnieje — CRUD z wynikami
+  ✅ Platnosci — lista oczekujacych + historia
+  ✅ Urzadzenia — polaczenie WHOOP/Garmin (mock)
+  ✅ Historia zdrowia — wykresy HR, HRV, sen, regeneracja
+  ✅ Wiadomosci — chat z trenerem (real-time)
+  ✅ Ustawienia — profil, haslo, progi powiadomien
+
+KOMUNIKACJA:
+  ✅ Chat real-time (Socket.io) trener ↔ rodzic
+  ✅ Status przeczytania wiadomosci
+  ✅ Persystencja w MongoDB
+  ✅ Powiadomienia push (socket)
+
+POWIADOMIENIA:
+  ✅ Baza danych z powiadomieniami
+  ✅ Socket.io push do klienta
+  ✅ Poziomy waznosci (info, warning, critical)
+  ✅ Quiet hours (cisza nocna)
+  ✅ Sledzenie nieprzeczytanych
+  ✅ Bell icon z dropdown'em
+
+DANE ZDROWOTNE (Wearables):
+  ✅ Mock provider WHOOP + Garmin (realistyczne dane deterministyczne)
+  ✅ Metryki: tetno spoczynkowe, HRV, jakosc snu, regeneracja, obciazenie
+  ✅ Synchronizacja co 15 minut (background job)
+  ✅ Wykresy sparkline na dashboardzie
+  ✅ Historia zdrowia z trendami
+
+PLATNOSCI:
+  ✅ Model platnosci (kwota, termin, status: pending/overdue/paid)
+  ✅ Automatyczne oznaczanie przeterminowanych
+  ✅ Trener: tworzenie faktur, statystyki, mark-as-paid
+  ✅ Rodzic: lista oczekujacych i historia
+  ✅ Stripe checkout (szkielet — wymaga klucza API)
+
+SUBSKRYPCJE:
+  ✅ 14-dniowy trial automatyczny
+  ✅ 3 plany: free / premium 39 PLN / family 59 PLN
+  ✅ Paywall gating (middleware)
+  ✅ Stripe portal/checkout (szkielet)
+
+AI COACHING ASSISTANT:
+  ✅ Integracja z Claude API (@anthropic-ai/sdk)
+  ✅ Generowanie rekomendacji treningowych (4 priorytetyzowane)
+  ✅ Automatyczne generowanie szkicu oceny okresowej
+  ✅ Agregacja kontekstu: sesje, umiejetnosci, zdrowie, turnieje, cele
+  ✅ Graceful degradation bez klucza API (503)
+  ✅ Przycisk "AI" w profilu zawodnika
+  ✅ Przycisk "Generuj z AI" w formularzu oceny
+
+BACKGROUND JOBS:
+  ✅ Synchronizacja wearables (co 15 min)
+  ✅ Ewaluacja alertow zdrowotnych (co 30 min)
+  ✅ Sprawdzanie wygasniecia trialu (co 24h)
+  ✅ Tygodniowe podsumowania email
+  ✅ Alert engine z progami konfigurowalnymi
+
+LANDING PAGE:
+  ✅ Strona marketingowa z animacjami scroll
+  ✅ Sekcje: features, pricing, FAQ
+  ✅ Beta signup (zapis do bazy)
+  ✅ Responsywna
+
+INNE:
+  ✅ Strony prawne (regulamin, polityka prywatnosci)
+  ✅ Seed script z danymi demo
+  ✅ Health check endpoint
+
+
+3. STACK TECHNOLOGICZNY
+================================================================================
+
+BACKEND:
+  Framework:      Express.js 4.21
+  Runtime:        Node.js
+  Baza danych:    MongoDB + Mongoose 8.9
+  Autoryzacja:    JWT (access + refresh) + bcryptjs + httpOnly cookies
+  Real-time:      Socket.io 4.8
+  Walidacja:      Zod 3.24
+  Upload plikow:  Multer
+  Platnosci:      Stripe 17.4 (szkielet)
+  Email:          Resend 4.0 (szkielet, loguje do konsoli w dev)
+  AI:             @anthropic-ai/sdk 0.80 (Claude API)
+  Bezpieczenstwo: Helmet, CORS, rate limiting
+  Zmienne srod.:  dotenv
+
+FRONTEND:
+  Framework:      React 18.2 + Vite 5.4
+  Routing:        React Router 6.21
+  State:          Zustand 4.4
+  HTTP:           Axios 1.6 (z interceptorami dla token refresh)
+  Formularze:     React Hook Form 7.49 + Zod resolver
+  Ikony:          Lucide React 0.303
+  WebSocket:      socket.io-client 4.7
+  Wykresy:        SVG (custom, bez bibliotek)
+
+DEPLOYMENT:
+  Target:         Railway
+  Konfiguracja:   railway.json
+
+JEZYK UI:         Polski (wszystkie teksty w interfejsie)
+
+
+4. METRYKI KODU
+================================================================================
+
+  Pliki JSX (frontend):         ~79
+  Pliki CSS (frontend):         ~25
+  Linie kodu frontend:          ~20,400
+  Linie kodu backend:           ~9,200
+  LACZNIE:                      ~29,600 linii kodu
+
+  Modele bazy danych:           11
+  Kontrolery API:               13
+  Prefixow API:                 12
+  Serwisy backend:              7
+  Background jobs:              5
+  Routy klienckie:              34
+  Komponenty UI:                17
+  Strony (page components):     ~60
+  Zustand stores:               2
+
+
+5. GDZIE STOIMY Z ROZWOJEM
+================================================================================
+
+ZREALIZOWANE (gotowe, dzialajace end-to-end):
+  ✅ Identyfikacja, role, profile (player/parent/coach)
+  ✅ Panel trenera — pelny (10 stron)
+  ✅ Panel rodzica — pelny (12+ stron)
+  ✅ Sesje treningowe — CRUD z edycja i skill updates
+  ✅ Plan treningowy — interaktywny builder + kalendarz + adherence
+  ✅ Turnieje — CRUD z wynikami
+  ✅ Oceny i rekomendacje — draft/publish + AI generowanie
+  ✅ Wizualizacja postepu — radar chart + wykresy liniowe
+  ✅ Platnosci — trener (CRUD, stats, mark-paid) + rodzic (lista, Stripe)
+  ✅ Chat real-time — Socket.io + MongoDB
+  ✅ Powiadomienia — DB + socket push
+  ✅ Dane zdrowotne — mock WHOOP/Garmin + wykresy
+  ✅ Subskrypcje/trial — paywall middleware
+  ✅ Landing page — marketing + beta signup
+  ✅ AI Coaching Assistant — rekomendacje + auto-oceny
+  ✅ Seed data demo — 2 uzytkownicy, 3 zawodnikow, sesje, turnieje, oceny
+  ✅ Mobile responsive (podstawowy)
+
+SZKIELET GOTOWY (wymaga kluczy API):
+  ⚙️ Stripe checkout + webhooks (potrzebuje STRIPE_SECRET_KEY)
+  ⚙️ Resend email (potrzebuje RESEND_API_KEY)
+  ⚙️ WHOOP/Garmin OAuth (mock dziala, prawdziwe wymaga developer credentials)
+  ⚙️ Claude AI (potrzebuje CLAUDE_API_KEY / ANTHROPIC_API_KEY)
+
+DO ZROBIENIA (nastepne kroki):
+  ❌ Export PDF ocen
+  ❌ Push notifications (Firebase/OneSignal)
+  ❌ Widok klubu/grupy dla trenerow
+  ❌ E2E testing
+  ❌ Deep mobile polish (360px breakpoint)
+  ❌ Prawdziwe integracje wearable (WHOOP/Garmin OAuth)
+
+NIE W SCOPE MVP (swiadomie odlozone):
+  ❌ Pelny silnik rezerwacji
+  ❌ Marketplace transakcji
+  ❌ Deep analytics / AI predykcje
+  ❌ Social publishing
+  ❌ Raportowanie do federacji
+  ❌ Modul sponsorow
+  ❌ Zlozony chat (grupowy, kanaly)
+
+
+6. DANE DEMO / SEED
+================================================================================
+
+Po uruchomieniu `npm run seed`:
+  - Trener: coach@serveiq.pl / password123
+  - Rodzic: parent@serveiq.pl / password123
+  - 3 zawodnikow: Kacper Nowak (14 lat), Julia Kowalska (14 lat), Antoni Wisniewski (13 lat)
+  - Kacper ma plan treningowy (7 sesji/tydzien)
+  - 8 sesji treningowych z aktualizacjami umiejetnosci
+  - 2 turnieje (zaplanowany + wynik)
+  - 2 oceny (miesieczna + kwartalna)
+  - 5 wiadomosci trener ↔ rodzic
+  - 2 platnosci (oplacona + oczekujaca)
+  - Dane zdrowotne (mock WHOOP)
+
+
+7. JAK URUCHOMIC
+================================================================================
+
+  1. npm run install:all
+  2. Stworz .env (wzor: .env.example)
+     — minimum: MONGO_URL, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET
+     — opcjonalnie: CLAUDE_API_KEY, STRIPE_SECRET_KEY, RESEND_API_KEY
+  3. npm run seed            (dane demo)
+  4. npm run dev             (serwer + klient)
+  5. Trener: http://localhost:5173 → coach@serveiq.pl / password123
+  6. Rodzic: http://localhost:5173 → parent@serveiq.pl / password123
+
+
+8. ARCHITEKTURA PLIKOW
+================================================================================
+
+serveiq/
+├── server/
+│   └── src/
+│       ├── controllers/     (13 kontrolerow)
+│       ├── models/          (11 modeli Mongoose)
+│       ├── routes/          (12 plikow routingu)
+│       ├── middleware/      (auth, subscription, errorHandler, rateLimiter)
+│       ├── services/        (7 serwisow: alert, email, stripe, AI, wearable...)
+│       ├── jobs/            (5 background jobs)
+│       ├── socket/          (chatHandler.js)
+│       └── scripts/         (seed.js)
+│
+├── client/
+│   └── src/
+│       ├── pages/
+│       │   ├── auth/        (5 stron: login, register, forgot, reset, invite)
+│       │   ├── coach/       (10 stron panelu trenera)
+│       │   ├── parent/      (12+ stron panelu rodzica)
+│       │   └── legal/       (2 strony prawne)
+│       ├── components/
+│       │   ├── layout/      (AppShell, Sidebar, Topbar, NotificationBell)
+│       │   ├── ui/          (Button, Input, Modal, Avatar, Toast, ProgressBar)
+│       │   └── shared/      (PaymentCard, PlayerCard, PaywallGate)
+│       ├── store/           (authStore, uiStore — Zustand)
+│       ├── api/             (axios.js z interceptorami)
+│       ├── hooks/           (useAuth, useToast)
+│       └── styles/          (tokens.css, global.css)
+│
+├── CLAUDE.md               (instrukcje dla AI lead engineer)
+├── SPRINT_STATUS.md         (status sprintu)
+├── .env.example             (wzor zmiennych srodowiskowych)
+└── railway.json             (konfiguracja deployment)
+
+
+================================================================================
+                    Koniec dokumentu — ServeIQ v1.0 MVP
+================================================================================
