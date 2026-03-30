@@ -10,7 +10,7 @@ export default function useToast() {
   )
 
   const error = useCallback(
-    (msg) => addToast(msg, 'error'),
+    (msg) => addToast(msg, 'error', 5000),
     [addToast]
   )
 

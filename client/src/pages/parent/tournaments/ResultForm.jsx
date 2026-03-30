@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { Save, X, Plus, Minus } from 'lucide-react'
 import api from '../../../api/axios'
 import Button from '../../../components/ui/Button/Button'
+import useToast from '../../../hooks/useToast'
 import { ROUNDS } from './constants'
 
 export default function ResultForm({ tournament, onSaved, onCancel }) {
+  const toast = useToast()
   const r = tournament.result || {}
   const [round, setRound] = useState(r.round || '')
   const [wins, setWins] = useState(r.wins ?? 0)
@@ -28,7 +30,9 @@ export default function ResultForm({ tournament, onSaved, onCancel }) {
         notes: notes || undefined,
       })
       onSaved()
-    } catch { /* silent */ }
+    } catch {
+      toast.error('Nie udalo sie zapisac wyniku')
+    }
     setSaving(false)
   }
 

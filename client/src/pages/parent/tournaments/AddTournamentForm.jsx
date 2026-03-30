@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { Save, X } from 'lucide-react'
 import api from '../../../api/axios'
 import Button from '../../../components/ui/Button/Button'
+import useToast from '../../../hooks/useToast'
 import { SURFACES, CATEGORIES, DRAW_SIZES } from './constants'
 
 export default function AddTournamentForm({ childId, onSaved, onCancel, initial }) {
+  const toast = useToast()
   const [name, setName] = useState(initial?.name || '')
   const [location, setLocation] = useState(initial?.location || '')
   const [surface, setSurface] = useState(initial?.surface || 'clay')
@@ -16,7 +18,14 @@ export default function AddTournamentForm({ childId, onSaved, onCancel, initial 
   const [saving, setSaving] = useState(false)
 
   const handleSave = async () => {
-    if (!name.trim() || !startDate) return
+    if (!name.trim() || !startDate) {
+      toast.error('Podaj nazwe i date turnieju')
+      return
+    }
+    if (endDate && startDate > endDate) {
+      toast.error('Data zakonczenia nie moze byc przed data rozpoczecia')
+      return
+    }
     setSaving(true)
     try {
       const payload = {
@@ -31,7 +40,9 @@ export default function AddTournamentForm({ childId, onSaved, onCancel, initial 
         await api.post('/tournaments', { ...payload, player: childId })
       }
       onSaved()
-    } catch { /* silent */ }
+    } catch {
+      toast.error('Nie udalo sie zapisac turnieju')
+    }
     setSaving(false)
   }
 

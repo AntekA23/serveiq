@@ -109,6 +109,17 @@ export default function CoachPlayerProfile() {
     } catch { /* silent */ }
   }
 
+  const handleToggleGoal = async (goalId, completed) => {
+    try {
+      await api.put(`/players/${id}/goals/${goalId}`, {
+        completed: !completed,
+        completedAt: !completed ? new Date().toISOString() : null,
+      })
+      const { data } = await api.get(`/players/${id}`)
+      setPlayer(data.player || data)
+    } catch { /* silent */ }
+  }
+
   if (loading) {
     return <div className="coach-page"><div className="coach-loading">Ladowanie...</div></div>
   }
@@ -196,7 +207,7 @@ export default function CoachPlayerProfile() {
             sessions.slice(0, 20).map((s) => {
               const d = new Date(s.date)
               return (
-                <div key={s._id} className="coach-session-detail">
+                <div key={s._id} className="coach-session-detail coach-session-detail-clickable" onClick={() => navigate(`/coach/sessions/${s._id}/edit`)}>
                   <div className="coach-session-date">
                     {d.getDate()}.{String(d.getMonth() + 1).padStart(2, '0')}.{d.getFullYear()}
                   </div>
@@ -232,7 +243,7 @@ export default function CoachPlayerProfile() {
             <div className="coach-empty">Brak celow</div>
           ) : (
             goals.map((g) => (
-              <div key={g._id} className={`coach-goal ${g.completed ? 'completed' : ''}`}>
+              <div key={g._id} className={`coach-goal ${g.completed ? 'completed' : ''}`} onClick={() => handleToggleGoal(g._id, g.completed)} style={{ cursor: 'pointer' }}>
                 <span className="coach-goal-text">{g.text}</span>
                 {g.dueDate && (
                   <span className="coach-goal-date">
