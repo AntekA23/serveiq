@@ -1,80 +1,108 @@
 # Sprint — 2026-03-30
 
 ## Sprint Goal
-Rebuild Training Plan + enable Coach Panel + polish parent UX
+Complete Coach Panel features + Reviews & Recommendations + Progress Visualization + Bug fixes
 
 ## All Tasks Completed
 
-### 1. Training Plan Rebuild (user request)
-- [x] Backend: `weeklySchedule` in Player model (planned sessions per day: type, duration, time, notes)
-- [x] Backend: API auto-derives `scheduledDays` + `weeklyGoal` from schedule
-- [x] Frontend: PlanTab rebuilt as interactive weekly schedule builder
-- [x] Frontend: Overview banner (total sessions, hours, active days, save state)
-- [x] Frontend: CalendarTab shows planned sessions as ghost items (dashed border + "plan" badge)
-- [x] Frontend: WeeklySummary shows adherence tracking (actual/planned, per-type breakdown)
-- [x] Frontend: WeekList shows "X/Y z planu" + ghost planned entries for empty days
-- [x] Frontend: MonthGrid shows planned sessions in day detail view
-- [x] Seed: Kacper has 7-session weekly schedule + milestones + focus areas
+### 1. Training Plan Rebuild (previous sprint)
+- [x] Backend: `weeklySchedule` in Player model
+- [x] Frontend: PlanTab, CalendarTab, WeeklySummary, WeekList, MonthGrid
+- [x] Seed: Kacper has 7-session weekly schedule
 
-### 2. Coach Panel (6 new pages)
-- [x] **CoachDashboard** — 4 stat cards, player list with skill bars, recent sessions
-- [x] **CoachPlayers** — search, skill chips, rankings, parent info
-- [x] **CoachPlayerProfile** — 3 tabs (skills with slider editing, session history, goals)
-- [x] **CoachSessions** — month nav, player filter, grouped by date
-- [x] **CoachNewSession** — full form with skill updates + visibility toggle
-- [x] **CoachNewPlayer** — name, DOB, gender, rate, parent invite email
-- [x] **Sidebar** — role-based nav (coach: Dashboard, Players, Sessions, Messages, Settings)
-- [x] **Routing** — 9 coach routes, CoachDisabled removed
-- [x] **Coach.css** — complete responsive stylesheet
+### 2. Coach Panel (previous sprint + enhancements)
+- [x] **CoachDashboard** — stats, player list, recent sessions, payment/review alerts
+- [x] **CoachPlayers** — search, skill chips, rankings
+- [x] **CoachPlayerProfile** — 4 tabs (skills, sessions, goals with toggle, reviews)
+- [x] **CoachSessions** — month nav, player filter, clickable cards for editing
+- [x] **CoachNewSession** — full form with skill updates
+- [x] **CoachEditSession** — edit existing sessions with delete
+- [x] **CoachNewPlayer** — name, DOB, gender, rate, parent invite
+- [x] **Sidebar** — role-based nav with 7 coach items
 
-### 3. Parent UX Polish
-- [x] Dashboard PlanPreview shows weekly schedule breakdown (days + types)
-- [x] ChildProfile shows "Recent Sessions" section (last 5 with type, date, time, coach badge)
-- [x] Timeline enhanced: shows training sessions + filters by type + grouped by month
-- [x] Timeline backend: returns session events alongside skill updates
-- [x] Seed: richer data (session types/surfaces/times, coach-parent messages, 2 tournaments, onboarding complete)
+### 3. Reviews & Recommendations (NEW)
+- [x] **Review model** — player, coach, period, type, structured assessment, skill snapshot, overall rating, draft/published status
+- [x] **Review controller** — CRUD with parent notification on publish
+- [x] **Review routes** — GET/POST/PUT/DELETE with role-based access
+- [x] **CoachReviews** — list page with player filter, status badges, star ratings
+- [x] **CoachNewReview** — create/edit form with structured fields (strengths, areas to improve, recommendations), star rating, skill snapshot, draft/publish workflow, player query param support
+- [x] **Parent Reviews** — expandable review cards with full assessment details and skill charts
+- [x] **Reviews tab** in CoachPlayerProfile with quick "Ocena" action button
+- [x] **Navigation** — links from ChildProfile, coach sidebar, player profile
+- [x] **Seed data** — 2 reviews (monthly + quarterly) with skill snapshots
+
+### 4. Progress Visualization (NEW)
+- [x] **Skill history API** — `/api/players/:id/skill-history` endpoint
+- [x] **SkillProgress page** — radar chart for current skills + per-skill line charts
+- [x] **SVG charts** — gradient area fills, data points, date labels, trend indicators
+- [x] **Navigation** — "Wykresy postepu" link from ChildProfile
+- [x] **Seed data** — sessions with skillUpdates for chart demo data
+
+### 5. Coach Payments/Invoicing (NEW)
+- [x] **CoachPayments** — full page with stats dashboard (paid/pending/overdue)
+- [x] **Payment creation form** — auto-fill from player monthly rate, parent auto-select
+- [x] **Status filter** — all/pending/overdue/paid
+- [x] **Payment cards** — status icons, amounts, player/parent names, dates
+- [x] **Navigation** — sidebar "Platnosci" item
+
+### 6. Session Editing (NEW)
+- [x] **CoachEditSession** — full edit form reusing session form patterns
+- [x] **Session update schema** — added startTime, sessionType, surface fields
+- [x] **Clickable session cards** in CoachSessions and CoachPlayerProfile
+- [x] **Delete confirmation** with toast feedback
+
+### 7. Bug Fixes & UX Improvements
+- [x] Tournament forms: added toast error notifications (previously silent)
+- [x] Tournament form: date range validation (end >= start)
+- [x] Error toast duration increased to 5s for better visibility
+- [x] Goal completion toggle in CoachPlayerProfile
+- [x] Mobile responsive improvements for ChildProfile nav links
+- [x] Clickable session details with hover states
+
+### 8. Dashboard Enhancements
+- [x] Coach dashboard: pending payments count with link
+- [x] Coach dashboard: draft reviews count with link
+- [x] Alert badges with accent styling
 
 ## Quality Gates
-- [x] `vite build` — 0 errors (3.8s)
-- [x] Server modules parse correctly
+- [x] `vite build` — 0 errors
+- [x] Server modules parse correctly (all new controllers, models, routes)
 - [x] No broken imports
 - [x] Existing conventions followed (Polish UI, camelCase, Bebas Neue headings)
 - [x] Responsive CSS for all new components
 
 ## Files Changed
 
-### New (7 files):
-- `client/src/pages/coach/CoachDashboard.jsx`
-- `client/src/pages/coach/CoachPlayers.jsx`
-- `client/src/pages/coach/CoachPlayerProfile.jsx`
-- `client/src/pages/coach/CoachSessions.jsx`
-- `client/src/pages/coach/CoachNewSession.jsx`
-- `client/src/pages/coach/CoachNewPlayer.jsx`
-- `client/src/pages/coach/Coach.css`
+### New (14 files):
+- `client/src/pages/coach/CoachEditSession.jsx`
+- `client/src/pages/coach/CoachReviews.jsx`
+- `client/src/pages/coach/CoachNewReview.jsx`
+- `client/src/pages/coach/CoachPayments.jsx`
+- `client/src/pages/parent/Reviews.jsx`
+- `client/src/pages/parent/Reviews.css`
+- `client/src/pages/parent/SkillProgress.jsx`
+- `client/src/pages/parent/SkillProgress.css`
+- `server/src/models/Review.js`
+- `server/src/controllers/reviewController.js`
+- `server/src/routes/reviews.js`
 
-### Modified (16 files):
-- `server/src/models/Player.js` — weeklySchedule schema
-- `server/src/controllers/playerController.js` — weeklySchedule CRUD + auto-derive
-- `server/src/controllers/healthController.js` — timeline includes sessions
-- `server/src/scripts/seed.js` — rich demo data
-- `client/src/App.jsx` — coach routes
-- `client/src/components/layout/Sidebar/Sidebar.jsx` — role-based nav
-- `client/src/pages/parent/training-plan/PlanTab.jsx` — rebuilt
-- `client/src/pages/parent/training-plan/CalendarTab.jsx` — planned sessions
-- `client/src/pages/parent/training-plan/WeekList.jsx` — ghost items + adherence
-- `client/src/pages/parent/training-plan/WeeklySummary.jsx` — adherence tracking
-- `client/src/pages/parent/training-plan/MonthGrid.jsx` — planned in detail view
-- `client/src/pages/parent/TrainingPlan.css` — schedule builder styles
-- `client/src/pages/parent/Dashboard.jsx` — schedule preview
-- `client/src/pages/parent/Dashboard.css` — schedule styles
-- `client/src/pages/parent/ChildProfile.jsx` — recent sessions
-- `client/src/pages/parent/ChildProfile.css` — session row styles
-- `client/src/pages/parent/Timeline.jsx` — rebuilt with filters + grouping
-- `client/src/pages/parent/Timeline.css` — filter + group styles
-
-### Config (2 files):
-- `CLAUDE.md` — created
-- `SPRINT_STATUS.md` — created
+### Modified (12 files):
+- `server/src/index.js` — review routes registration
+- `server/src/controllers/sessionController.js` — expanded update schema
+- `server/src/controllers/playerController.js` — skill-history endpoint
+- `server/src/routes/players.js` — skill-history route
+- `server/src/scripts/seed.js` — reviews + session skillUpdates seed data
+- `client/src/App.jsx` — 8 new routes
+- `client/src/components/layout/Sidebar/Sidebar.jsx` — 3 new coach nav items
+- `client/src/pages/coach/Coach.css` — payments, reviews, alerts, clickable styles
+- `client/src/pages/coach/CoachSessions.jsx` — clickable session cards
+- `client/src/pages/coach/CoachPlayerProfile.jsx` — reviews tab, goal toggle, session click
+- `client/src/pages/coach/CoachDashboard.jsx` — payment/review alerts
+- `client/src/pages/parent/ChildProfile.jsx` — progress + reviews nav links
+- `client/src/pages/parent/ChildProfile.css` — mobile responsive fixes
+- `client/src/pages/parent/tournaments/AddTournamentForm.jsx` — error handling
+- `client/src/pages/parent/tournaments/ResultForm.jsx` — error handling
+- `client/src/hooks/useToast.js` — error duration 5s
 
 ## Setup Steps
 1. `npm run install:all`
@@ -85,9 +113,10 @@ Rebuild Training Plan + enable Coach Panel + polish parent UX
 6. Parent: parent@serveiq.pl / password123
 
 ## Suggested Next Sprint
-1. Coach session editing
-2. Coach payments/invoicing UI
-3. Reviews & recommendations (coach → parent)
-4. Progress visualization (skill charts over time)
-5. Mobile responsive polish
-6. E2E testing
+1. Coach session creation from calendar (click on date)
+2. PDF export of reviews
+3. Mobile responsive deep polish (360px breakpoint)
+4. E2E testing
+5. Push notifications (Firebase/OneSignal)
+6. AI coaching assistant integration
+7. Club/group view for coaches
