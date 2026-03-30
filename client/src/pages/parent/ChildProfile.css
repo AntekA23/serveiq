@@ -346,6 +346,19 @@
   margin-top: 2px;
 }
 
+/* ─── Recent Sessions ─── */
+.child-profile-sessions { display: flex; flex-direction: column; gap: 2px; }
+.child-session-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); }
+.child-session-dot { width: 4px; border-radius: 2px; min-height: 20px; align-self: stretch; flex-shrink: 0; }
+.child-session-body { flex: 1; min-width: 0; }
+.child-session-top { display: flex; align-items: center; gap: 8px; font-size: 12px; flex-wrap: wrap; }
+.child-session-type { font-weight: 700; }
+.child-session-date { color: var(--color-text-secondary); }
+.child-session-time { color: var(--color-text-tertiary); }
+.child-session-dur { color: var(--color-text-tertiary); }
+.child-session-badge { font-size: 10px; padding: 1px 6px; border-radius: var(--radius-full); background: var(--color-accent-muted); color: var(--color-accent); font-weight: 600; }
+.child-session-notes { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   .child-profile-hero {

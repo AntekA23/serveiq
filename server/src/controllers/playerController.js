@@ -108,12 +108,22 @@ const createPlayerSelfSchema = z.object({
   gender: z.enum(['M', 'F'], { message: 'Płeć musi być "M" lub "F"' }).optional(),
 });
 
+const plannedSessionItemSchema = z.object({
+  _id: z.string().optional(),
+  day: z.number().min(1).max(7),
+  sessionType: z.enum(['kort', 'sparing', 'kondycja', 'rozciaganie', 'mecz', 'inne']),
+  durationMinutes: z.number().min(15).max(300),
+  startTime: z.string().optional(),
+  notes: z.string().optional(),
+});
+
 const updateTrainingPlanSchema = z.object({
   weeklyGoal: z.object({
     sessionsPerWeek: z.number().min(0).max(14).optional(),
     hoursPerWeek: z.number().min(0).max(40).optional(),
   }).optional(),
   scheduledDays: z.array(z.number().min(1).max(7)).optional(),
+  weeklySchedule: z.array(plannedSessionItemSchema).optional(),
   focus: z.array(z.string()).optional(),
   notes: z.string().optional().nullable(),
 });
@@ -531,14 +541,26 @@ export const updateTrainingPlan = async (req, res, next) => {
 
     if (!player.trainingPlan) player.trainingPlan = {};
 
-    if (data.weeklyGoal) {
+    if (data.weeklySchedule !== undefined) {
+      player.trainingPlan.weeklySchedule = data.weeklySchedule;
+      // Auto-derive scheduledDays and weeklyGoal from schedule
+      const days = [...new Set(data.weeklySchedule.map((s) => s.day))].sort();
+      player.trainingPlan.scheduledDays = days;
+      const totalMins = data.weeklySchedule.reduce((sum, s) => sum + s.durationMinutes, 0);
+      player.trainingPlan.weeklyGoal = {
+        sessionsPerWeek: data.weeklySchedule.length,
+        hoursPerWeek: Math.round((totalMins / 60) * 10) / 10,
+      };
+    }
+    if (data.weeklyGoal && !data.weeklySchedule) {
       if (!player.trainingPlan.weeklyGoal) player.trainingPlan.weeklyGoal = {};
       if (data.weeklyGoal.sessionsPerWeek !== undefined)
         player.trainingPlan.weeklyGoal.sessionsPerWeek = data.weeklyGoal.sessionsPerWeek;
       if (data.weeklyGoal.hoursPerWeek !== undefined)
         player.trainingPlan.weeklyGoal.hoursPerWeek = data.weeklyGoal.hoursPerWeek;
     }
-    if (data.scheduledDays !== undefined) player.trainingPlan.scheduledDays = data.scheduledDays;
+    if (data.scheduledDays !== undefined && !data.weeklySchedule)
+      player.trainingPlan.scheduledDays = data.scheduledDays;
     if (data.focus !== undefined) player.trainingPlan.focus = data.focus;
     if (data.notes !== undefined) player.trainingPlan.notes = data.notes;
 

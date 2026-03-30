@@ -484,6 +484,13 @@
   color: var(--color-text-tertiary);
 }
 
+/* Schedule preview in plan card */
+.plan-schedule-preview { margin-top: 4px; }
+.plan-schedule-days { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.plan-schedule-day { display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: var(--color-bg-tertiary); border-radius: var(--radius-sm); font-size: 11px; }
+.plan-schedule-day-name { font-weight: 700; color: var(--color-text-secondary); min-width: 24px; }
+.plan-schedule-type { color: var(--color-accent); font-weight: 600; }
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   .metrics-grid {

@@ -43,6 +43,31 @@ const milestoneSchema = new mongoose.Schema(
   { _id: true }
 );
 
+const plannedSessionSchema = new mongoose.Schema(
+  {
+    day: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 7,
+    },
+    sessionType: {
+      type: String,
+      enum: ['kort', 'sparing', 'kondycja', 'rozciaganie', 'mecz', 'inne'],
+      required: true,
+    },
+    durationMinutes: {
+      type: Number,
+      required: true,
+      min: 15,
+      max: 300,
+    },
+    startTime: String,
+    notes: String,
+  },
+  { _id: true }
+);
+
 const playerSchema = new mongoose.Schema(
   {
     firstName: {
@@ -93,11 +118,15 @@ const playerSchema = new mongoose.Schema(
     goals: [goalSchema],
     trainingPlan: {
       weeklyGoal: {
-        sessionsPerWeek: { type: Number, default: 5 },
-        hoursPerWeek: { type: Number, default: 8 },
+        sessionsPerWeek: { type: Number, default: 0 },
+        hoursPerWeek: { type: Number, default: 0 },
       },
       scheduledDays: {
         type: [Number],
+        default: [],
+      },
+      weeklySchedule: {
+        type: [plannedSessionSchema],
         default: [],
       },
       focus: [String],

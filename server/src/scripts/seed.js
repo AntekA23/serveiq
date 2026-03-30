@@ -65,6 +65,7 @@ const seed = async () => {
       lastName: 'Nowak',
       phone: '+48 601 200 300',
       isActive: true,
+      onboardingCompleted: true,
     });
 
     console.log(`  Trener: ${coach.email} (hasło: password123)`);
@@ -126,12 +127,35 @@ const seed = async () => {
     // Połącz rodzica z Kacprem
     const kacper = players[0];
     kacper.parents.push(parent._id);
+
+    // Dodaj plan treningowy z harmonogramem tygodniowym
+    kacper.trainingPlan = {
+      weeklySchedule: [
+        { day: 1, sessionType: 'kort', durationMinutes: 90, startTime: '16:00', notes: 'Praca nad serwisem' },
+        { day: 1, sessionType: 'kondycja', durationMinutes: 45, startTime: '18:00', notes: '' },
+        { day: 2, sessionType: 'rozciaganie', durationMinutes: 30, startTime: '07:00', notes: 'Poranne rozciaganie' },
+        { day: 3, sessionType: 'kort', durationMinutes: 90, startTime: '16:00', notes: 'Gra z bazy' },
+        { day: 3, sessionType: 'kondycja', durationMinutes: 45, startTime: '18:00', notes: '' },
+        { day: 5, sessionType: 'sparing', durationMinutes: 120, startTime: '15:00', notes: 'Sparing z Julka' },
+        { day: 6, sessionType: 'kort', durationMinutes: 60, startTime: '10:00', notes: 'Trening techniczny' },
+      ],
+      scheduledDays: [1, 2, 3, 5, 6],
+      weeklyGoal: { sessionsPerWeek: 7, hoursPerWeek: 8 },
+      focus: ['Serwis', 'Forhend', 'Kondycja'],
+      notes: 'Kacper przygotowuje sie do turnieju w maju. Fokus na serwis i gre z bazy.',
+      milestones: [
+        { text: 'Serwis plaski > 100 km/h', date: new Date('2026-05-01') },
+        { text: 'Turniej regionalny - cwiecfinal', date: new Date('2026-05-15') },
+        { text: 'Poprawa footworku na backhandzie', completed: true, completedAt: new Date('2026-03-20') },
+      ],
+    };
     await kacper.save();
 
     parent.parentProfile = { children: [kacper._id] };
     await parent.save();
 
-    console.log(`\n  Rodzic Anna Nowak powiązany z zawodnikiem Kacper Nowak\n`);
+    console.log(`\n  Rodzic Anna Nowak powiązany z zawodnikiem Kacper Nowak`);
+    console.log(`  Plan treningowy z harmonogramem tygodniowym dodany dla Kacpra\n`);
 
     // ====== Tworzenie sesji treningowych ======
 
@@ -142,6 +166,9 @@ const seed = async () => {
       {
         player: kacper._id,
         title: 'Trening serwisu',
+        sessionType: 'kort',
+        surface: 'clay',
+        startTime: '16:00',
         daysAgo: 2,
         durationMinutes: 90,
         notes: 'Praca nad płaskim serwisem. Kacper robi postępy w tossie.',
@@ -150,14 +177,30 @@ const seed = async () => {
       {
         player: kacper._id,
         title: 'Gra z bazy',
+        sessionType: 'kort',
+        surface: 'clay',
+        startTime: '16:00',
         daysAgo: 5,
         durationMinutes: 60,
         notes: 'Ćwiczenie forehandu cross-court. Trzeba popracować nad footworkiem.',
         focusAreas: ['forehand', 'footwork'],
       },
       {
+        player: kacper._id,
+        title: 'Trening kondycyjny',
+        sessionType: 'kondycja',
+        startTime: '18:00',
+        daysAgo: 2,
+        durationMinutes: 45,
+        notes: 'Szybkość i koordynacja. Drabinka, skakanki, sprint.',
+        focusAreas: ['fitness', 'szybkosc'],
+      },
+      {
         player: players[1]._id,
         title: 'Trening na siatce',
+        sessionType: 'kort',
+        surface: 'hard',
+        startTime: '14:00',
         daysAgo: 3,
         durationMinutes: 90,
         notes: 'Julia świetnie radzi sobie z wolej forehandowy. Backhand volley wymaga korekty.',
@@ -166,6 +209,9 @@ const seed = async () => {
       {
         player: players[1]._id,
         title: 'Przygotowanie turniejowe',
+        sessionType: 'sparing',
+        surface: 'clay',
+        startTime: '15:00',
         daysAgo: 7,
         durationMinutes: 120,
         notes: 'Symulacja meczowa. Julia powinna grać bardziej agresywnie na returnach.',
@@ -174,6 +220,8 @@ const seed = async () => {
       {
         player: players[2]._id,
         title: 'Trening ogólnorozwojowy',
+        sessionType: 'kondycja',
+        startTime: '09:00',
         daysAgo: 1,
         durationMinutes: 60,
         notes: 'Praca nad koordynacją i szybkością. Antoni robi duże postępy w fitness.',
@@ -188,7 +236,12 @@ const seed = async () => {
       await Session.create({
         player: sData.player,
         coach: coach._id,
+        createdBy: coach._id,
+        source: 'coach',
         date: sessionDate,
+        sessionType: sData.sessionType || 'kort',
+        surface: sData.surface || '',
+        startTime: sData.startTime || '',
         durationMinutes: sData.durationMinutes,
         title: sData.title,
         notes: sData.notes,
@@ -242,6 +295,8 @@ const seed = async () => {
     const tournament = await Tournament.create({
       player: players[1]._id,
       coach: coach._id,
+      createdBy: coach._id,
+      source: 'coach',
       name: 'Ogólnopolski Turniej Młodzieżowy - Kraków',
       location: 'Kraków, KS Olsza',
       surface: 'clay',
@@ -256,7 +311,52 @@ const seed = async () => {
       },
       notes: 'Julia doszła do ćwierćfinału. Przegrała z 3. rozstawioną zawodniczką.',
     });
-    console.log(`  ${tournament.name}\n`);
+    console.log(`  ${tournament.name}`);
+
+    const tournament2 = await Tournament.create({
+      player: kacper._id,
+      coach: coach._id,
+      createdBy: parent._id,
+      source: 'parent',
+      name: 'Turniej Tennis 10 — Warszawa',
+      location: 'Warszawa, KT Smecz',
+      surface: 'clay',
+      startDate: new Date('2026-04-25'),
+      endDate: new Date('2026-04-26'),
+      category: 'Tennis 10 Red',
+      drawSize: 16,
+      status: 'planned',
+      notes: 'Pierwszy turniej Kacpra w tym sezonie.',
+    });
+    console.log(`  ${tournament2.name}\n`);
+
+    // ====== Tworzenie wiadomosci ======
+
+    console.log('Tworzenie wiadomosci...');
+
+    const messagesData = [
+      { from: coach._id, to: parent._id, text: 'Witam! Kacper robi swietne postepy na treningach.', daysAgo: 3 },
+      { from: parent._id, to: coach._id, text: 'Dziekuje! Bardzo sie cieszy z treningow.', daysAgo: 3 },
+      { from: coach._id, to: parent._id, text: 'W przyszlym tygodniu chcialbym skupic sie na serwisie. Prosze o dodatkowe rozciaganie w domu.', daysAgo: 2 },
+      { from: parent._id, to: coach._id, text: 'Jasne, zadbam o to. Czy jest cos co moglibysmy cwiczye na podworku?', daysAgo: 1 },
+      { from: coach._id, to: parent._id, text: 'Tak - proste cwiczenia z pilka o sciane, forehand i backhand po 50 uderzen dziennie.', daysAgo: 1 },
+    ];
+
+    for (const mData of messagesData) {
+      const msgDate = new Date(now);
+      msgDate.setDate(msgDate.getDate() - mData.daysAgo);
+      msgDate.setHours(10 + Math.floor(Math.random() * 8), Math.floor(Math.random() * 60));
+
+      await Message.create({
+        from: mData.from,
+        to: mData.to,
+        text: mData.text,
+        read: true,
+        createdAt: msgDate,
+        updatedAt: msgDate,
+      });
+    }
+    console.log(`  ${messagesData.length} wiadomosci miedzy trenerem a rodzicem\n`);
 
     // ====== Podsumowanie ======
 

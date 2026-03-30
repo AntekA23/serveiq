@@ -21,7 +21,7 @@
 }
 
 .timeline-header {
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 
 .timeline-title {
@@ -35,6 +35,55 @@
 .timeline-subtitle {
   font-size: 13px;
   color: var(--color-text-tertiary);
+}
+
+/* ─── Filters ─── */
+.timeline-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.timeline-filter {
+  padding: 6px 14px;
+  border: 1px solid var(--color-border-md);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.timeline-filter:hover {
+  border-color: var(--filter-color, var(--color-accent));
+  color: var(--filter-color, var(--color-accent));
+}
+
+.timeline-filter.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* ─── Grouped by month ─── */
+.timeline-grouped {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.timeline-month-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
 }
 
 /* ─── Timeline List ─── */
@@ -59,7 +108,7 @@
   position: relative;
   display: flex;
   gap: 14px;
-  padding-bottom: 24px;
+  padding-bottom: 16px;
 }
 
 .timeline-event:last-child {
@@ -84,8 +133,7 @@
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 14px 16px;
-  box-shadow: var(--shadow-card);
+  padding: 12px 14px;
   transition: border-color 0.15s ease;
 }
 
@@ -97,7 +145,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .timeline-event-icon {
@@ -111,7 +159,7 @@
 }
 
 .timeline-event-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--color-text);
   flex: 1;
@@ -130,45 +178,17 @@
   line-height: 1.4;
 }
 
-/* ─── Event type colors ─── */
-.timeline-event--skill_update .timeline-event-dot {
-  background: var(--color-blue);
-}
-.timeline-event--skill_update .timeline-event-icon {
-  background: var(--color-blue-bg);
-  color: var(--color-blue);
-}
-
-.timeline-event--tournament .timeline-event-dot {
-  background: var(--color-amber);
-}
-.timeline-event--tournament .timeline-event-icon {
-  background: var(--color-amber-bg);
-  color: var(--color-amber);
-}
-
-.timeline-event--goal_completed .timeline-event-dot {
-  background: var(--color-green);
-}
-.timeline-event--goal_completed .timeline-event-icon {
-  background: var(--color-green-bg);
-  color: var(--color-green);
-}
-
-.timeline-event--health_trend .timeline-event-dot {
-  background: var(--color-sleep);
-}
-.timeline-event--health_trend .timeline-event-icon {
-  background: var(--color-sleep-bg);
-  color: var(--color-sleep);
-}
-
-.timeline-event--device_connected .timeline-event-dot {
-  background: var(--color-hrv);
-}
-.timeline-event--device_connected .timeline-event-icon {
-  background: var(--color-hrv-bg);
-  color: var(--color-hrv);
+.timeline-event-badge {
+  display: inline-block;
+  margin-left: 36px;
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 /* ─── Loading / Empty ─── */
@@ -194,5 +214,18 @@
 
   .timeline-event-description {
     margin-left: 0;
+  }
+
+  .timeline-event-badge {
+    margin-left: 0;
+  }
+
+  .timeline-filters {
+    gap: 4px;
+  }
+
+  .timeline-filter {
+    font-size: 11px;
+    padding: 5px 10px;
   }
 }

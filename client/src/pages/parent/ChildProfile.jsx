@@ -95,11 +95,21 @@ function HealthChart({ label, icon: Icon, data, unit, color, bgColor }) {
   )
 }
 
+const sessionTypeLabels = {
+  kort: 'Kort', sparing: 'Sparing', kondycja: 'Kondycja',
+  rozciaganie: 'Rozciaganie', mecz: 'Mecz', inne: 'Inne',
+}
+const sessionTypeColors = {
+  kort: 'var(--color-green)', sparing: 'var(--color-amber)', kondycja: 'var(--color-blue)',
+  rozciaganie: 'var(--color-purple)', mecz: 'var(--color-heart)', inne: 'var(--color-text-tertiary)',
+}
+
 export default function ChildProfile() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [child, setChild] = useState(null)
   const [wearableHistory, setWearableHistory] = useState([])
+  const [recentSessions, setRecentSessions] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -109,12 +119,21 @@ export default function ChildProfile() {
         const { data: playerData } = await api.get(`/players/${id}`)
         setChild(playerData.player || playerData)
 
-        try {
-          const { data: historyRaw } = await api.get(`/wearables/data/${id}?type=daily_summary`)
-          const history = Array.isArray(historyRaw) ? historyRaw : historyRaw.data || []
-          setWearableHistory(history)
-        } catch {
-          setWearableHistory([])
+        // Fetch wearable data and sessions in parallel
+        const results = await Promise.allSettled([
+          api.get(`/wearables/data/${id}?type=daily_summary`),
+          api.get(`/sessions?player=${id}`),
+        ])
+
+        if (results[0].status === 'fulfilled') {
+          const historyRaw = results[0].value.data
+          setWearableHistory(Array.isArray(historyRaw) ? historyRaw : historyRaw.data || [])
+        }
+
+        if (results[1].status === 'fulfilled') {
+          const sessionsRaw = results[1].value.data
+          const sessions = Array.isArray(sessionsRaw) ? sessionsRaw : sessionsRaw.sessions || []
+          setRecentSessions(sessions.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5))
         }
       } catch {
         // silent
@@ -305,6 +324,45 @@ export default function ChildProfile() {
               )
             })}
           </div>
+        </div>
+      )}
+
+      {/* Recent Sessions */}
+      {recentSessions.length > 0 && (
+        <div className="child-profile-section">
+          <h2 className="child-profile-section-title">
+            <Calendar size={16} />
+            Ostatnie sesje treningowe
+          </h2>
+          <div className="child-profile-sessions">
+            {recentSessions.map((s) => {
+              const d = new Date(s.date)
+              const color = sessionTypeColors[s.sessionType] || sessionTypeColors.inne
+              return (
+                <div key={s._id} className="child-session-row">
+                  <div className="child-session-dot" style={{ background: color }} />
+                  <div className="child-session-body">
+                    <div className="child-session-top">
+                      <span className="child-session-type" style={{ color }}>
+                        {sessionTypeLabels[s.sessionType] || 'Trening'}
+                      </span>
+                      <span className="child-session-date">
+                        {d.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })}
+                      </span>
+                      {s.startTime && <span className="child-session-time">{s.startTime}</span>}
+                      <span className="child-session-dur">{s.durationMinutes}min</span>
+                      {s.source === 'coach' && <span className="child-session-badge">trener</span>}
+                    </div>
+                    {s.notes && <div className="child-session-notes">{s.notes}</div>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <button className="child-profile-nav-link" style={{ marginTop: 8 }}
+            onClick={() => navigate(`/parent/child/${id}/timeline`)}>
+            <Clock size={14} /> Zobacz wszystkie
+          </button>
         </div>
       )}
 

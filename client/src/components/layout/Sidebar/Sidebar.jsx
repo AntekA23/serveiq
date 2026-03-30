@@ -9,6 +9,8 @@ import {
   MessageSquare,
   Settings,
   LogOut,
+  Users,
+  ClipboardList,
 } from 'lucide-react'
 import useAuthStore from '../../../store/authStore'
 import useUiStore from '../../../store/uiStore'
@@ -26,6 +28,14 @@ const parentNav = [
   { to: '/parent/settings', label: 'Ustawienia', icon: Settings },
 ]
 
+const coachNav = [
+  { to: '/coach/dashboard', label: 'Pulpit', icon: LayoutDashboard },
+  { to: '/coach/players', label: 'Zawodnicy', icon: Users },
+  { to: '/coach/sessions', label: 'Sesje', icon: ClipboardList },
+  { to: '/coach/messages', label: 'Wiadomosci', icon: MessageSquare },
+  { to: '/coach/settings', label: 'Ustawienia', icon: Settings },
+]
+
 export default function Sidebar() {
   const user = useAuthStore((s) => s.user)
   const sidebarOpen = useUiStore((s) => s.sidebarOpen)
@@ -33,7 +43,7 @@ export default function Sidebar() {
   const { logout } = useAuth()
   const navigate = useNavigate()
 
-  const navItems = parentNav
+  const navItems = user?.role === 'coach' ? coachNav : parentNav
 
   const handleLogout = async () => {
     await logout()

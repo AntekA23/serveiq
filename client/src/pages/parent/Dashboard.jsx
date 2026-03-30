@@ -100,19 +100,33 @@ function DeviceStatusBar({ devices }) {
 function PlanPreview({ child, navigate }) {
   const plan = child?.trainingPlan
   const milestones = plan?.milestones || []
+  const schedule = plan?.weeklySchedule || []
   const nextMilestone = milestones.find(m => !m.completed)
+
+  const dayNames = ['', 'Pon', 'Wt', 'Sr', 'Czw', 'Pt', 'Sb', 'Nd']
+  const typeLabels = {
+    kort: 'Kort', sparing: 'Sparing', kondycja: 'Kondycja',
+    rozciaganie: 'Rozciag.', mecz: 'Mecz', inne: 'Inne',
+  }
+
+  // Group schedule by day
+  const byDay = {}
+  schedule.forEach(s => {
+    if (!byDay[s.day]) byDay[s.day] = []
+    byDay[s.day].push(s)
+  })
 
   return (
     <div className="plan-preview card">
       <div className="plan-preview-header">
         <Calendar size={16} />
-        <span>Plan na przyszlosc</span>
+        <span>Plan treningowy</span>
         <button className="plan-preview-more" onClick={() => navigate('/parent/training-plan')}>
           Zobacz wiecej <ChevronRight size={14} />
         </button>
       </div>
       <div className="plan-preview-body">
-        {nextMilestone ? (
+        {nextMilestone && (
           <div className="plan-milestone">
             <Target size={16} className="plan-milestone-icon" />
             <div>
@@ -126,27 +140,37 @@ function PlanPreview({ child, navigate }) {
               )}
             </div>
           </div>
-        ) : null}
+        )}
 
-        {plan?.weeklyGoal && (
+        {schedule.length > 0 ? (
+          <div className="plan-schedule-preview">
+            <div className="plan-weekly">
+              <div className="plan-weekly-label">Harmonogram</div>
+              <div className="plan-weekly-value">
+                {schedule.length} treningow · {Math.round(schedule.reduce((s, i) => s + i.durationMinutes, 0) / 60 * 10) / 10}h / tydz
+              </div>
+            </div>
+            <div className="plan-schedule-days">
+              {Object.entries(byDay).sort(([a], [b]) => a - b).map(([day, items]) => (
+                <div key={day} className="plan-schedule-day">
+                  <span className="plan-schedule-day-name">{dayNames[day]}</span>
+                  {items.map((item, i) => (
+                    <span key={i} className="plan-schedule-type">{typeLabels[item.sessionType] || item.sessionType}</span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : plan?.weeklyGoal?.sessionsPerWeek ? (
           <div className="plan-weekly">
             <div className="plan-weekly-label">Cel tygodniowy</div>
             <div className="plan-weekly-value">
-              {plan.weeklyGoal.sessionsPerWeek || '—'} treningow / tydz
+              {plan.weeklyGoal.sessionsPerWeek} treningow / tydz
             </div>
           </div>
-        )}
+        ) : null}
 
-        {plan?.scheduledDays?.length > 0 && (
-          <div className="plan-weekly">
-            <div className="plan-weekly-label">Dni treningowe</div>
-            <div className="plan-weekly-value">
-              {plan.scheduledDays.map(d => ['', 'Pon', 'Wt', 'Sr', 'Czw', 'Pt', 'Sb', 'Nd'][d]).join(', ')}
-            </div>
-          </div>
-        )}
-
-        {!nextMilestone && !plan?.weeklyGoal && (
+        {!nextMilestone && schedule.length === 0 && !plan?.weeklyGoal?.sessionsPerWeek && (
           <div className="plan-empty">
             Brak aktywnego planu treningowego
           </div>

@@ -165,7 +165,26 @@ export const getTimeline = async (req, res, next) => {
       .sort({ date: -1 })
       .limit(30);
 
+    const typeLabels = {
+      kort: 'Kort', sparing: 'Sparing', kondycja: 'Kondycja',
+      rozciaganie: 'Rozciaganie', mecz: 'Mecz', inne: 'Trening',
+    };
+
     sessions.forEach((s) => {
+      // Add session as training event
+      events.push({
+        type: 'session',
+        date: s.date,
+        title: s.title || typeLabels[s.sessionType] || 'Trening',
+        description: [
+          typeLabels[s.sessionType],
+          s.durationMinutes ? `${s.durationMinutes}min` : null,
+          s.notes,
+        ].filter(Boolean).join(' · '),
+        sessionType: s.sessionType,
+      });
+
+      // Also add skill updates if present
       if (s.skillUpdates && s.skillUpdates.length > 0) {
         s.skillUpdates.forEach((su) => {
           events.push({

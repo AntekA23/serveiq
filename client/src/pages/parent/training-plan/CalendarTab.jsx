@@ -60,12 +60,22 @@ export default function CalendarTab({ child, plan, onRefresh }) {
     setAddingDate(addingDate === ds ? null : ds)
   }
 
+  // Build planned sessions from weekly schedule for this week
+  const schedule = plan?.weeklySchedule || []
+  const scheduledDays = plan?.scheduledDays || []
+
   // Week sessions for summary
   const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 7)
   const weekSessions = sessions.filter((s) => {
     const d = new Date(s.date)
     return d >= weekStart && d < weekEnd
   })
+
+  // Build planned items for each day of the week (for display)
+  const getPlannedForDate = (date) => {
+    const dayOfWeek = date.getDay() === 0 ? 7 : date.getDay()
+    return schedule.filter((s) => s.day === dayOfWeek)
+  }
 
   return (
     <div className="tp-calendar">
@@ -97,7 +107,8 @@ export default function CalendarTab({ child, plan, onRefresh }) {
       {view === 'week' ? (
         <WeekList
           sessions={sessions}
-          scheduledDays={plan?.scheduledDays || []}
+          scheduledDays={scheduledDays}
+          plannedSchedule={schedule}
           weekStart={weekStart}
           addingDate={addingDate}
           onAddClick={handleAddClick}
@@ -106,7 +117,8 @@ export default function CalendarTab({ child, plan, onRefresh }) {
       ) : (
         <MonthGrid
           sessions={sessions}
-          scheduledDays={plan?.scheduledDays || []}
+          scheduledDays={scheduledDays}
+          plannedSchedule={schedule}
           currentMonth={currentMonth}
           onMonthChange={(d) => { setCurrentMonth((p) => { const n = new Date(p); n.setMonth(n.getMonth() + d); return n }); setSelectedDay(null) }}
           selectedDay={selectedDay}
