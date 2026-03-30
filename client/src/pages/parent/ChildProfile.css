@@ -37,12 +37,21 @@
   display: flex;
   align-items: center;
   gap: 24px;
-  background: var(--color-bg-secondary);
+  background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-tertiary) 100%);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 28px;
   margin-bottom: 24px;
   box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+.child-profile-hero::after {
+  content: '';
+  position: absolute; top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%);
+  opacity: 0.04; pointer-events: none;
 }
 
 .child-profile-name {
@@ -196,33 +205,39 @@
 /* ─── Nav Links ─── */
 .child-profile-nav-links {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 24px;
+  flex-wrap: wrap;
 }
 
 .child-profile-nav-link {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 18px;
+  padding: 12px 18px;
   background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-md);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  color: var(--color-text);
+  color: var(--color-text-secondary);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 140px;
+  justify-content: center;
 }
 
 .child-profile-nav-link:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
-  box-shadow: var(--shadow-glow);
+  background: var(--color-accent-muted);
+  transform: translateY(-1px);
 }
 
 .child-profile-nav-link svg {
   color: var(--color-accent);
+  flex-shrink: 0;
 }
 
 /* ─── No Data ─── */
@@ -265,19 +280,34 @@
 .child-profile-skills {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
+  gap: 10px;
 }
 
 .child-profile-skill {
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 14px;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.child-profile-skill:hover {
+  border-color: var(--color-border-md);
+}
+.child-profile-skill::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--skill-color, var(--color-accent));
+  border-radius: 3px 0 0 3px;
 }
 
 .child-profile-skill-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 8px;
@@ -285,7 +315,10 @@
 }
 
 .child-profile-skill-score {
-  color: var(--color-text-secondary);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--color-text);
+  letter-spacing: 0.5px;
 }
 
 .child-profile-skill-notes {

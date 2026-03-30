@@ -38,6 +38,15 @@ const skillColors = {
   fitness: 'amber',
 }
 
+const skillCssColors = {
+  serve: '#4DA6FF',
+  forehand: '#22C55E',
+  backhand: '#F59E0B',
+  volley: '#7C5CFC',
+  tactics: '#1ABC9C',
+  fitness: '#FF6B35',
+}
+
 function MiniSparkline({ data, color, height = 40 }) {
   if (!data || data.length === 0) return null
 
@@ -328,7 +337,7 @@ export default function ChildProfile() {
               const notes = typeof skillData === 'object' ? skillData?.notes : null
 
               return (
-                <div key={key} className="child-profile-skill">
+                <div key={key} className="child-profile-skill" style={{ '--skill-color': skillCssColors[key] }}>
                   <div className="child-profile-skill-header">
                     <span>{label}</span>
                     <span className="child-profile-skill-score">{value}%</span>
