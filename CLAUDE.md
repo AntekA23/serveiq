@@ -32,6 +32,7 @@ Build the agreed ServeIQ MVP end-to-end with maximum autonomy. Do not stop after
 | File Upload | Multer (local /uploads/avatars) |
 | Payments | Stripe (scaffolded, needs API keys) |
 | Email | Resend (scaffolded, logs to console in dev) |
+| AI | Claude API (@anthropic-ai/sdk) — coaching recommendations, review generation |
 | Security | Helmet, CORS, rate limiting |
 | Deploy target | Railway |
 
@@ -80,23 +81,30 @@ client/
 - Stripe checkout + webhooks + portal (needs STRIPE_SECRET_KEY, price IDs)
 - Resend email sending (needs RESEND_API_KEY)
 - WHOOP/Garmin OAuth (needs developer credentials, mock works fine for MVP)
+- Claude AI coaching assistant (needs CLAUDE_API_KEY)
 
-### Coach panel (newly built):
-- **CoachDashboard** — stats, player list, recent sessions
+### Coach panel (fully built):
+- **CoachDashboard** — stats, player list, recent sessions, payment/review alerts
 - **CoachPlayers** — searchable list, CoachNewPlayer form with parent invite
-- **CoachPlayerProfile** — skills editing, session history, goals management
-- **CoachSessions** — month view, player filter, CoachNewSession form with skill updates
+- **CoachPlayerProfile** — 4 tabs (skills, sessions, goals, reviews), AI recommendations button
+- **CoachSessions** — month view, player filter, clickable cards for editing
+- **CoachEditSession** — full edit form for existing sessions with delete
+- **CoachReviews** — list page with player filter, status badges, star ratings
+- **CoachNewReview** — create/edit with AI draft generation, draft/publish workflow
+- **CoachPayments** — stats dashboard, payment creation, mark-as-paid, status filter
 - **Coach Messages** — reuses Chat component
-- Sidebar shows role-based navigation (coach vs parent)
+- Sidebar shows role-based navigation (coach vs parent, 7 nav items)
+
+### Parent extras:
+- **Reviews** — view coach reviews with expandable cards
+- **SkillProgress** — radar chart + per-skill line charts over time
+- **ChildProfile** — quick nav to progress, reviews, timeline, health
 
 ### Not built yet:
-- Coach session editing (create-only for now)
-- Coach payment/invoice management
-- Reviews & recommendations
-- Progress visualization over time (skill charts, monthly summaries)
 - PDF export
 - Push notifications (Firebase/OneSignal)
-- AI coaching assistant
+- Club/group view for coaches
+- E2E testing
 
 ## Database Models (Mongoose)
 
@@ -132,6 +140,8 @@ client/
 - `GET/POST /api/messages`, conversations, read status
 - `GET/PUT/DELETE /api/notifications`, unread-count, read-all
 - `POST /api/beta`
+- `GET/POST/PUT/DELETE /api/reviews`
+- `POST /api/ai/recommendations/:playerId`, `POST /api/ai/review-draft/:playerId`
 
 ## Product Principles
 
