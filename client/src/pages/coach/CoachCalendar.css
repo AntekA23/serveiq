@@ -1,0 +1,116 @@
+/* ═══ Coach Calendar ═══ */
+.ccal-page { max-width: 920px; }
+
+.ccal-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
+}
+
+/* Month navigation */
+.ccal-nav {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; margin-bottom: 16px;
+}
+.ccal-nav-btn {
+  background: var(--color-bg-secondary); border: 1px solid var(--color-border-md);
+  border-radius: var(--radius-sm); color: var(--color-text-secondary);
+  cursor: pointer; padding: 6px 8px; display: flex; transition: all 0.15s;
+}
+.ccal-nav-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.ccal-nav-label {
+  font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+  letter-spacing: 1px; color: var(--color-text); min-width: 180px; text-align: center;
+}
+
+/* Calendar grid */
+.ccal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+  background: var(--color-border); border-radius: var(--radius-md); overflow: hidden;
+  margin-bottom: 16px;
+}
+.ccal-day-name {
+  background: var(--color-bg-tertiary); padding: 8px;
+  font-size: 11px; font-weight: 700; color: var(--color-text-tertiary);
+  text-align: center; text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* Calendar cell */
+.ccal-cell {
+  background: var(--color-bg-secondary); padding: 8px;
+  min-height: 72px; cursor: pointer; transition: all 0.15s;
+  display: flex; flex-direction: column; gap: 4px;
+  position: relative;
+}
+.ccal-cell:hover { background: var(--color-bg-tertiary); }
+.ccal-cell.other { opacity: 0.3; }
+.ccal-cell.today { background: var(--color-accent-muted); }
+.ccal-cell.today .ccal-cell-num { color: var(--color-accent); font-weight: 800; }
+.ccal-cell.selected {
+  background: var(--color-bg-tertiary);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+.ccal-cell.has-sessions { }
+
+.ccal-cell-num {
+  font-size: 13px; font-weight: 600; color: var(--color-text-secondary);
+}
+
+/* Session dots */
+.ccal-cell-dots { display: flex; flex-wrap: wrap; gap: 3px; margin-top: auto; }
+.ccal-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ccal-dot-more { font-size: 9px; color: var(--color-text-tertiary); font-weight: 700; }
+
+/* Detail panel */
+.ccal-detail {
+  background: var(--color-bg-secondary); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); overflow: hidden;
+  box-shadow: var(--shadow-card);
+  animation: ccal-slide-in 0.2s ease;
+}
+@keyframes ccal-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ccal-detail-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--color-border);
+  font-size: 14px; font-weight: 600; color: var(--color-text);
+  text-transform: capitalize;
+}
+.ccal-detail-empty {
+  padding: 24px 16px; text-align: center;
+  color: var(--color-text-tertiary); font-size: 13px;
+}
+.ccal-detail-list { padding: 4px 0; }
+.ccal-detail-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; cursor: pointer; transition: background 0.15s;
+}
+.ccal-detail-item:hover { background: var(--color-bg-tertiary); }
+.ccal-detail-dot { width: 4px; border-radius: 2px; min-height: 28px; align-self: stretch; flex-shrink: 0; }
+.ccal-detail-body { flex: 1; min-width: 0; }
+.ccal-detail-title { font-size: 13px; font-weight: 600; color: var(--color-text); display: block; }
+.ccal-detail-meta { font-size: 11px; color: var(--color-text-tertiary); display: block; }
+.ccal-detail-type {
+  font-family: 'Bebas Neue', sans-serif; font-size: 18px;
+  letter-spacing: 1px; flex-shrink: 0;
+}
+
+/* Loading overlay */
+.ccal-loading-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(11,14,20,0.3); pointer-events: none; z-index: 10;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ccal-cell { min-height: 56px; padding: 6px; }
+  .ccal-cell-num { font-size: 12px; }
+  .ccal-dot { width: 6px; height: 6px; }
+}
+@media (max-width: 480px) {
+  .ccal-cell { min-height: 44px; padding: 4px; }
+  .ccal-cell-num { font-size: 11px; }
+  .ccal-nav-label { font-size: 18px; min-width: 140px; }
+}

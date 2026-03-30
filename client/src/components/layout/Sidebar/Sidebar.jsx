@@ -12,6 +12,7 @@ import {
   Users,
   ClipboardList,
   FileText,
+  CalendarDays,
 } from 'lucide-react'
 import useAuthStore from '../../../store/authStore'
 import useUiStore from '../../../store/uiStore'
@@ -32,6 +33,7 @@ const parentNav = [
 const coachNav = [
   { to: '/coach/dashboard', label: 'Pulpit', icon: LayoutDashboard },
   { to: '/coach/players', label: 'Zawodnicy', icon: Users },
+  { to: '/coach/calendar', label: 'Kalendarz', icon: CalendarDays },
   { to: '/coach/sessions', label: 'Sesje', icon: ClipboardList },
   { to: '/coach/reviews', label: 'Oceny', icon: FileText },
   { to: '/coach/payments', label: 'Platnosci', icon: CreditCard },

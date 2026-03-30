@@ -34,6 +34,7 @@ import CoachSessions from './pages/coach/CoachSessions'
 import CoachNewSession from './pages/coach/CoachNewSession'
 import CoachEditSession from './pages/coach/CoachEditSession'
 import CoachNewPlayer from './pages/coach/CoachNewPlayer'
+import CoachCalendar from './pages/coach/CoachCalendar'
 import CoachReviews from './pages/coach/CoachReviews'
 import CoachNewReview from './pages/coach/CoachNewReview'
 import CoachPayments from './pages/coach/CoachPayments'
@@ -48,6 +49,9 @@ import PaymentCancel from './pages/parent/PaymentCancel'
 
 // OAuth callback
 import DeviceCallback from './pages/parent/DeviceCallback'
+
+// 404
+import NotFound from './pages/NotFound'
 
 // Landing + Legal pages
 import Landing from './pages/Landing'
@@ -134,6 +138,9 @@ export default function App() {
         } />
         <Route path="/coach/player/:id" element={
           <ProtectedRoute role="coach"><AppShell><CoachPlayerProfile /></AppShell></ProtectedRoute>
+        } />
+        <Route path="/coach/calendar" element={
+          <ProtectedRoute role="coach"><AppShell><CoachCalendar /></AppShell></ProtectedRoute>
         } />
         <Route path="/coach/sessions" element={
           <ProtectedRoute role="coach"><AppShell><CoachSessions /></AppShell></ProtectedRoute>
@@ -226,6 +233,9 @@ export default function App() {
 
         {/* OAuth callback */}
         <Route path="/parent/devices/callback" element={<DeviceCallback />} />
+
+        {/* 404 catch-all */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
       <ToastContainer />

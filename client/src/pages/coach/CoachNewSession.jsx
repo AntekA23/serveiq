@@ -41,7 +41,7 @@ export default function CoachNewSession() {
 
   const [form, setForm] = useState({
     player: searchParams.get('player') || '',
-    date: new Date().toISOString().split('T')[0],
+    date: searchParams.get('date') || new Date().toISOString().split('T')[0],
     startTime: '16:00',
     sessionType: 'kort',
     surface: 'clay',
