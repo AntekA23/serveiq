@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Save, Send, Star, Trash2 } from 'lucide-react'
 import api from '../../api/axios'
 import Button from '../../components/ui/Button/Button'
@@ -22,6 +22,7 @@ const SKILL_NAMES = {
 export default function CoachNewReview() {
   const navigate = useNavigate()
   const { id: editId } = useParams()
+  const [searchParams] = useSearchParams()
   const toast = useToast()
   const isEdit = !!editId
 
@@ -33,7 +34,7 @@ export default function CoachNewReview() {
   const monthAgo = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString().split('T')[0]
 
   const [form, setForm] = useState({
-    player: '',
+    player: searchParams.get('player') || '',
     periodStart: monthAgo,
     periodEnd: today,
     type: 'monthly',

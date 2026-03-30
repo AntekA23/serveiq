@@ -381,4 +381,27 @@
   .child-profile-skills {
     grid-template-columns: 1fr;
   }
+
+  .child-profile-nav-links {
+    flex-wrap: wrap;
+  }
+
+  .child-profile-nav-link {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .child-profile-hero {
+    padding: 20px;
+  }
+  .child-profile-name {
+    font-size: 24px;
+  }
+  .child-profile-nav-link {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
 }

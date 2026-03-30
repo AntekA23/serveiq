@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare
+  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare, FileText
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -69,18 +69,21 @@ export default function CoachPlayerProfile() {
   const navigate = useNavigate()
   const [player, setPlayer] = useState(null)
   const [sessions, setSessions] = useState([])
+  const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState('skills')
 
   useEffect(() => {
     const fetch = async () => {
       try {
-        const [playerRes, sessionsRes] = await Promise.all([
+        const [playerRes, sessionsRes, reviewsRes] = await Promise.all([
           api.get(`/players/${id}`),
           api.get(`/sessions?player=${id}`),
+          api.get(`/reviews?player=${id}`),
         ])
         setPlayer(playerRes.data.player || playerRes.data)
         setSessions((sessionsRes.data.sessions || sessionsRes.data || []).sort((a, b) => new Date(b.date) - new Date(a.date)))
+        setReviews((reviewsRes.data.reviews || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)))
       } catch { /* silent */ }
       setLoading(false)
     }
@@ -138,7 +141,10 @@ export default function CoachPlayerProfile() {
         </div>
         <div className="coach-profile-actions">
           <Button variant="primary" size="sm" onClick={() => navigate(`/coach/sessions/new?player=${id}`)}>
-            <Plus size={14} /> Nowa sesja
+            <Plus size={14} /> Sesja
+          </Button>
+          <Button size="sm" onClick={() => navigate(`/coach/reviews/new?player=${id}`)}>
+            <FileText size={14} /> Ocena
           </Button>
           <Button variant="ghost" size="sm" onClick={() => {
             const parentId = player.parents?.[0]?._id || player.parents?.[0]
@@ -159,6 +165,9 @@ export default function CoachPlayerProfile() {
         </button>
         <button className={`coach-tab ${tab === 'goals' ? 'active' : ''}`} onClick={() => setTab('goals')}>
           <Star size={14} /> Cele ({goals.length})
+        </button>
+        <button className={`coach-tab ${tab === 'reviews' ? 'active' : ''}`} onClick={() => setTab('reviews')}>
+          <FileText size={14} /> Oceny ({reviews.length})
         </button>
       </div>
 
@@ -231,6 +240,41 @@ export default function CoachPlayerProfile() {
                   </span>
                 )}
                 {g.completed && <span className="coach-goal-done">Ukonczony</span>}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Reviews tab */}
+      {tab === 'reviews' && (
+        <div className="coach-reviews-tab">
+          <Button size="sm" onClick={() => navigate(`/coach/reviews/new?player=${id}`)} style={{ marginBottom: 12 }}>
+            <Plus size={14} /> Nowa ocena
+          </Button>
+          {reviews.length === 0 ? (
+            <div className="coach-empty">Brak ocen dla tego zawodnika</div>
+          ) : (
+            reviews.map((r) => (
+              <div key={r._id} className="coach-review-card" onClick={() => navigate(`/coach/reviews/${r._id}/edit`)}>
+                <div className="coach-review-card-top">
+                  <span className={`coach-review-status ${r.status}`}>
+                    {r.status === 'draft' ? 'Szkic' : 'Opublikowana'}
+                  </span>
+                  {r.overallRating && (
+                    <div className="coach-review-rating">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} size={10} fill={s <= r.overallRating ? 'var(--color-amber)' : 'none'} stroke={s <= r.overallRating ? 'var(--color-amber)' : 'var(--color-text-tertiary)'} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="coach-review-title">{r.title}</div>
+                <div className="coach-review-period">
+                  {new Date(r.periodStart).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })}
+                  {' — '}
+                  {new Date(r.periodEnd).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </div>
               </div>
             ))
           )}

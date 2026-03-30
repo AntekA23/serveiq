@@ -170,6 +170,9 @@
 .coach-skill-update-name { font-weight: 600; min-width: 70px; }
 .coach-skill-remove { background: none; border: none; color: var(--color-heart); cursor: pointer; font-size: 16px; }
 
+/* ═══ Reviews tab ═══ */
+.coach-reviews-tab { display: flex; flex-direction: column; gap: 6px; }
+
 /* ═══ Session card clickable ═══ */
 .coach-session-card-clickable { cursor: pointer; transition: border-color 0.15s; }
 .coach-session-card-clickable:hover { border-color: var(--color-accent); }
