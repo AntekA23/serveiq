@@ -235,10 +235,19 @@
   .coach-grid { grid-template-columns: 1fr; }
   .coach-profile-header { flex-direction: column; align-items: flex-start; }
   .coach-profile-actions { width: 100%; }
+  .coach-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .coach-tab { white-space: nowrap; padding: 10px 14px; }
+  .coach-form-row { grid-template-columns: 1fr; }
+  .coach-payment-card { flex-wrap: wrap; }
+  .coach-header { flex-direction: column; align-items: flex-start; gap: 8px; }
 }
 @media (max-width: 480px) {
   .coach-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
   .coach-stat { padding: 12px; }
   .coach-stat-value { font-size: 22px; }
   .coach-type-grid { grid-template-columns: repeat(2, 1fr); }
+  .coach-session-card-top { flex-direction: column; gap: 2px; }
+  .coach-session-dur { margin-left: 0; }
+  .coach-payment-amount { font-size: 18px; }
+  .coach-review-arrow { display: none; }
 }
