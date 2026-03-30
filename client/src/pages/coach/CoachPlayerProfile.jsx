@@ -1,13 +1,104 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare, FileText, Sparkles, Loader
+  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare, FileText, Sparkles, Loader, ClipboardList, Trash2, Clock
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import Button from '../../components/ui/Button/Button'
 import useToast from '../../hooks/useToast'
 import './Coach.css'
+
+const DAY_NAMES = ['Pon', 'Wt', 'Sr', 'Czw', 'Pt', 'Sb', 'Nd']
+const TYPE_OPTIONS = [
+  { value: 'kort', label: 'Kort' }, { value: 'sparing', label: 'Sparing' },
+  { value: 'kondycja', label: 'Kondycja' }, { value: 'rozciaganie', label: 'Rozciaganie' },
+  { value: 'mecz', label: 'Mecz' }, { value: 'inne', label: 'Inne' },
+]
+
+function CoachPlanTab({ playerId, player, toast }) {
+  const plan = player?.trainingPlan || {}
+  const [schedule, setSchedule] = useState(plan.weeklySchedule || [])
+  const [saving, setSaving] = useState(false)
+  const [dirty, setDirty] = useState(false)
+
+  const addItem = (day) => {
+    setSchedule((prev) => [...prev, { day, sessionType: 'kort', durationMinutes: 90, startTime: '16:00', notes: '' }])
+    setDirty(true)
+  }
+
+  const updateItem = (idx, field, value) => {
+    setSchedule((prev) => prev.map((item, i) => i === idx ? { ...item, [field]: field === 'durationMinutes' ? Number(value) : value } : item))
+    setDirty(true)
+  }
+
+  const removeItem = (idx) => {
+    setSchedule((prev) => prev.filter((_, i) => i !== idx))
+    setDirty(true)
+  }
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await api.put(`/players/${playerId}/training-plan`, { weeklySchedule: schedule })
+      toast.success('Plan treningowy zapisany')
+      setDirty(false)
+    } catch {
+      toast.error('Nie udalo sie zapisac planu')
+    }
+    setSaving(false)
+  }
+
+  const totalSessions = schedule.length
+  const totalHours = Math.round(schedule.reduce((s, i) => s + (i.durationMinutes || 0), 0) / 60 * 10) / 10
+  const activeDays = [...new Set(schedule.map((s) => s.day))].length
+
+  return (
+    <div className="coach-plan-tab">
+      {/* Summary */}
+      <div className="coach-plan-summary">
+        <div className="coach-plan-stat"><span className="coach-plan-stat-val">{totalSessions}</span> sesji/tyg</div>
+        <div className="coach-plan-stat"><span className="coach-plan-stat-val">{totalHours}</span> h/tyg</div>
+        <div className="coach-plan-stat"><span className="coach-plan-stat-val">{activeDays}</span> dni/tyg</div>
+        {dirty && (
+          <Button variant="primary" size="sm" onClick={handleSave} loading={saving}>
+            <Save size={14} /> Zapisz
+          </Button>
+        )}
+      </div>
+
+      {/* Schedule by day */}
+      <div className="coach-plan-days">
+        {[1, 2, 3, 4, 5, 6, 7].map((day) => {
+          const dayItems = schedule.map((item, idx) => ({ ...item, _idx: idx })).filter((i) => i.day === day)
+          return (
+            <div key={day} className={`coach-plan-day ${dayItems.length > 0 ? 'active' : ''}`}>
+              <div className="coach-plan-day-header">
+                <span className="coach-plan-day-name">{DAY_NAMES[day - 1]}</span>
+                <button className="coach-plan-add-btn" onClick={() => addItem(day)} title="Dodaj sesje">
+                  <Plus size={12} />
+                </button>
+              </div>
+              {dayItems.map((item) => (
+                <div key={item._idx} className="coach-plan-item">
+                  <select value={item.sessionType} onChange={(e) => updateItem(item._idx, 'sessionType', e.target.value)} className="coach-plan-select">
+                    {TYPE_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                  <input type="time" value={item.startTime || '16:00'} onChange={(e) => updateItem(item._idx, 'startTime', e.target.value)} className="coach-plan-time" />
+                  <select value={item.durationMinutes} onChange={(e) => updateItem(item._idx, 'durationMinutes', e.target.value)} className="coach-plan-dur">
+                    {[30, 45, 60, 75, 90, 120].map((d) => <option key={d} value={d}>{d}min</option>)}
+                  </select>
+                  <button className="coach-plan-remove" onClick={() => removeItem(item._idx)}><Trash2 size={12} /></button>
+                </div>
+              ))}
+              {dayItems.length === 0 && <div className="coach-plan-empty-day">—</div>}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 const SKILL_NAMES = {
   serve: 'Serwis',
@@ -222,6 +313,9 @@ export default function CoachPlayerProfile() {
         <button className={`coach-tab ${tab === 'goals' ? 'active' : ''}`} onClick={() => setTab('goals')}>
           <Star size={14} /> Cele ({goals.length})
         </button>
+        <button className={`coach-tab ${tab === 'plan' ? 'active' : ''}`} onClick={() => setTab('plan')}>
+          <ClipboardList size={14} /> Plan
+        </button>
         <button className={`coach-tab ${tab === 'reviews' ? 'active' : ''}`} onClick={() => setTab('reviews')}>
           <FileText size={14} /> Oceny ({reviews.length})
         </button>
@@ -301,6 +395,9 @@ export default function CoachPlayerProfile() {
           )}
         </div>
       )}
+
+      {/* Plan tab */}
+      {tab === 'plan' && <CoachPlanTab playerId={id} player={player} toast={toast} />}
 
       {/* Reviews tab */}
       {tab === 'reviews' && (

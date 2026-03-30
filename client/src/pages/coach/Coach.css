@@ -191,6 +191,26 @@
 .coach-payment-mark-btn { background: none; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); color: var(--color-text-tertiary); cursor: pointer; padding: 6px; flex-shrink: 0; align-self: center; transition: all 0.15s; }
 .coach-payment-mark-btn:hover { color: var(--color-green); border-color: var(--color-green); }
 
+/* ═══ Training Plan Tab ═══ */
+.coach-plan-tab { }
+.coach-plan-summary { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.coach-plan-stat { font-size: 13px; color: var(--color-text-secondary); }
+.coach-plan-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--color-accent); margin-right: 4px; letter-spacing: 0.5px; }
+.coach-plan-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.coach-plan-day { background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 8px; min-height: 80px; }
+.coach-plan-day.active { border-color: var(--color-accent-dim); }
+.coach-plan-day-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.coach-plan-day-name { font-size: 11px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; }
+.coach-plan-add-btn { background: none; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); color: var(--color-text-tertiary); cursor: pointer; padding: 2px; display: flex; }
+.coach-plan-add-btn:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.coach-plan-item { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+.coach-plan-select { padding: 3px 4px; border: 1px solid var(--color-border); border-radius: 3px; background: var(--color-bg-tertiary); color: var(--color-text); font-size: 10px; width: 100%; box-sizing: border-box; }
+.coach-plan-time { padding: 3px 4px; border: 1px solid var(--color-border); border-radius: 3px; background: var(--color-bg-tertiary); color: var(--color-text); font-size: 10px; width: 60px; }
+.coach-plan-dur { padding: 3px 4px; border: 1px solid var(--color-border); border-radius: 3px; background: var(--color-bg-tertiary); color: var(--color-text); font-size: 10px; width: 55px; }
+.coach-plan-remove { background: none; border: none; color: var(--color-text-tertiary); cursor: pointer; padding: 2px; }
+.coach-plan-remove:hover { color: var(--color-heart); }
+.coach-plan-empty-day { font-size: 11px; color: var(--color-text-tertiary); text-align: center; padding: 8px 0; }
+
 /* ═══ AI Recommendations ═══ */
 .coach-ai-section { background: var(--color-bg-secondary); border: 1px solid var(--color-accent-dim); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; }
 .coach-ai-header { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
@@ -263,6 +283,7 @@
   .coach-form-row { grid-template-columns: 1fr; }
   .coach-payment-card { flex-wrap: wrap; }
   .coach-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .coach-plan-days { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 480px) {
   .coach-stats { grid-template-columns: 1fr 1fr; gap: 8px; }

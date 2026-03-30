@@ -528,13 +528,23 @@ async function verifyParentPlayer(userId, playerId) {
 }
 
 /**
+ * Sprawdza dostęp do zawodnika (trener lub rodzic)
+ */
+async function verifyPlayerAccess(user, playerId) {
+  if (user.role === 'coach') {
+    return Player.findOne({ _id: playerId, coach: user._id, active: true });
+  }
+  return Player.findOne({ _id: playerId, parents: user._id, active: true });
+}
+
+/**
  * PUT /api/players/:id/training-plan
- * Aktualizuj plan treningowy (cel, dni, fokus, notatki)
+ * Aktualizuj plan treningowy (trener lub rodzic)
  */
 export const updateTrainingPlan = async (req, res, next) => {
   try {
     const data = updateTrainingPlanSchema.parse(req.body);
-    const player = await verifyParentPlayer(req.user._id, req.params.id);
+    const player = await verifyPlayerAccess(req.user, req.params.id);
 
     if (!player) {
       return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
@@ -581,7 +591,7 @@ export const updateTrainingPlan = async (req, res, next) => {
 export const addMilestone = async (req, res, next) => {
   try {
     const data = milestoneSchema.parse(req.body);
-    const player = await verifyParentPlayer(req.user._id, req.params.id);
+    const player = await verifyPlayerAccess(req.user, req.params.id);
 
     if (!player) {
       return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
@@ -614,7 +624,7 @@ export const addMilestone = async (req, res, next) => {
 export const updateMilestone = async (req, res, next) => {
   try {
     const data = updateMilestoneSchema.parse(req.body);
-    const player = await verifyParentPlayer(req.user._id, req.params.id);
+    const player = await verifyPlayerAccess(req.user, req.params.id);
 
     if (!player) {
       return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
@@ -648,7 +658,7 @@ export const updateMilestone = async (req, res, next) => {
  */
 export const deleteMilestone = async (req, res, next) => {
   try {
-    const player = await verifyParentPlayer(req.user._id, req.params.id);
+    const player = await verifyPlayerAccess(req.user, req.params.id);
 
     if (!player) {
       return res.status(404).json({ message: 'Zawodnik nie znaleziony' });

@@ -27,11 +27,11 @@ router.put('/:id/avatar', verifyToken, uploadMiddleware, uploadAvatar);
 router.get('/:id/timeline', verifyToken, getTimeline);
 router.get('/:id/skill-history', verifyToken, getSkillHistory);
 
-// Plan treningowy (rodzic)
-router.put('/:id/training-plan', verifyToken, requireRole('parent'), updateTrainingPlan);
-router.post('/:id/milestones', verifyToken, requireRole('parent'), addMilestone);
-router.put('/:id/milestones/:mid', verifyToken, requireRole('parent'), updateMilestone);
-router.delete('/:id/milestones/:mid', verifyToken, requireRole('parent'), deleteMilestone);
+// Plan treningowy (trener lub rodzic)
+router.put('/:id/training-plan', verifyToken, requireRole('coach', 'parent'), updateTrainingPlan);
+router.post('/:id/milestones', verifyToken, requireRole('coach', 'parent'), addMilestone);
+router.put('/:id/milestones/:mid', verifyToken, requireRole('coach', 'parent'), updateMilestone);
+router.delete('/:id/milestones/:mid', verifyToken, requireRole('coach', 'parent'), deleteMilestone);
 
 // Endpointy dostępne dla trenera i rodzica (dane filtrowane wg roli)
 router.get('/', verifyToken, requireRole('coach', 'parent'), getPlayers);

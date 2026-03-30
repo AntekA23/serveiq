@@ -13,6 +13,7 @@ import {
   Calendar,
   Target,
   AlertCircle,
+  FileText,
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -174,6 +175,50 @@ function PlanPreview({ child, navigate }) {
           <div className="plan-empty">
             Brak aktywnego planu treningowego
           </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function LatestReview({ childId, navigate }) {
+  const [review, setReview] = useState(null)
+
+  useEffect(() => {
+    if (!childId) return
+    api.get(`/reviews?player=${childId}`).then(({ data }) => {
+      const reviews = data.reviews || []
+      if (reviews.length > 0) setReview(reviews[0])
+    }).catch(() => {})
+  }, [childId])
+
+  if (!review) return null
+
+  const coachName = review.coach
+    ? `${review.coach.firstName || ''} ${review.coach.lastName || ''}`.trim()
+    : 'Trener'
+
+  return (
+    <div className="review-preview card" onClick={() => navigate(`/parent/child/${childId}/reviews`)}>
+      <div className="plan-preview-header">
+        <FileText size={16} />
+        <span>Ostatnia ocena od trenera</span>
+        <button className="plan-preview-more">
+          Wszystkie <ChevronRight size={14} />
+        </button>
+      </div>
+      <div className="review-preview-body">
+        <div className="review-preview-title">{review.title}</div>
+        <div className="review-preview-meta">
+          {coachName} · {new Date(review.createdAt).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })}
+          {review.overallRating && (
+            <span className="review-preview-stars">
+              {'★'.repeat(review.overallRating)}{'☆'.repeat(5 - review.overallRating)}
+            </span>
+          )}
+        </div>
+        {review.strengths && (
+          <div className="review-preview-excerpt">{review.strengths.slice(0, 120)}{review.strengths.length > 120 ? '...' : ''}</div>
         )}
       </div>
     </div>
@@ -423,6 +468,9 @@ export default function Dashboard() {
 
       {/* Plan preview */}
       <PlanPreview child={selectedChild} navigate={navigate} />
+
+      {/* Latest review */}
+      <LatestReview childId={selectedChild?._id} navigate={navigate} />
     </div>
   )
 }
