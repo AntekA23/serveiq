@@ -1,12 +1,92 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus } from 'lucide-react'
+import { Plus, ChevronRight } from 'lucide-react'
 import api from '../../api/axios'
 import Button from '../../components/ui/Button/Button'
 import PlayerCard from '../../components/shared/PlayerCard/PlayerCard'
 import SessionItem from '../../components/shared/SessionItem/SessionItem'
 import useUiStore from '../../store/uiStore'
 import './Dashboard.css'
+
+function InviteCodeCard() {
+  const [code, setCode] = useState('')
+  const [active, setActive] = useState(true)
+  const [loaded, setLoaded] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    Promise.all([
+      api.get('/coach-links/my-code'),
+      api.get('/coach-links/requests?status=pending')
+    ]).then(([codeRes, reqRes]) => {
+      setCode(codeRes.data.inviteCode || '')
+      setActive(codeRes.data.inviteActive)
+      setPendingCount(reqRes.data.requests.length)
+      setLoaded(true)
+    }).catch(() => setLoaded(true))
+  }, [])
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleReset = async () => {
+    try {
+      const res = await api.post('/coach-links/reset-code')
+      setCode(res.data.inviteCode)
+    } catch { /* silent */ }
+  }
+
+  const handleToggle = async () => {
+    try {
+      const res = await api.patch('/coach-links/toggle-code')
+      setActive(res.data.inviteActive)
+    } catch { /* silent */ }
+  }
+
+  if (!loaded) return null
+
+  return (
+    <div className="dashboard-section" style={{ marginBottom: 20 }}>
+      <div className="dashboard-section-title">
+        <span>Kod zaproszenia dla rodziców</span>
+        {pendingCount > 0 && (
+          <Button size="sm" onClick={() => navigate('/coach/requests')}>
+            {pendingCount} oczekujących <ChevronRight size={14} />
+          </Button>
+        )}
+      </div>
+      {active ? (
+        <>
+          <div style={{
+            fontSize: 28, fontWeight: 700, letterSpacing: 6, textAlign: 'center',
+            padding: '18px 0', background: 'var(--color-bg-secondary, #1a1d24)',
+            borderRadius: 8, marginBottom: 12, fontFamily: 'monospace',
+            border: '1px solid var(--color-border, #2a2d35)'
+          }}>{code}</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button variant="primary" size="sm" onClick={handleCopy} style={{ flex: 1 }}>
+              {copied ? 'Skopiowano!' : 'Kopiuj kod'}
+            </Button>
+            <Button size="sm" onClick={handleReset}>Nowy kod</Button>
+            <Button size="sm" onClick={handleToggle}>Wyłącz</Button>
+          </div>
+        </>
+      ) : (
+        <div style={{ textAlign: 'center', padding: '16px 0' }}>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: 14, marginBottom: 12 }}>
+            Kod jest dezaktywowany — rodzice nie mogą się dołączyć
+          </p>
+          <Button variant="primary" size="sm" onClick={handleToggle}>Aktywuj kod</Button>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -83,6 +163,8 @@ export default function Dashboard() {
           <div className="metric-value">{paymentStats?.pending?.count || 0}</div>
         </div>
       </div>
+
+      <InviteCodeCard />
 
       <div className="dashboard-sections">
         <div className="dashboard-section">
