@@ -89,6 +89,101 @@ function SessionRow({ session, onClick }) {
   )
 }
 
+function InviteCodeCard() {
+  const [code, setCode] = useState('')
+  const [active, setActive] = useState(true)
+  const [loadingCode, setLoadingCode] = useState(true)
+  const [copied, setCopied] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    Promise.all([
+      api.get('/coach-links/my-code'),
+      api.get('/coach-links/requests?status=pending')
+    ]).then(([codeRes, reqRes]) => {
+      setCode(codeRes.data.inviteCode || '')
+      setActive(codeRes.data.inviteActive)
+      setPendingCount(reqRes.data.requests.length)
+    }).catch(() => {}).finally(() => setLoadingCode(false))
+  }, [])
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleReset = async () => {
+    try {
+      const res = await api.post('/coach-links/reset-code')
+      setCode(res.data.inviteCode)
+    } catch { /* silent */ }
+  }
+
+  const handleToggle = async () => {
+    try {
+      const res = await api.patch('/coach-links/toggle-code')
+      setActive(res.data.inviteActive)
+    } catch { /* silent */ }
+  }
+
+  if (loadingCode) return null
+
+  return (
+    <div className="cd-card" style={{ marginBottom: 20 }}>
+      <div className="cd-card-head">
+        <h2>Kod zaproszenia</h2>
+        {pendingCount > 0 && (
+          <button
+            className="cd-card-link"
+            onClick={() => navigate('/coach/requests')}
+            style={{ color: 'var(--color-accent)', fontWeight: 700 }}
+          >
+            {pendingCount} oczekujących <ChevronRight size={14} />
+          </button>
+        )}
+      </div>
+      <div className="cd-card-content" style={{ padding: '16px 20px' }}>
+        {active ? (
+          <>
+            <div style={{
+              fontSize: 24, fontWeight: 700, letterSpacing: 4, textAlign: 'center',
+              padding: '14px 0', background: 'var(--color-bg)', borderRadius: 8, marginBottom: 12,
+              fontFamily: 'monospace', color: 'var(--color-text)'
+            }}>{code}</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={handleCopy} className="cd-card-link" style={{
+                flex: 1, padding: '8px 0', background: 'var(--color-accent)', color: '#0B0E14',
+                border: 'none', borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer',
+                textAlign: 'center', display: 'block'
+              }}>{copied ? 'Skopiowano!' : 'Kopiuj'}</button>
+              <button onClick={handleReset} className="cd-card-link" style={{
+                padding: '8px 14px', background: 'transparent', color: 'var(--color-text)',
+                border: '1px solid var(--color-border-md)', borderRadius: 8, fontSize: 13, cursor: 'pointer'
+              }}>Nowy kod</button>
+              <button onClick={handleToggle} className="cd-card-link" style={{
+                padding: '8px 14px', background: 'transparent', color: 'var(--color-text-secondary)',
+                border: '1px solid var(--color-border-md)', borderRadius: 8, fontSize: 13, cursor: 'pointer'
+              }}>Wyłącz</button>
+            </div>
+          </>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '8px 0' }}>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: 14, marginBottom: 12 }}>
+              Kod jest dezaktywowany
+            </p>
+            <button onClick={handleToggle} style={{
+              padding: '10px 24px', background: 'var(--color-accent)', color: '#0B0E14',
+              border: 'none', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer'
+            }}>Aktywuj</button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function CoachDashboard() {
   const user = useAuthStore((s) => s.user)
   const navigate = useNavigate()
@@ -249,6 +344,9 @@ export default function CoachDashboard() {
           })}
         </div>
       )}
+
+      {/* Invite code */}
+      <InviteCodeCard />
 
       {/* Two-column grid */}
       <div className="cd-grid">

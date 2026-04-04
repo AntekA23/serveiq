@@ -12,6 +12,7 @@ const coachNav = [
   { to: '/players', label: 'Zawodnicy', icon: '\u{1F464}' },
   { to: '/activities', label: 'Aktywno\u015Bci', icon: '\u{1F4C5}' },
   { to: '/reviews', label: 'Recenzje', icon: '\u{1F4CB}' },
+  { to: '/coach/requests', label: 'Pro\u015Bby', icon: '\u{1F4E9}' },
   { to: '/messages', label: 'Wiadomo\u015Bci', icon: '\u{1F4AC}' },
   { to: '/settings', label: 'Ustawienia', icon: '\u2699\uFE0F' },
 ]
@@ -19,6 +20,7 @@ const coachNav = [
 const parentNav = [
   { to: '/parent/dashboard', label: 'Panel', icon: '\u{1F3E0}' },
   { to: '/my-children', label: 'Moje dzieci', icon: '\u{1F476}' },
+  { to: '/parent/add-coach', label: 'Dodaj trenera', icon: '\u{1F517}' },
   { to: '/calendar', label: 'Kalendarz', icon: '\u{1F4C5}' },
   { to: '/timeline', label: 'Timeline', icon: '\u{1F4F0}' },
   { to: '/messages', label: 'Wiadomo\u015Bci', icon: '\u{1F4AC}' },

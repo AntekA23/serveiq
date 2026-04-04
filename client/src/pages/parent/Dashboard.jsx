@@ -188,6 +188,21 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Add coach button */}
+      <a
+        href="/parent/add-coach"
+        onClick={(e) => { e.preventDefault(); navigate('/parent/add-coach') }}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          padding: '8px 16px', background: 'var(--color-accent-muted)',
+          color: 'var(--color-accent)', border: '1px solid var(--color-accent)',
+          borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none',
+          marginBottom: 16
+        }}
+      >
+        🔗 Dodaj trenera
+      </a>
+
       {/* Hero section: child info */}
       <div className="dashboard-hero">
         <div className="dashboard-hero-child" onClick={() => navigate(`/parent/child/${selectedChild._id}`)}>

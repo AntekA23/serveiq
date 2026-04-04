@@ -16,6 +16,7 @@ import AcceptInvite from './pages/auth/AcceptInvite'
 import CoachDashboard from './pages/coach/Dashboard'
 import CoachPlayers from './pages/coach/Players'
 import CoachDisabled from './pages/coach/CoachDisabled'
+import CoachRequests from './pages/coach/CoachRequests'
 
 // Parent pages
 import ParentDashboard from './pages/parent/Dashboard'
@@ -28,6 +29,7 @@ import ParentMessages from './pages/parent/Chat'
 import Onboarding from './pages/parent/Onboarding'
 import ParentSettings from './pages/parent/Settings'
 import Pricing from './pages/parent/Pricing'
+import AddCoach from './pages/parent/AddCoach'
 
 // Club pages
 import ClubDashboard from './pages/club/ClubDashboard'
@@ -155,6 +157,14 @@ export default function App() {
           }
         />
         <Route path="/coach/disabled" element={<CoachDisabled />} />
+        <Route
+          path="/coach/requests"
+          element={
+            <ProtectedRoute role="coach">
+              <AppShell><CoachRequests /></AppShell>
+            </ProtectedRoute>
+          }
+        />
 
         {/* ==================== */}
         {/* PARENT ROUTES        */}
@@ -220,6 +230,14 @@ export default function App() {
           element={
             <ProtectedRoute role="parent">
               <AppShell><Pricing /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/add-coach"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><AddCoach /></AppShell>
             </ProtectedRoute>
           }
         />
