@@ -148,71 +148,97 @@
   margin: 4px 0;
 }
 
-/* ─── Sliders ─── */
-.settings-slider-row {
+/* ─── Textarea ─── */
+.settings-textarea-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 4px 0;
+  gap: 6px;
 }
 
-.settings-slider-info {
-  display: flex;
-  flex-direction: column;
+.settings-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  resize: vertical;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  box-sizing: border-box;
+  min-height: 72px;
 }
 
-.settings-slider-control {
+.settings-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+/* ─── Invite Code ─── */
+.settings-invite-desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.settings-invite-code-box {
+  background: var(--color-bg);
+  border: 2px dashed var(--color-accent);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.settings-invite-code-box.inactive {
+  border-color: var(--color-border);
+  opacity: 0.5;
+}
+
+.settings-invite-code {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  color: var(--color-accent);
+}
+
+.settings-invite-code-box.inactive .settings-invite-code {
+  color: var(--color-text-tertiary);
+}
+
+.settings-invite-status {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
 }
 
-.settings-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  background: var(--color-bg-tertiary);
-  border-radius: var(--radius-full);
-  outline: none;
-  cursor: pointer;
-}
-
-.settings-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
+.settings-invite-dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: var(--color-accent);
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 0 6px rgba(204,255,0,0.3);
+  background: var(--color-text-tertiary);
+  flex-shrink: 0;
 }
 
-.settings-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  cursor: pointer;
-  border: none;
+.settings-invite-dot.active {
+  background: var(--color-green);
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
 }
 
-.settings-slider-value {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-accent);
-  min-width: 40px;
-  text-align: right;
+.settings-invite-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.settings-slider-value--red {
-  color: var(--color-red);
-}
-
-.settings-slider-value--amber {
-  color: var(--color-amber);
+.settings-invite-hint {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  line-height: 1.4;
 }
 
 /* ─── Quiet Hours ─── */

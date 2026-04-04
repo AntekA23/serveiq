@@ -3,15 +3,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
-  User,
-  Lock,
-  Bell,
-  Save,
-  Trash2,
-  Phone,
-  Mail,
-  AlertTriangle,
-  X,
+  User, Lock, Bell, Save, Trash2, Phone, Mail,
+  AlertTriangle, X, Link2, Copy, RefreshCw, ToggleLeft, ToggleRight,
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -21,45 +14,67 @@ import Button from '../../components/ui/Button/Button'
 import Input from '../../components/ui/Input/Input'
 import './Settings.css'
 
-const TABS = [
-  { key: 'profile', label: 'Profil', icon: User },
-  { key: 'security', label: 'Bezpieczenstwo', icon: Lock },
-  { key: 'notifications', label: 'Powiadomienia', icon: Bell },
-]
-
-// --- Profile Tab ---
+// ────────────────────────────────────────────
+// Profile Tab (shared)
+// ────────────────────────────────────────────
 const profileSchema = z.object({
-  firstName: z.string().min(2, 'Imie jest wymagane'),
+  firstName: z.string().min(2, 'Imię jest wymagane'),
   lastName: z.string().min(2, 'Nazwisko jest wymagane'),
   phone: z.string().optional(),
+})
+
+const coachProfileSchema = profileSchema.extend({
+  specialization: z.string().optional(),
+  itfLevel: z.string().optional(),
+  bio: z.string().max(500).optional(),
 })
 
 function TabProfile() {
   const user = useAuthStore((s) => s.user)
   const toast = useToast()
   const [loading, setLoading] = useState(false)
+  const isCoach = user?.role === 'coach'
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(profileSchema),
+    resolver: zodResolver(isCoach ? coachProfileSchema : profileSchema),
     defaultValues: {
       firstName: user?.firstName || '',
       lastName: user?.lastName || '',
       phone: user?.phone || '',
+      specialization: user?.coachProfile?.specialization || '',
+      itfLevel: user?.coachProfile?.itfLevel || '',
+      bio: user?.coachProfile?.bio || '',
     },
   })
 
   const onSubmit = async (data) => {
     setLoading(true)
     try {
-      await api.put('/auth/profile', data)
-      useAuthStore.getState().setUser({ ...user, ...data })
+      const payload = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+      }
+      if (isCoach) {
+        payload.coachProfile = {
+          specialization: data.specialization,
+          itfLevel: data.itfLevel,
+          bio: data.bio,
+        }
+      }
+      await api.put('/auth/profile', payload)
+      useAuthStore.getState().setUser({
+        ...user,
+        ...payload,
+        coachProfile: isCoach ? { ...user.coachProfile, ...payload.coachProfile } : user.coachProfile,
+      })
       toast.success('Profil zaktualizowany')
     } catch {
-      toast.error('Nie udalo sie zapisac zmian')
+      toast.error('Nie udało się zapisać zmian')
     } finally {
       setLoading(false)
     }
@@ -70,7 +85,7 @@ function TabProfile() {
       <div className="settings-section-title">Dane osobowe</div>
       <div className="settings-form-row">
         <Input
-          label="Imie"
+          label="Imię"
           placeholder="Jan"
           icon={User}
           register={register('firstName')}
@@ -96,6 +111,39 @@ function TabProfile() {
         <Mail size={14} />
         <span>Email: {user?.email}</span>
       </div>
+
+      {isCoach && (
+        <>
+          <div className="settings-divider" />
+          <div className="settings-section-title">Profil trenera</div>
+          <div className="settings-form-row">
+            <Input
+              label="Specjalizacja"
+              placeholder="np. Tenis juniorów"
+              register={register('specialization')}
+              error={errors.specialization?.message}
+            />
+            <Input
+              label="Poziom ITF"
+              placeholder="np. ITF Level 2"
+              register={register('itfLevel')}
+              error={errors.itfLevel?.message}
+            />
+          </div>
+          <div className="settings-textarea-group">
+            <label className="input-label">Bio</label>
+            <textarea
+              {...register('bio')}
+              placeholder="Krótki opis o sobie — rodzice zobaczą to przy wpisywaniu kodu zaproszenia"
+              maxLength={500}
+              rows={3}
+              className="settings-textarea"
+            />
+            {errors.bio && <span className="input-error">{errors.bio.message}</span>}
+          </div>
+        </>
+      )}
+
       <Button type="submit" variant="primary" loading={loading}>
         <Save size={16} />
         Zapisz zmiany
@@ -104,13 +152,112 @@ function TabProfile() {
   )
 }
 
-// --- Security Tab ---
+// ────────────────────────────────────────────
+// Invite Code Tab (coach only)
+// ────────────────────────────────────────────
+function TabInviteCode() {
+  const [code, setCode] = useState('')
+  const [active, setActive] = useState(true)
+  const [loaded, setLoaded] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [resetting, setResetting] = useState(false)
+  const toast = useToast()
+
+  useEffect(() => {
+    api.get('/coach-links/my-code')
+      .then((res) => {
+        setCode(res.data.inviteCode || '')
+        setActive(res.data.inviteActive)
+      })
+      .catch(() => toast.error('Nie udało się pobrać kodu'))
+      .finally(() => setLoaded(true))
+  }, [toast])
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code)
+    setCopied(true)
+    toast.success('Kod skopiowany')
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleReset = async () => {
+    setResetting(true)
+    try {
+      const res = await api.post('/coach-links/reset-code')
+      setCode(res.data.inviteCode)
+      toast.success('Wygenerowano nowy kod')
+    } catch {
+      toast.error('Nie udało się zresetować kodu')
+    } finally {
+      setResetting(false)
+    }
+  }
+
+  const handleToggle = async () => {
+    try {
+      const res = await api.patch('/coach-links/toggle-code')
+      setActive(res.data.inviteActive)
+      toast.success(res.data.inviteActive ? 'Kod aktywowany' : 'Kod dezaktywowany')
+    } catch {
+      toast.error('Nie udało się zmienić statusu kodu')
+    }
+  }
+
+  if (!loaded) return <div className="settings-section"><p>Ładowanie...</p></div>
+
+  return (
+    <div className="settings-section">
+      <div className="settings-section-title">Kod zaproszenia dla rodziców</div>
+      <p className="settings-invite-desc">
+        Podaj ten kod rodzicowi — wpisze go w aplikacji, wybierze dziecko i wyśle prośbę o dołączenie.
+        Ty decydujesz czy zaakceptować.
+      </p>
+
+      <div className={`settings-invite-code-box ${!active ? 'inactive' : ''}`}>
+        <span className="settings-invite-code">{active ? code : '--------'}</span>
+      </div>
+
+      <div className="settings-invite-status">
+        <span className={`settings-invite-dot ${active ? 'active' : ''}`} />
+        <span>{active ? 'Aktywny — rodzice mogą dołączać' : 'Nieaktywny — kod nie działa'}</span>
+      </div>
+
+      <div className="settings-invite-actions">
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={handleCopy}
+          disabled={!active}
+        >
+          <Copy size={14} />
+          {copied ? 'Skopiowano!' : 'Kopiuj kod'}
+        </Button>
+        <Button size="sm" onClick={handleReset} loading={resetting}>
+          <RefreshCw size={14} />
+          Nowy kod
+        </Button>
+        <Button size="sm" onClick={handleToggle}>
+          {active ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+          {active ? 'Wyłącz' : 'Włącz'}
+        </Button>
+      </div>
+
+      <div className="settings-invite-hint">
+        Po wygenerowaniu nowego kodu stary przestaje działać. Istniejące połączenia zostają.
+      </div>
+    </div>
+  )
+}
+
+// ────────────────────────────────────────────
+// Security Tab (shared)
+// ────────────────────────────────────────────
 const passwordSchema = z.object({
-  oldPassword: z.string().min(1, 'Wprowadz aktualne haslo'),
-  newPassword: z.string().min(6, 'Nowe haslo musi miec co najmniej 6 znakow'),
-  confirmPassword: z.string().min(1, 'Potwierdz haslo'),
+  oldPassword: z.string().min(1, 'Wprowadź aktualne hasło'),
+  newPassword: z.string().min(6, 'Nowe hasło musi mieć co najmniej 6 znaków'),
+  confirmPassword: z.string().min(1, 'Potwierdź hasło'),
 }).refine((data) => data.newPassword === data.confirmPassword, {
-  message: 'Hasla musza sie zgadzac',
+  message: 'Hasła muszą się zgadzać',
   path: ['confirmPassword'],
 })
 
@@ -137,10 +284,10 @@ function TabSecurity() {
         oldPassword: data.oldPassword,
         newPassword: data.newPassword,
       })
-      toast.success('Haslo zostalo zmienione')
+      toast.success('Hasło zostało zmienione')
       reset()
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Nie udalo sie zmienic hasla')
+      toast.error(err.response?.data?.message || 'Nie udało się zmienić hasła')
     } finally {
       setLoadingPw(false)
     }
@@ -150,10 +297,10 @@ function TabSecurity() {
     setDeleting(true)
     try {
       await api.delete('/auth/account')
-      toast.success('Konto zostalo usuniete')
+      toast.success('Konto zostało usunięte')
       await logout()
     } catch {
-      toast.error('Nie udalo sie usunac konta')
+      toast.error('Nie udało się usunąć konta')
     } finally {
       setDeleting(false)
       setShowDeleteModal(false)
@@ -163,28 +310,28 @@ function TabSecurity() {
   return (
     <>
       <form className="settings-section" onSubmit={handleSubmit(onSubmitPassword)}>
-        <div className="settings-section-title">Zmien haslo</div>
+        <div className="settings-section-title">Zmień hasło</div>
         <Input
-          label="Aktualne haslo"
+          label="Aktualne hasło"
           type="password"
-          placeholder="Wprowadz haslo"
+          placeholder="Wprowadź hasło"
           icon={Lock}
           register={register('oldPassword')}
           error={errors.oldPassword?.message}
         />
         <div className="settings-form-row">
           <Input
-            label="Nowe haslo"
+            label="Nowe hasło"
             type="password"
-            placeholder="Min. 6 znakow"
+            placeholder="Min. 6 znaków"
             icon={Lock}
             register={register('newPassword')}
             error={errors.newPassword?.message}
           />
           <Input
-            label="Potwierdz haslo"
+            label="Potwierdź hasło"
             type="password"
-            placeholder="Powtorz haslo"
+            placeholder="Powtórz hasło"
             icon={Lock}
             register={register('confirmPassword')}
             error={errors.confirmPassword?.message}
@@ -192,18 +339,18 @@ function TabSecurity() {
         </div>
         <Button type="submit" variant="primary" loading={loadingPw}>
           <Save size={16} />
-          Zmien haslo
+          Zmień hasło
         </Button>
       </form>
 
       <div className="settings-section settings-danger-zone">
         <div className="settings-section-title settings-danger-title">Strefa niebezpieczna</div>
         <p className="settings-danger-desc">
-          Usuniesz swoje konto i wszystkie powiazane dane. Ta operacja jest nieodwracalna.
+          Usuniesz swoje konto i wszystkie powiązane dane. Ta operacja jest nieodwracalna.
         </p>
         <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
           <Trash2 size={16} />
-          Usun konto
+          Usuń konto
         </Button>
       </div>
 
@@ -216,11 +363,11 @@ function TabSecurity() {
             <div className="settings-delete-modal-icon">
               <AlertTriangle size={32} />
             </div>
-            <h3>Usunac konto?</h3>
-            <p>Ta operacja jest nieodwracalna. Wszystkie Twoje dane, dzieci i ustawienia zostana trwale usuniete.</p>
+            <h3>Usunąć konto?</h3>
+            <p>Ta operacja jest nieodwracalna. Wszystkie Twoje dane, dzieci i ustawienia zostaną trwale usunięte.</p>
             <div className="settings-delete-modal-actions">
               <Button variant="danger" onClick={handleDelete} loading={deleting}>
-                Tak, usun konto
+                Tak, usuń konto
               </Button>
               <Button onClick={() => setShowDeleteModal(false)}>
                 Anuluj
@@ -233,26 +380,21 @@ function TabSecurity() {
   )
 }
 
-// --- Notifications Tab ---
+// ────────────────────────────────────────────
+// Notifications Tab (shared)
+// ────────────────────────────────────────────
 function TabNotifications() {
   const toast = useToast()
   const [loading, setLoading] = useState(false)
   const [settings, setSettings] = useState({
     weeklyEmail: true,
     pushNotifications: true,
-    criticalThreshold: 30,
-    warningThreshold: 50,
-    minSleepHours: 7,
     quietHoursStart: '22:00',
     quietHoursEnd: '07:00',
   })
 
   const handleToggle = (key) => {
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }))
-  }
-
-  const handleSlider = (key, value) => {
-    setSettings((prev) => ({ ...prev, [key]: Number(value) }))
   }
 
   const handleTime = (key, value) => {
@@ -263,9 +405,9 @@ function TabNotifications() {
     setLoading(true)
     try {
       await api.put('/auth/notification-settings', settings)
-      toast.success('Ustawienia powiadomien zapisane')
+      toast.success('Ustawienia powiadomień zapisane')
     } catch {
-      toast.error('Nie udalo sie zapisac ustawien')
+      toast.error('Nie udało się zapisać ustawień')
     } finally {
       setLoading(false)
     }
@@ -291,7 +433,7 @@ function TabNotifications() {
       <div className="settings-toggle-row">
         <div className="settings-toggle-info">
           <div className="settings-toggle-label">Powiadomienia push</div>
-          <div className="settings-toggle-desc">Powiadomienia w przegladarce</div>
+          <div className="settings-toggle-desc">Powiadomienia w przeglądarce</div>
         </div>
         <button
           className={`settings-toggle ${settings.pushNotifications ? 'active' : ''}`}
@@ -303,66 +445,9 @@ function TabNotifications() {
 
       <div className="settings-divider" />
 
-      <div className="settings-slider-row">
-        <div className="settings-slider-info">
-          <div className="settings-toggle-label">Alert regeneracji (krytyczny)</div>
-          <div className="settings-toggle-desc">Powiadom gdy regeneracja spadnie ponizej</div>
-        </div>
-        <div className="settings-slider-control">
-          <input
-            type="range"
-            min="10"
-            max="60"
-            value={settings.criticalThreshold}
-            onChange={(e) => handleSlider('criticalThreshold', e.target.value)}
-            className="settings-slider"
-          />
-          <span className="settings-slider-value settings-slider-value--red">{settings.criticalThreshold}%</span>
-        </div>
-      </div>
-
-      <div className="settings-slider-row">
-        <div className="settings-slider-info">
-          <div className="settings-toggle-label">Alert regeneracji (ostrzezenie)</div>
-          <div className="settings-toggle-desc">Powiadom gdy regeneracja spadnie ponizej</div>
-        </div>
-        <div className="settings-slider-control">
-          <input
-            type="range"
-            min="30"
-            max="80"
-            value={settings.warningThreshold}
-            onChange={(e) => handleSlider('warningThreshold', e.target.value)}
-            className="settings-slider"
-          />
-          <span className="settings-slider-value settings-slider-value--amber">{settings.warningThreshold}%</span>
-        </div>
-      </div>
-
-      <div className="settings-slider-row">
-        <div className="settings-slider-info">
-          <div className="settings-toggle-label">Minimalny czas snu</div>
-          <div className="settings-toggle-desc">Powiadom gdy sen jest krotszy niz</div>
-        </div>
-        <div className="settings-slider-control">
-          <input
-            type="range"
-            min="5"
-            max="10"
-            step="0.5"
-            value={settings.minSleepHours}
-            onChange={(e) => handleSlider('minSleepHours', e.target.value)}
-            className="settings-slider"
-          />
-          <span className="settings-slider-value">{settings.minSleepHours}h</span>
-        </div>
-      </div>
-
-      <div className="settings-divider" />
-
       <div className="settings-quiet-hours">
         <div className="settings-toggle-label">Godziny ciszy</div>
-        <div className="settings-toggle-desc">Brak powiadomien w tym przedziale</div>
+        <div className="settings-toggle-desc">Brak powiadomień w tym przedziale</div>
         <div className="settings-quiet-hours-row">
           <div className="settings-time-field">
             <label className="input-label">Od</label>
@@ -393,8 +478,20 @@ function TabNotifications() {
   )
 }
 
-// --- Main Settings ---
+// ────────────────────────────────────────────
+// Main Settings
+// ────────────────────────────────────────────
 export default function Settings() {
+  const user = useAuthStore((s) => s.user)
+  const isCoach = user?.role === 'coach'
+
+  const TABS = [
+    { key: 'profile', label: 'Profil', icon: User },
+    ...(isCoach ? [{ key: 'invite', label: 'Kod zaproszenia', icon: Link2 }] : []),
+    { key: 'security', label: 'Bezpieczeństwo', icon: Lock },
+    { key: 'notifications', label: 'Powiadomienia', icon: Bell },
+  ]
+
   const [activeTab, setActiveTab] = useState('profile')
 
   return (
@@ -416,6 +513,7 @@ export default function Settings() {
 
       <div className="settings-content">
         {activeTab === 'profile' && <TabProfile />}
+        {activeTab === 'invite' && isCoach && <TabInviteCode />}
         {activeTab === 'security' && <TabSecurity />}
         {activeTab === 'notifications' && <TabNotifications />}
       </div>
