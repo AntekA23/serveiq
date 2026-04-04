@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import useAuthStore from './store/authStore'
-import useAuth from './hooks/useAuth'
+import useAuthStore, { useHydrated } from './store/authStore'
 import AppShell from './components/layout/AppShell'
 import ToastContainer from './components/ui/Toast'
 
@@ -117,16 +115,12 @@ function RootRedirect() {
 }
 
 export default function App() {
-  const { checkAuth } = useAuth()
-  const [loading, setLoading] = useState(true)
+  const hydrated = useHydrated()
 
-  useEffect(() => {
-    checkAuth().finally(() => setLoading(false))
-  }, [checkAuth])
-
-  if (loading) {
-    return null
-  }
+  // Wait for zustand to rehydrate from localStorage before rendering anything.
+  // Without this, the store initializes with null values and ProtectedRoute
+  // redirects to /login before the persisted token is available.
+  if (!hydrated) return null
 
   return (
     <>

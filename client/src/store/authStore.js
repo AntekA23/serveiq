@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -25,5 +26,24 @@ const useAuthStore = create(
     }
   )
 )
+
+/**
+ * Hook that returns true only after zustand has rehydrated from localStorage.
+ * Use this to prevent rendering auth-dependent UI before stored state is available.
+ */
+export function useHydrated() {
+  const [hydrated, setHydrated] = useState(useAuthStore.persist.hasHydrated())
+
+  useEffect(() => {
+    if (useAuthStore.persist.hasHydrated()) {
+      setHydrated(true)
+      return
+    }
+    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true))
+    return unsub
+  }, [])
+
+  return hydrated
+}
 
 export default useAuthStore
