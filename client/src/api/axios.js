@@ -91,11 +91,9 @@ api.interceptors.response.use(
         return api(originalRequest)
       } catch (refreshError) {
         processQueue(refreshError, null)
-        // Only logout if refresh explicitly returned 401
-        // (not network errors, timeouts, etc.)
-        if (refreshError.response?.status === 401) {
-          useAuthStore.getState().logout()
-        }
+        // DON'T logout here. Let the calling code handle it.
+        // The user stays logged in with cached data.
+        // Only explicit logout action should clear the store.
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false

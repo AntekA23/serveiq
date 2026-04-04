@@ -45,41 +45,21 @@ export default function useAuth() {
     const currentToken = useAuthStore.getState().accessToken
     const currentUser = useAuthStore.getState().user
 
-    // No token at all — nothing to check
+    // No token — not logged in
     if (!currentToken) return
 
-    // Skip auth check in demo mode - user is already set
+    // Demo mode — already set
     if (currentToken === DEMO_TOKEN) return
 
-    // We have token + user in localStorage — trust it.
-    // Try to refresh user data from server, but don't logout on failure.
-    if (currentUser) {
-      try {
-        const { data } = await api.get('/auth/me')
-        setUser(data.user)
-        if (data.accessToken) {
-          setAuth(data.user, data.accessToken)
-        }
-      } catch {
-        // Server unreachable or token expired and refresh failed.
-        // Keep using cached user — don't logout.
-        // Interceptor only logouts on explicit 401 from refresh now.
-      }
-      return
-    }
+    // We have both token AND user in localStorage — just use them.
+    // Don't call /auth/me at all. The token will be validated
+    // on actual API calls, and refresh will happen automatically
+    // via the interceptor when needed.
+    if (currentUser) return
 
-    // Token exists but no user (shouldn't happen, but handle it)
-    try {
-      const { data } = await api.get('/auth/me')
-      setUser(data.user)
-      if (data.accessToken) {
-        setAuth(data.user, data.accessToken)
-      }
-    } catch {
-      // No cached user and can't fetch — clear token
-      useAuthStore.getState().logout()
-    }
-  }, [setUser, setAuth])
+    // Edge case: token exists but no user (corrupted state) — clear it
+    useAuthStore.getState().logout()
+  }, [])
 
   const acceptInvite = useCallback(async (inviteToken, password, firstName, lastName, phone) => {
     const { data } = await api.post('/auth/accept-invite', { inviteToken, password, firstName, lastName, phone })
