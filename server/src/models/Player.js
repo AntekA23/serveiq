@@ -3,45 +3,12 @@ import mongoose from 'mongoose';
 const skillSchema = {
   score: {
     type: Number,
-    min: [0, 'Wynik umiejętności nie może być mniejszy niż 0'],
-    max: [100, 'Wynik umiejętności nie może być większy niż 100'],
+    min: 0,
+    max: 5,
     default: 0,
   },
   notes: String,
 };
-
-const goalSchema = new mongoose.Schema(
-  {
-    text: {
-      type: String,
-      required: [true, 'Treść celu jest wymagana'],
-    },
-    dueDate: Date,
-    completed: {
-      type: Boolean,
-      default: false,
-    },
-    completedAt: Date,
-  },
-  { _id: true }
-);
-
-const milestoneSchema = new mongoose.Schema(
-  {
-    text: {
-      type: String,
-      required: [true, 'Treść kamienia milowego jest wymagana'],
-    },
-    date: Date,
-    description: String,
-    completed: {
-      type: Boolean,
-      default: false,
-    },
-    completedAt: Date,
-  },
-  { _id: true }
-);
 
 const plannedSessionSchema = new mongoose.Schema(
   {
@@ -100,6 +67,23 @@ const playerSchema = new mongoose.Schema(
         ref: 'User',
       },
     ],
+    club: { type: mongoose.Schema.Types.ObjectId, ref: 'Club' },
+    groups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
+
+    // Pathway
+    pathwayStage: { type: String },
+    pathwayHistory: [{
+      stage: String,
+      startDate: Date,
+      endDate: Date,
+      notes: String,
+    }],
+    developmentLevel: {
+      type: String,
+      enum: ['beginner', 'tennis10', 'committed', 'advanced', 'performance'],
+      default: 'beginner',
+    },
+
     ranking: {
       pzt: Number,
       te: Number,
@@ -119,18 +103,15 @@ const playerSchema = new mongoose.Schema(
       forehand: skillSchema,
       backhand: skillSchema,
       volley: skillSchema,
+      movement: skillSchema,
       tactics: skillSchema,
+      mental: skillSchema,
       fitness: skillSchema,
     },
-    goals: [goalSchema],
     trainingPlan: {
       weeklyGoal: {
-        sessionsPerWeek: { type: Number, default: 0 },
-        hoursPerWeek: { type: Number, default: 0 },
-      },
-      scheduledDays: {
-        type: [Number],
-        default: [],
+        sessionsPerWeek: { type: Number, default: 3 },
+        hoursPerWeek: { type: Number, default: 4 },
       },
       weeklySchedule: {
         type: [plannedSessionSchema],
@@ -138,9 +119,7 @@ const playerSchema = new mongoose.Schema(
       },
       focus: [String],
       notes: String,
-      milestones: [milestoneSchema],
     },
-    monthlyRate: Number,
     active: {
       type: Boolean,
       default: true,
@@ -150,6 +129,11 @@ const playerSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+playerSchema.index({ club: 1, pathwayStage: 1 });
+playerSchema.index({ coach: 1 });
+playerSchema.index({ 'parents': 1 });
+playerSchema.index({ club: 1, active: 1 });
 
 const Player = mongoose.model('Player', playerSchema);
 

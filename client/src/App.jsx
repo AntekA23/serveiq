@@ -12,47 +12,38 @@ import ForgotPassword from './pages/auth/ForgotPassword'
 import ResetPassword from './pages/auth/ResetPassword'
 import AcceptInvite from './pages/auth/AcceptInvite'
 
-// Parent pages (PRIMARY)
+// Coach pages
+import CoachDashboard from './pages/coach/Dashboard'
+import CoachPlayers from './pages/coach/Players'
+import CoachDisabled from './pages/coach/CoachDisabled'
+
+// Parent pages
 import ParentDashboard from './pages/parent/Dashboard'
 import ChildProfile from './pages/parent/ChildProfile'
-import HealthHistory from './pages/parent/HealthHistory'
-import Timeline from './pages/parent/Timeline'
-import Devices from './pages/parent/Devices'
+import ParentTimeline from './pages/parent/Timeline'
 import TrainingPlan from './pages/parent/TrainingPlan'
 import Tournaments from './pages/parent/Tournaments'
 import ParentPayments from './pages/parent/Payments'
 import ParentMessages from './pages/parent/Chat'
 import Onboarding from './pages/parent/Onboarding'
-import Settings from './pages/parent/Settings'
+import ParentSettings from './pages/parent/Settings'
 import Pricing from './pages/parent/Pricing'
 
-// Coach pages
-import CoachDashboard from './pages/coach/CoachDashboard'
-import CoachPlayers from './pages/coach/CoachPlayers'
-import CoachPlayerProfile from './pages/coach/CoachPlayerProfile'
-import CoachSessions from './pages/coach/CoachSessions'
-import CoachNewSession from './pages/coach/CoachNewSession'
-import CoachEditSession from './pages/coach/CoachEditSession'
-import CoachNewPlayer from './pages/coach/CoachNewPlayer'
-import CoachCalendar from './pages/coach/CoachCalendar'
-import CoachReviews from './pages/coach/CoachReviews'
-import CoachNewReview from './pages/coach/CoachNewReview'
-import CoachPayments from './pages/coach/CoachPayments'
+// Club pages
+import ClubDashboard from './pages/club/ClubDashboard'
+import CoachesList from './pages/club/CoachesList'
 
-// Parent extra pages
-import Reviews from './pages/parent/Reviews'
-import SkillProgress from './pages/parent/SkillProgress'
-import FindCoach from './pages/parent/FindCoach'
+// Shared pages (placeholders)
+import Groups from './pages/shared/Groups'
+import Activities from './pages/shared/Activities'
+import Reviews from './pages/shared/Reviews'
+import SharedTimeline from './pages/shared/Timeline'
+import Calendar from './pages/shared/Calendar'
+import MyChildren from './pages/shared/MyChildren'
 
 // Payment pages
 import PaymentSuccess from './pages/parent/PaymentSuccess'
 import PaymentCancel from './pages/parent/PaymentCancel'
-
-// OAuth callback
-import DeviceCallback from './pages/parent/DeviceCallback'
-
-// 404
-import NotFound from './pages/NotFound'
 
 // Landing + Legal pages
 import Landing from './pages/Landing'
@@ -70,8 +61,32 @@ function ProtectedRoute({ children, role }) {
   }
 
   if (role && user?.role !== role) {
+    // Redirect to the appropriate dashboard for this role
     if (user?.role === 'coach') return <Navigate to="/coach/dashboard" replace />
+    if (user?.role === 'clubAdmin') return <Navigate to="/club/dashboard" replace />
     return <Navigate to="/parent/dashboard" replace />
+  }
+
+  // Onboarding redirect for parents
+  if (
+    user?.role === 'parent' &&
+    !user?.onboardingCompleted &&
+    location.pathname !== '/parent/onboarding'
+  ) {
+    return <Navigate to="/parent/onboarding" replace />
+  }
+
+  return children
+}
+
+/** Routes accessible by multiple authenticated roles */
+function AuthRoute({ children }) {
+  const accessToken = useAuthStore((s) => s.accessToken)
+  const user = useAuthStore((s) => s.user)
+  const location = useLocation()
+
+  if (!accessToken) {
+    return <Navigate to="/login" replace />
   }
 
   // Onboarding redirect for parents
@@ -92,6 +107,7 @@ function RootRedirect() {
 
   if (!accessToken) return <Landing />
   if (user?.role === 'coach') return <Navigate to="/coach/dashboard" replace />
+  if (user?.role === 'clubAdmin') return <Navigate to="/club/dashboard" replace />
   if (user?.role === 'parent' && !user?.onboardingCompleted) {
     return <Navigate to="/parent/onboarding" replace />
   }
@@ -127,54 +143,22 @@ export default function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/accept-invite/:token" element={<AcceptInvite />} />
 
-        {/* ═══ Coach routes ═══ */}
-        <Route path="/coach/dashboard" element={
-          <ProtectedRoute role="coach"><AppShell><CoachDashboard /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/players" element={
-          <ProtectedRoute role="coach"><AppShell><CoachPlayers /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/players/new" element={
-          <ProtectedRoute role="coach"><AppShell><CoachNewPlayer /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/player/:id" element={
-          <ProtectedRoute role="coach"><AppShell><CoachPlayerProfile /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/calendar" element={
-          <ProtectedRoute role="coach"><AppShell><CoachCalendar /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/sessions" element={
-          <ProtectedRoute role="coach"><AppShell><CoachSessions /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/sessions/new" element={
-          <ProtectedRoute role="coach"><AppShell><CoachNewSession /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/sessions/:id/edit" element={
-          <ProtectedRoute role="coach"><AppShell><CoachEditSession /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/reviews" element={
-          <ProtectedRoute role="coach"><AppShell><CoachReviews /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/reviews/new" element={
-          <ProtectedRoute role="coach"><AppShell><CoachNewReview /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/reviews/:id/edit" element={
-          <ProtectedRoute role="coach"><AppShell><CoachNewReview /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/payments" element={
-          <ProtectedRoute role="coach"><AppShell><CoachPayments /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/messages" element={
-          <ProtectedRoute role="coach"><AppShell><ParentMessages /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/messages/:userId" element={
-          <ProtectedRoute role="coach"><AppShell><ParentMessages /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/coach/settings" element={
-          <ProtectedRoute role="coach"><AppShell><Settings /></AppShell></ProtectedRoute>
-        } />
+        {/* ==================== */}
+        {/* COACH ROUTES         */}
+        {/* ==================== */}
+        <Route
+          path="/coach/dashboard"
+          element={
+            <ProtectedRoute role="coach">
+              <AppShell><CoachDashboard /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/coach/disabled" element={<CoachDisabled />} />
 
-        {/* Parent onboarding (no AppShell) */}
+        {/* ==================== */}
+        {/* PARENT ROUTES        */}
+        {/* ==================== */}
         <Route
           path="/parent/onboarding"
           element={
@@ -183,63 +167,185 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/parent/dashboard"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><ParentDashboard /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/child/:id"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><ChildProfile /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/child/:id/timeline"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><ParentTimeline /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/training-plan"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><TrainingPlan /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/tournaments"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><Tournaments /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/payments"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><ParentPayments /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/pricing"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><Pricing /></AppShell>
+            </ProtectedRoute>
+          }
+        />
 
-        {/* ═══ Parent routes (PRIMARY) ═══ */}
-        <Route path="/parent/dashboard" element={
-          <ProtectedRoute role="parent"><AppShell><ParentDashboard /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/child/:id" element={
-          <ProtectedRoute role="parent"><AppShell><ChildProfile /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/child/:id/health" element={
-          <ProtectedRoute role="parent"><AppShell><HealthHistory /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/child/:id/progress" element={
-          <ProtectedRoute role="parent"><AppShell><SkillProgress /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/child/:id/reviews" element={
-          <ProtectedRoute role="parent"><AppShell><Reviews /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/child/:id/timeline" element={
-          <ProtectedRoute role="parent"><AppShell><Timeline /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/find-coach" element={
-          <ProtectedRoute role="parent"><AppShell><FindCoach /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/devices" element={
-          <ProtectedRoute role="parent"><AppShell><Devices /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/training-plan" element={
-          <ProtectedRoute role="parent"><AppShell><TrainingPlan /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/tournaments" element={
-          <ProtectedRoute role="parent"><AppShell><Tournaments /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/payments" element={
-          <ProtectedRoute role="parent"><AppShell><ParentPayments /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/messages" element={
-          <ProtectedRoute role="parent"><AppShell><ParentMessages /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/messages/:userId" element={
-          <ProtectedRoute role="parent"><AppShell><ParentMessages /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/settings" element={
-          <ProtectedRoute role="parent"><AppShell><Settings /></AppShell></ProtectedRoute>
-        } />
-        <Route path="/parent/pricing" element={
-          <ProtectedRoute role="parent"><AppShell><Pricing /></AppShell></ProtectedRoute>
-        } />
+        {/* ==================== */}
+        {/* CLUB ADMIN ROUTES    */}
+        {/* ==================== */}
+        <Route
+          path="/club/dashboard"
+          element={
+            <ProtectedRoute role="clubAdmin">
+              <AppShell><ClubDashboard /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coaches"
+          element={
+            <ProtectedRoute role="clubAdmin">
+              <AppShell><CoachesList /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ================================ */}
+        {/* SHARED ROUTES (multi-role)       */}
+        {/* ================================ */}
+        <Route
+          path="/groups"
+          element={
+            <AuthRoute>
+              <AppShell><Groups /></AppShell>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/players"
+          element={
+            <AuthRoute>
+              <AppShell><CoachPlayers /></AppShell>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/activities"
+          element={
+            <AuthRoute>
+              <AppShell><Activities /></AppShell>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/reviews"
+          element={
+            <AuthRoute>
+              <AppShell><Reviews /></AppShell>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/timeline"
+          element={
+            <AuthRoute>
+              <AppShell><SharedTimeline /></AppShell>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/calendar"
+          element={
+            <AuthRoute>
+              <AppShell><Calendar /></AppShell>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/my-children"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><MyChildren /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/messages"
+          element={
+            <AuthRoute>
+              <AppShell><ParentMessages /></AppShell>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/messages/:userId"
+          element={
+            <AuthRoute>
+              <AppShell><ParentMessages /></AppShell>
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <AuthRoute>
+              <AppShell><ParentSettings /></AppShell>
+            </AuthRoute>
+          }
+        />
+
+        {/* Keep legacy parent message routes working */}
+        <Route
+          path="/parent/messages"
+          element={<Navigate to="/messages" replace />}
+        />
+        <Route
+          path="/parent/messages/:userId"
+          element={<Navigate to="/messages" replace />}
+        />
+        <Route
+          path="/parent/settings"
+          element={<Navigate to="/settings" replace />}
+        />
 
         {/* Payment callback routes */}
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/cancel" element={<PaymentCancel />} />
 
-        {/* OAuth callback */}
-        <Route path="/parent/devices/callback" element={<DeviceCallback />} />
-
-        {/* 404 catch-all */}
-        <Route path="*" element={<NotFound />} />
       </Routes>
 
       <ToastContainer />

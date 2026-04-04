@@ -21,12 +21,17 @@ import sessionRoutes from './routes/sessions.js';
 import paymentRoutes from './routes/payments.js';
 import tournamentRoutes from './routes/tournaments.js';
 import messageRoutes from './routes/messages.js';
-import wearableRoutes from './routes/wearables.js';
 import subscriptionRoutes from './routes/subscriptions.js';
 import notificationRoutes from './routes/notifications.js';
 import betaRoutes from './routes/beta.js';
+import clubRoutes from './routes/clubs.js';
+import groupRoutes from './routes/groups.js';
+import activityRoutes from './routes/activities.js';
+import goalRoutes from './routes/goals.js';
+import observationRoutes from './routes/observations.js';
 import reviewRoutes from './routes/reviews.js';
-import aiRoutes from './routes/ai.js';
+import recommendationRoutes from './routes/recommendations.js';
+import timelineRoutes from './routes/timeline.js';
 
 // ====== Konfiguracja ======
 
@@ -95,12 +100,17 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/messages', messageRoutes);
-app.use('/api/wearables', wearableRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/beta', betaRoutes);
+app.use('/api/clubs', clubRoutes);
+app.use('/api/groups', groupRoutes);
+app.use('/api/activities', activityRoutes);
+app.use('/api/goals', goalRoutes);
+app.use('/api/observations', observationRoutes);
 app.use('/api/reviews', reviewRoutes);
-app.use('/api/ai', aiRoutes);
+app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/timeline', timelineRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

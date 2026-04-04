@@ -1,64 +1,90 @@
 import { z } from 'zod';
-import Review from '../models/Review.js';
-import Player from '../models/Player.js';
-import Notification from '../models/Notification.js';
+import ReviewSummary from '../models/ReviewSummary.js';
+import Activity from '../models/Activity.js';
+import Observation from '../models/Observation.js';
+import DevelopmentGoal from '../models/DevelopmentGoal.js';
 
 // ====== Zod Schemas ======
 
 const createReviewSchema = z.object({
   player: z.string().min(1, 'Zawodnik jest wymagany'),
-  periodStart: z.string().min(1, 'Data poczatku okresu jest wymagana'),
-  periodEnd: z.string().min(1, 'Data konca okresu jest wymagana'),
-  type: z.enum(['monthly', 'quarterly', 'tournament', 'milestone', 'general']).optional(),
-  title: z.string().min(1, 'Tytul oceny jest wymagany'),
-  strengths: z.string().optional(),
-  areasToImprove: z.string().optional(),
-  recommendations: z.string().optional(),
-  notes: z.string().optional(),
-  skillRatings: z.object({
-    serve: z.number().min(0).max(100).optional(),
-    forehand: z.number().min(0).max(100).optional(),
-    backhand: z.number().min(0).max(100).optional(),
-    volley: z.number().min(0).max(100).optional(),
-    tactics: z.number().min(0).max(100).optional(),
-    fitness: z.number().min(0).max(100).optional(),
-  }).optional(),
-  overallRating: z.number().min(1).max(5).optional(),
+  club: z.string().optional(),
+  periodType: z.enum(['weekly', 'monthly', 'quarterly', 'seasonal', 'ad-hoc']).optional(),
+  periodStart: z.string().min(1, 'Data początkowa okresu jest wymagana'),
+  periodEnd: z.string().min(1, 'Data końcowa okresu jest wymagana'),
+  whatHappened: z.string().optional(),
+  whatWentWell: z.string().optional(),
+  whatNeedsFocus: z.string().optional(),
+  nextSteps: z.string().optional(),
+  goalsReviewed: z.array(z.string()).optional(),
+  observations: z.array(z.string()).optional(),
   visibleToParent: z.boolean().optional(),
-  status: z.enum(['draft', 'published']).optional(),
 });
 
-const updateReviewSchema = createReviewSchema.partial().omit({ player: true });
+const updateReviewSchema = z.object({
+  periodType: z.enum(['weekly', 'monthly', 'quarterly', 'seasonal', 'ad-hoc']).optional(),
+  periodStart: z.string().optional(),
+  periodEnd: z.string().optional(),
+  whatHappened: z.string().optional().nullable(),
+  whatWentWell: z.string().optional().nullable(),
+  whatNeedsFocus: z.string().optional().nullable(),
+  nextSteps: z.string().optional().nullable(),
+  goalsReviewed: z.array(z.string()).optional(),
+  observations: z.array(z.string()).optional(),
+  activitiesCount: z.number().min(0).optional(),
+  aiGenerated: z.boolean().optional(),
+  aiDraft: z.string().optional().nullable(),
+  status: z.enum(['draft', 'published', 'archived']).optional(),
+  visibleToParent: z.boolean().optional(),
+});
 
 // ====== Kontrolery ======
 
 /**
- * GET /api/reviews
- * Coach → swoje oceny. Parent → oceny dzieci (opublikowane).
+ * GET /api/reviews?player=X&status=X
+ * Lista przeglądów
  */
 export const getReviews = async (req, res, next) => {
   try {
-    const { player } = req.query;
     const filter = {};
 
-    if (req.user.role === 'coach') {
-      filter.coach = req.user._id;
-    } else if (req.user.role === 'parent') {
+    if (req.query.player) {
+      filter.player = req.query.player;
+    }
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+
+    // Rodzic widzi tylko opublikowane i widoczne przeglądy
+    if (req.user.role === 'parent') {
       const childrenIds = req.user.parentProfile?.children || [];
-      if (childrenIds.length === 0) return res.json({ reviews: [] });
-      filter.player = { $in: childrenIds };
-      filter.visibleToParent = true;
+      if (childrenIds.length === 0) {
+        return res.json({ reviews: [] });
+      }
+      filter.player = filter.player ? filter.player : { $in: childrenIds };
       filter.status = 'published';
+      filter.visibleToParent = true;
     }
 
-    if (player) {
-      filter.player = player;
+    // Coach widzi swoje przeglądy
+    if (req.user.role === 'coach') {
+      if (!filter.player) {
+        filter.author = req.user._id;
+      }
     }
 
-    const reviews = await Review.find(filter)
+    // clubAdmin widzi przeglądy z klubu
+    if (req.user.role === 'clubAdmin' && req.user.club) {
+      if (!filter.player) {
+        filter.club = req.user.club;
+      }
+    }
+
+    const reviews = await ReviewSummary.find(filter)
       .populate('player', 'firstName lastName')
-      .populate('coach', 'firstName lastName')
-      .sort({ createdAt: -1 });
+      .populate('author', 'firstName lastName role')
+      .populate('goalsReviewed', 'title status progress')
+      .sort({ periodEnd: -1 });
 
     res.json({ reviews });
   } catch (error) {
@@ -67,27 +93,63 @@ export const getReviews = async (req, res, next) => {
 };
 
 /**
+ * POST /api/reviews
+ * Utwórz przegląd (coach)
+ */
+export const createReview = async (req, res, next) => {
+  try {
+    const data = createReviewSchema.parse(req.body);
+
+    const reviewData = {
+      ...data,
+      author: req.user._id,
+      periodStart: new Date(data.periodStart),
+      periodEnd: new Date(data.periodEnd),
+    };
+
+    // Jeśli nie podano klubu, użyj klubu użytkownika
+    if (!data.club && req.user.club) {
+      reviewData.club = req.user.club;
+    }
+
+    const review = await ReviewSummary.create(reviewData);
+
+    const populatedReview = await ReviewSummary.findById(review._id)
+      .populate('player', 'firstName lastName')
+      .populate('author', 'firstName lastName role')
+      .populate('goalsReviewed', 'title status progress');
+
+    res.status(201).json({
+      message: 'Przegląd został utworzony',
+      review: populatedReview,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * GET /api/reviews/:id
+ * Szczegóły przeglądu
  */
 export const getReview = async (req, res, next) => {
   try {
-    const filter = { _id: req.params.id };
-
-    if (req.user.role === 'coach') {
-      filter.coach = req.user._id;
-    } else if (req.user.role === 'parent') {
-      const childrenIds = req.user.parentProfile?.children || [];
-      filter.player = { $in: childrenIds };
-      filter.visibleToParent = true;
-      filter.status = 'published';
-    }
-
-    const review = await Review.findOne(filter)
+    const review = await ReviewSummary.findById(req.params.id)
       .populate('player', 'firstName lastName')
-      .populate('coach', 'firstName lastName');
+      .populate('author', 'firstName lastName role')
+      .populate('goalsReviewed', 'title status progress category')
+      .populate('observations', 'text type engagement effort mood');
 
     if (!review) {
-      return res.status(404).json({ message: 'Ocena nie znaleziona' });
+      return res.status(404).json({ message: 'Przegląd nie znaleziony' });
+    }
+
+    // Rodzic widzi tylko opublikowane przeglądy
+    if (req.user.role === 'parent') {
+      const childrenIds = (req.user.parentProfile?.children || []).map((c) => c.toString());
+      if (!childrenIds.includes(review.player._id.toString()) || review.status !== 'published' || !review.visibleToParent) {
+        return res.status(403).json({ message: 'Brak dostępu do tego przeglądu' });
+      }
     }
 
     res.json({ review });
@@ -97,122 +159,48 @@ export const getReview = async (req, res, next) => {
 };
 
 /**
- * POST /api/reviews
- * Coach tworzy ocene
- */
-export const createReview = async (req, res, next) => {
-  try {
-    const data = createReviewSchema.parse(req.body);
-
-    // Verify player belongs to this coach
-    const player = await Player.findOne({ _id: data.player, coach: req.user._id, active: true });
-    if (!player) {
-      return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
-    }
-
-    // Snapshot current skills if not provided
-    const skillRatings = data.skillRatings || {};
-    if (player.skills) {
-      for (const [key, val] of Object.entries(player.skills.toObject ? player.skills.toObject() : player.skills)) {
-        if (val && typeof val.score === 'number' && skillRatings[key] === undefined) {
-          skillRatings[key] = val.score;
-        }
-      }
-    }
-
-    const review = await Review.create({
-      ...data,
-      coach: req.user._id,
-      periodStart: new Date(data.periodStart),
-      periodEnd: new Date(data.periodEnd),
-      skillRatings,
-    });
-
-    // Notify parent(s) if published and visible
-    if (data.status === 'published' && data.visibleToParent !== false) {
-      const parentIds = player.parents || [];
-      for (const parentId of parentIds) {
-        await Notification.create({
-          user: parentId,
-          type: 'system',
-          title: 'Nowa ocena od trenera',
-          body: `Trener wystawil ocene dla ${player.firstName}: "${data.title}"`,
-          severity: 'info',
-          player: player._id,
-          actionUrl: `/parent/child/${player._id}/reviews`,
-        });
-      }
-    }
-
-    const populatedReview = await Review.findById(review._id)
-      .populate('player', 'firstName lastName')
-      .populate('coach', 'firstName lastName');
-
-    res.status(201).json({
-      message: 'Ocena zostala utworzona',
-      review: populatedReview,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
  * PUT /api/reviews/:id
+ * Aktualizuj/opublikuj przegląd
  */
 export const updateReview = async (req, res, next) => {
   try {
     const data = updateReviewSchema.parse(req.body);
 
-    const review = await Review.findOne({
-      _id: req.params.id,
-      coach: req.user._id,
-    });
+    const review = await ReviewSummary.findById(req.params.id);
 
     if (!review) {
-      return res.status(404).json({ message: 'Ocena nie znaleziona' });
+      return res.status(404).json({ message: 'Przegląd nie znaleziony' });
     }
 
-    const wasDraft = review.status === 'draft';
+    const fields = [
+      'periodType', 'whatHappened', 'whatWentWell', 'whatNeedsFocus',
+      'nextSteps', 'goalsReviewed', 'observations', 'activitiesCount',
+      'aiGenerated', 'aiDraft', 'status', 'visibleToParent',
+    ];
 
-    // Update fields
-    for (const [key, value] of Object.entries(data)) {
-      if (value !== undefined) {
-        if (key === 'periodStart' || key === 'periodEnd') {
-          review[key] = new Date(value);
-        } else {
-          review[key] = value;
-        }
+    for (const field of fields) {
+      if (data[field] !== undefined) {
+        review[field] = data[field];
       }
+    }
+
+    if (data.periodStart !== undefined) review.periodStart = new Date(data.periodStart);
+    if (data.periodEnd !== undefined) review.periodEnd = new Date(data.periodEnd);
+
+    // Ustaw datę publikacji
+    if (data.status === 'published' && !review.publishedAt) {
+      review.publishedAt = new Date();
     }
 
     await review.save();
 
-    // Notify parents if just published
-    if (wasDraft && review.status === 'published' && review.visibleToParent) {
-      const player = await Player.findById(review.player);
-      if (player) {
-        const parentIds = player.parents || [];
-        for (const parentId of parentIds) {
-          await Notification.create({
-            user: parentId,
-            type: 'system',
-            title: 'Nowa ocena od trenera',
-            body: `Trener wystawil ocene dla ${player.firstName}: "${review.title}"`,
-            severity: 'info',
-            player: player._id,
-            actionUrl: `/parent/child/${player._id}/reviews`,
-          });
-        }
-      }
-    }
-
-    const updatedReview = await Review.findById(review._id)
+    const updatedReview = await ReviewSummary.findById(review._id)
       .populate('player', 'firstName lastName')
-      .populate('coach', 'firstName lastName');
+      .populate('author', 'firstName lastName role')
+      .populate('goalsReviewed', 'title status progress');
 
     res.json({
-      message: 'Ocena zostala zaktualizowana',
+      message: 'Przegląd został zaktualizowany',
       review: updatedReview,
     });
   } catch (error) {
@@ -221,20 +209,72 @@ export const updateReview = async (req, res, next) => {
 };
 
 /**
- * DELETE /api/reviews/:id
+ * GET /api/reviews/:id/prefill
+ * Auto-agregacja danych dla okresu przeglądu
  */
-export const deleteReview = async (req, res, next) => {
+export const prefillReview = async (req, res, next) => {
   try {
-    const review = await Review.findOneAndDelete({
-      _id: req.params.id,
-      coach: req.user._id,
-    });
+    const review = await ReviewSummary.findById(req.params.id);
 
     if (!review) {
-      return res.status(404).json({ message: 'Ocena nie znaleziona' });
+      return res.status(404).json({ message: 'Przegląd nie znaleziony' });
     }
 
-    res.json({ message: 'Ocena zostala usunieta' });
+    const playerId = review.player;
+    const periodStart = review.periodStart;
+    const periodEnd = review.periodEnd;
+
+    // Policz aktywności w okresie
+    const activitiesCount = await Activity.countDocuments({
+      players: playerId,
+      date: { $gte: periodStart, $lte: periodEnd },
+    });
+
+    // Pobierz obserwacje w okresie
+    const observations = await Observation.find({
+      player: playerId,
+      createdAt: { $gte: periodStart, $lte: periodEnd },
+    })
+      .populate('author', 'firstName lastName')
+      .sort({ createdAt: -1 });
+
+    // Aktywne cele
+    const activeGoals = await DevelopmentGoal.find({
+      player: playerId,
+      status: 'active',
+    }).sort({ createdAt: -1 });
+
+    // Aktywności z frekwencją
+    const activitiesWithAttendance = await Activity.find({
+      players: playerId,
+      date: { $gte: periodStart, $lte: periodEnd },
+      'attendance.0': { $exists: true },
+    }).select('attendance date type title');
+
+    // Oblicz statystyki frekwencji
+    let attendancePresent = 0;
+    let attendanceTotal = 0;
+    for (const act of activitiesWithAttendance) {
+      for (const att of act.attendance) {
+        if (att.player?.toString() === playerId.toString()) {
+          attendanceTotal++;
+          if (att.status === 'present') attendancePresent++;
+        }
+      }
+    }
+
+    res.json({
+      prefill: {
+        activitiesCount,
+        observations,
+        activeGoals,
+        attendanceRate: attendanceTotal > 0
+          ? Math.round((attendancePresent / attendanceTotal) * 100)
+          : null,
+        periodStart,
+        periodEnd,
+      },
+    });
   } catch (error) {
     next(error);
   }

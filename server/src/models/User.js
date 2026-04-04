@@ -18,8 +18,8 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: {
-        values: ['coach', 'parent'],
-        message: 'Rola musi być "coach" lub "parent"',
+        values: ['coach', 'parent', 'clubAdmin', 'player'],
+        message: 'Rola musi być "coach", "parent", "clubAdmin" lub "player"',
       },
       required: [true, 'Rola jest wymagana'],
     },
@@ -39,11 +39,14 @@ const userSchema = new mongoose.Schema(
     },
     avatarUrl: String,
 
+    club: { type: mongoose.Schema.Types.ObjectId, ref: 'Club' },
+
     // Profil trenera
     coachProfile: {
-      club: String,
+      specialization: String,
       itfLevel: String,
       bio: String,
+      assignedGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
     },
 
     // Profil rodzica
@@ -54,6 +57,11 @@ const userSchema = new mongoose.Schema(
           ref: 'Player',
         },
       ],
+    },
+
+    // Profil admina klubu
+    adminProfile: {
+      permissions: [String],
     },
 
     refreshToken: String,
@@ -72,7 +80,7 @@ const userSchema = new mongoose.Schema(
     subscription: {
       plan: {
         type: String,
-        enum: ['free', 'premium', 'family'],
+        enum: ['free', 'pilot', 'premium'],
         default: 'premium',
       },
       status: {
@@ -91,10 +99,6 @@ const userSchema = new mongoose.Schema(
     },
 
     notificationSettings: {
-      recoveryThresholdCritical: { type: Number, default: 33 },
-      recoveryThresholdWarning: { type: Number, default: 50 },
-      minSleepHours: { type: Number, default: 6 },
-      hrvDropThreshold: { type: Number, default: 15 },
       weeklyEmail: { type: Boolean, default: true },
       pushNotifications: { type: Boolean, default: true },
       quietHoursStart: { type: String, default: '22:00' },
@@ -150,6 +154,9 @@ userSchema.methods.toJSON = function () {
   delete obj.inviteExpires;
   return obj;
 };
+
+userSchema.index({ email: 1 });
+userSchema.index({ club: 1, role: 1 });
 
 const User = mongoose.model('User', userSchema);
 

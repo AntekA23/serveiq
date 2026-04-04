@@ -1,17 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  Heart,
-  Activity,
-  Moon,
-  Zap,
   TrendingUp,
-  TrendingDown,
-  Minus,
   ArrowLeft,
-  Watch,
   Calendar,
-  BarChart3,
   Clock,
   FileText,
 } from 'lucide-react'
@@ -38,88 +30,10 @@ const skillColors = {
   fitness: 'amber',
 }
 
-const skillCssColors = {
-  serve: '#4DA6FF',
-  forehand: '#22C55E',
-  backhand: '#F59E0B',
-  volley: '#7C5CFC',
-  tactics: '#1ABC9C',
-  fitness: '#FF6B35',
-}
-
-function MiniSparkline({ data, color, height = 40 }) {
-  if (!data || data.length === 0) return null
-
-  const max = Math.max(...data)
-  const min = Math.min(...data)
-  const range = max - min || 1
-  const width = 120
-
-  const points = data.map((val, i) => {
-    const x = (i / (data.length - 1)) * width
-    const y = height - ((val - min) / range) * (height - 4) - 2
-    return `${x},${y}`
-  }).join(' ')
-
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="mini-sparkline" style={{ width, height }}>
-      <polyline
-        points={points}
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function HealthChart({ label, icon: Icon, data, unit, color, bgColor }) {
-  const latest = data?.[data.length - 1]
-  const prev = data?.[data.length - 2]
-  const trend = latest > prev ? 'up' : latest < prev ? 'down' : 'stable'
-  const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus
-
-  return (
-    <div className="health-chart-card">
-      <div className="health-chart-header">
-        <div className="health-chart-icon" style={{ background: bgColor, color }}>
-          <Icon size={16} />
-        </div>
-        <span className="health-chart-label">{label}</span>
-        <div className={`health-chart-trend ${trend}`}>
-          <TrendIcon size={12} />
-        </div>
-      </div>
-      <div className="health-chart-value" style={{ color }}>
-        {latest ?? '—'}
-        <span className="health-chart-unit">{unit}</span>
-      </div>
-      <MiniSparkline data={data} color={color} />
-      <div className="health-chart-range">
-        <span>Min: {data ? Math.min(...data) : '—'}</span>
-        <span>Max: {data ? Math.max(...data) : '—'}</span>
-      </div>
-    </div>
-  )
-}
-
-const sessionTypeLabels = {
-  kort: 'Kort', sparing: 'Sparing', kondycja: 'Kondycja',
-  rozciaganie: 'Rozciaganie', mecz: 'Mecz', inne: 'Inne',
-}
-const sessionTypeColors = {
-  kort: 'var(--color-green)', sparing: 'var(--color-amber)', kondycja: 'var(--color-blue)',
-  rozciaganie: 'var(--color-purple)', mecz: 'var(--color-heart)', inne: 'var(--color-text-tertiary)',
-}
-
 export default function ChildProfile() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [child, setChild] = useState(null)
-  const [wearableHistory, setWearableHistory] = useState([])
-  const [recentSessions, setRecentSessions] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -128,23 +42,6 @@ export default function ChildProfile() {
         setLoading(true)
         const { data: playerData } = await api.get(`/players/${id}`)
         setChild(playerData.player || playerData)
-
-        // Fetch wearable data and sessions in parallel
-        const results = await Promise.allSettled([
-          api.get(`/wearables/data/${id}?type=daily_summary`),
-          api.get(`/sessions?player=${id}`),
-        ])
-
-        if (results[0].status === 'fulfilled') {
-          const historyRaw = results[0].value.data
-          setWearableHistory(Array.isArray(historyRaw) ? historyRaw : historyRaw.data || [])
-        }
-
-        if (results[1].status === 'fulfilled') {
-          const sessionsRaw = results[1].value.data
-          const sessions = Array.isArray(sessionsRaw) ? sessionsRaw : sessionsRaw.sessions || []
-          setRecentSessions(sessions.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5))
-        }
       } catch {
         // silent
       } finally {
@@ -174,12 +71,6 @@ export default function ChildProfile() {
   const childAge = child.dateOfBirth
     ? Math.floor((Date.now() - new Date(child.dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
     : null
-
-  // Extract chart data from history
-  const hrData = wearableHistory.map(d => d.metrics?.heartRate?.resting).filter(Boolean)
-  const hrvData = wearableHistory.map(d => d.metrics?.hrv?.value).filter(Boolean)
-  const sleepData = wearableHistory.map(d => d.metrics?.sleep?.quality).filter(Boolean)
-  const recoveryData = wearableHistory.map(d => d.metrics?.recovery?.score).filter(Boolean)
 
   const activeGoals = (child.goals || []).filter(g => !g.completed)
   const completedGoals = (child.goals || []).filter(g => g.completed)
@@ -237,59 +128,8 @@ export default function ChildProfile() {
         </div>
       </div>
 
-      {/* Health metrics charts (7 days) */}
-      {wearableHistory.length > 0 && (
-        <div className="child-profile-section">
-          <h2 className="child-profile-section-title">
-            <Activity size={16} />
-            Metryki zdrowotne (ostatnie 7 dni)
-          </h2>
-          <div className="health-charts-grid">
-            <HealthChart
-              label="Tetno spoczynkowe"
-              icon={Heart}
-              data={hrData.slice(-7)}
-              unit="bpm"
-              color="var(--color-heart)"
-              bgColor="var(--color-heart-bg)"
-            />
-            <HealthChart
-              label="HRV"
-              icon={Activity}
-              data={hrvData.slice(-7)}
-              unit="ms"
-              color="var(--color-hrv)"
-              bgColor="var(--color-hrv-bg)"
-            />
-            <HealthChart
-              label="Jakosc snu"
-              icon={Moon}
-              data={sleepData.slice(-7)}
-              unit="%"
-              color="var(--color-sleep)"
-              bgColor="var(--color-sleep-bg)"
-            />
-            <HealthChart
-              label="Regeneracja"
-              icon={Zap}
-              data={recoveryData.slice(-7)}
-              unit="%"
-              color="var(--color-recovery-green)"
-              bgColor="var(--color-green-bg)"
-            />
-          </div>
-        </div>
-      )}
-
       {/* Quick navigation links */}
       <div className="child-profile-nav-links">
-        <button
-          className="child-profile-nav-link"
-          onClick={() => navigate(`/parent/child/${id}/health`)}
-        >
-          <BarChart3 size={16} />
-          Historia zdrowia
-        </button>
         <button
           className="child-profile-nav-link"
           onClick={() => navigate(`/parent/child/${id}/timeline`)}
@@ -297,31 +137,7 @@ export default function ChildProfile() {
           <Clock size={16} />
           Historia postepu
         </button>
-        <button
-          className="child-profile-nav-link"
-          onClick={() => navigate(`/parent/child/${id}/progress`)}
-        >
-          <TrendingUp size={16} />
-          Wykresy postepu
-        </button>
-        <button
-          className="child-profile-nav-link"
-          onClick={() => navigate(`/parent/child/${id}/reviews`)}
-        >
-          <FileText size={16} />
-          Oceny od trenera
-        </button>
       </div>
-
-      {wearableHistory.length === 0 && (
-        <div className="child-profile-no-data">
-          <Watch size={24} />
-          <p>Brak danych z urzadzen. Polacz WHOOP lub Garmin aby widziec metryki zdrowotne.</p>
-          <button className="child-profile-connect-btn" onClick={() => navigate('/parent/devices')}>
-            Polacz urzadzenie
-          </button>
-        </div>
-      )}
 
       {/* Tennis skills */}
       {child.skills && (
@@ -337,7 +153,7 @@ export default function ChildProfile() {
               const notes = typeof skillData === 'object' ? skillData?.notes : null
 
               return (
-                <div key={key} className="child-profile-skill" style={{ '--skill-color': skillCssColors[key] }}>
+                <div key={key} className="child-profile-skill">
                   <div className="child-profile-skill-header">
                     <span>{label}</span>
                     <span className="child-profile-skill-score">{value}%</span>
@@ -348,45 +164,6 @@ export default function ChildProfile() {
               )
             })}
           </div>
-        </div>
-      )}
-
-      {/* Recent Sessions */}
-      {recentSessions.length > 0 && (
-        <div className="child-profile-section">
-          <h2 className="child-profile-section-title">
-            <Calendar size={16} />
-            Ostatnie sesje treningowe
-          </h2>
-          <div className="child-profile-sessions">
-            {recentSessions.map((s) => {
-              const d = new Date(s.date)
-              const color = sessionTypeColors[s.sessionType] || sessionTypeColors.inne
-              return (
-                <div key={s._id} className="child-session-row">
-                  <div className="child-session-dot" style={{ background: color }} />
-                  <div className="child-session-body">
-                    <div className="child-session-top">
-                      <span className="child-session-type" style={{ color }}>
-                        {sessionTypeLabels[s.sessionType] || 'Trening'}
-                      </span>
-                      <span className="child-session-date">
-                        {d.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })}
-                      </span>
-                      {s.startTime && <span className="child-session-time">{s.startTime}</span>}
-                      <span className="child-session-dur">{s.durationMinutes}min</span>
-                      {s.source === 'coach' && <span className="child-session-badge">trener</span>}
-                    </div>
-                    {s.notes && <div className="child-session-notes">{s.notes}</div>}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-          <button className="child-profile-nav-link" style={{ marginTop: 8 }}
-            onClick={() => navigate(`/parent/child/${id}/timeline`)}>
-            <Clock size={14} /> Zobacz wszystkie
-          </button>
         </div>
       )}
 

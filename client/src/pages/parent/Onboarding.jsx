@@ -7,10 +7,8 @@ import {
   User,
   Phone,
   Baby,
-  Watch,
   CheckCircle2,
   ChevronRight,
-  Plus,
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -224,98 +222,7 @@ function StepChild({ onNext, onChildCreated }) {
   )
 }
 
-// --- Step 3: Connect Device ---
-const PROVIDERS = {
-  whoop: {
-    name: 'WHOOP',
-    color: 'var(--color-whoop)',
-    bg: 'var(--color-whoop-bg)',
-    description: 'Monitoruj regeneracje, obciazenie i sen z opaski WHOOP.',
-  },
-  garmin: {
-    name: 'Garmin',
-    color: 'var(--color-garmin)',
-    bg: 'var(--color-garmin-bg)',
-    description: 'Sledz aktywnosc, Body Battery i stres z zegarka Garmin.',
-  },
-}
-
-function StepDevice({ onNext, childId }) {
-  const [connecting, setConnecting] = useState(null)
-  const [connected, setConnected] = useState([])
-  const toast = useToast()
-
-  const handleConnect = async (provider) => {
-    if (!childId) {
-      toast.error('Najpierw dodaj dziecko')
-      return
-    }
-    setConnecting(provider)
-    try {
-      await api.post('/wearables', { provider, deviceName: PROVIDERS[provider].name, playerId: childId })
-      setConnected((prev) => [...prev, provider])
-      toast.success(`Polaczono z ${PROVIDERS[provider].name}`)
-    } catch {
-      toast.error('Nie udalo sie polaczyc urzadzenia')
-    } finally {
-      setConnecting(null)
-    }
-  }
-
-  return (
-    <div className="onboarding-step-card">
-      <div className="onboarding-step-icon">
-        <Watch size={28} />
-      </div>
-      <h2 className="onboarding-step-title">Polacz urzadzenie</h2>
-      <p className="onboarding-step-desc">Polacz opaske lub zegarek aby sledzic dane zdrowotne</p>
-
-      <div className="onboarding-devices-grid">
-        {Object.entries(PROVIDERS).map(([key, info]) => {
-          const isConnected = connected.includes(key)
-          return (
-            <div
-              key={key}
-              className={`onboarding-device-card ${isConnected ? 'connected' : ''}`}
-              style={{ '--provider-color': info.color, '--provider-bg': info.bg }}
-            >
-              <div className="onboarding-device-icon">
-                {isConnected ? <CheckCircle2 size={24} /> : <Watch size={24} />}
-              </div>
-              <div className="onboarding-device-name">{info.name}</div>
-              <div className="onboarding-device-desc">{info.description}</div>
-              {isConnected ? (
-                <div className="onboarding-device-connected">Polaczono</div>
-              ) : (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleConnect(key)}
-                  loading={connecting === key}
-                >
-                  <Plus size={14} />
-                  Polacz
-                </Button>
-              )}
-            </div>
-          )
-        })}
-      </div>
-
-      <div className="onboarding-device-actions">
-        <Button variant="primary" onClick={onNext}>
-          Dalej
-          <ChevronRight size={16} />
-        </Button>
-        <button className="onboarding-skip-btn" onClick={onNext}>
-          Polacze pozniej
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// --- Step 4: Complete ---
+// --- Step 3: Complete ---
 function StepComplete() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
@@ -359,19 +266,18 @@ export default function Onboarding() {
   const [childId, setChildId] = useState(null)
   const user = useAuthStore((s) => s.user)
 
-  const handleNext = () => setStep((s) => Math.min(s + 1, 4))
+  const handleNext = () => setStep((s) => Math.min(s + 1, 3))
 
   return (
     <div className="onboarding">
       <div className="onboarding-header">
         <div className="onboarding-logo">SERVE<span style={{ color: 'var(--color-text)' }}>IQ</span></div>
       </div>
-      <ProgressBar steps={4} current={step} />
+      <ProgressBar steps={3} current={step} />
       <div className="onboarding-content">
         {step === 1 && <StepProfile onNext={handleNext} user={user} />}
         {step === 2 && <StepChild onNext={handleNext} onChildCreated={setChildId} />}
-        {step === 3 && <StepDevice onNext={handleNext} childId={childId} />}
-        {step === 4 && <StepComplete />}
+        {step === 3 && <StepComplete />}
       </div>
     </div>
   )

@@ -1,47 +1,51 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import {
-  LayoutDashboard,
-  User,
-  Watch,
-  Calendar,
-  Trophy,
-  CreditCard,
-  MessageSquare,
-  Settings,
-  LogOut,
-  Users,
-  ClipboardList,
-  FileText,
-  CalendarDays,
-  UserPlus,
-} from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import useAuthStore from '../../../store/authStore'
 import useUiStore from '../../../store/uiStore'
 import useAuth from '../../../hooks/useAuth'
 import Avatar from '../../ui/Avatar'
 import './Sidebar.css'
 
-const parentNav = [
-  { to: '/parent/dashboard', label: 'Pulpit', icon: LayoutDashboard },
-  { to: '/parent/devices', label: 'Urzadzenia', icon: Watch },
-  { to: '/parent/training-plan', label: 'Plan treningowy', icon: Calendar },
-  { to: '/parent/tournaments', label: 'Turnieje', icon: Trophy },
-  { to: '/parent/find-coach', label: 'Znajdz trenera', icon: UserPlus },
-  { to: '/parent/payments', label: 'Platnosci', icon: CreditCard },
-  { to: '/parent/messages', label: 'Wiadomosci', icon: MessageSquare },
-  { to: '/parent/settings', label: 'Ustawienia', icon: Settings },
+const coachNav = [
+  { to: '/coach/dashboard', label: 'Dashboard', icon: '\u{1F3E0}' },
+  { to: '/groups', label: 'Grupy', icon: '\u{1F465}' },
+  { to: '/players', label: 'Zawodnicy', icon: '\u{1F464}' },
+  { to: '/activities', label: 'Aktywno\u015Bci', icon: '\u{1F4C5}' },
+  { to: '/reviews', label: 'Recenzje', icon: '\u{1F4CB}' },
+  { to: '/messages', label: 'Wiadomo\u015Bci', icon: '\u{1F4AC}' },
+  { to: '/settings', label: 'Ustawienia', icon: '\u2699\uFE0F' },
 ]
 
-const coachNav = [
-  { to: '/coach/dashboard', label: 'Pulpit', icon: LayoutDashboard },
-  { to: '/coach/players', label: 'Zawodnicy', icon: Users },
-  { to: '/coach/calendar', label: 'Kalendarz', icon: CalendarDays },
-  { to: '/coach/sessions', label: 'Sesje', icon: ClipboardList },
-  { to: '/coach/reviews', label: 'Oceny', icon: FileText },
-  { to: '/coach/payments', label: 'Platnosci', icon: CreditCard },
-  { to: '/coach/messages', label: 'Wiadomosci', icon: MessageSquare },
-  { to: '/coach/settings', label: 'Ustawienia', icon: Settings },
+const parentNav = [
+  { to: '/parent/dashboard', label: 'Panel', icon: '\u{1F3E0}' },
+  { to: '/my-children', label: 'Moje dzieci', icon: '\u{1F476}' },
+  { to: '/calendar', label: 'Kalendarz', icon: '\u{1F4C5}' },
+  { to: '/timeline', label: 'Timeline', icon: '\u{1F4F0}' },
+  { to: '/messages', label: 'Wiadomo\u015Bci', icon: '\u{1F4AC}' },
+  { to: '/settings', label: 'Ustawienia', icon: '\u2699\uFE0F' },
 ]
+
+const clubAdminNav = [
+  { to: '/club/dashboard', label: 'Panel Klubu', icon: '\u{1F3E0}' },
+  { to: '/groups', label: 'Grupy', icon: '\u{1F465}' },
+  { to: '/players', label: 'Zawodnicy', icon: '\u{1F464}' },
+  { to: '/coaches', label: 'Trenerzy', icon: '\u{1F3CB}\uFE0F' },
+  { to: '/activities', label: 'Aktywno\u015Bci', icon: '\u{1F4C5}' },
+  { to: '/reviews', label: 'Recenzje', icon: '\u{1F4CB}' },
+  { to: '/settings', label: 'Ustawienia', icon: '\u2699\uFE0F' },
+]
+
+const roleLabels = {
+  coach: 'Trener',
+  parent: 'Rodzic',
+  clubAdmin: 'Admin klubu',
+}
+
+function getNavItems(role) {
+  if (role === 'coach') return coachNav
+  if (role === 'clubAdmin') return clubAdminNav
+  return parentNav
+}
 
 export default function Sidebar() {
   const user = useAuthStore((s) => s.user)
@@ -50,7 +54,7 @@ export default function Sidebar() {
   const { logout } = useAuth()
   const navigate = useNavigate()
 
-  const navItems = user?.role === 'coach' ? coachNav : parentNav
+  const navItems = getNavItems(user?.role)
 
   const handleLogout = async () => {
     await logout()
@@ -69,7 +73,15 @@ export default function Sidebar() {
         <div className="sidebar-overlay" onClick={toggleSidebar} />
       )}
       <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
-        <div className="sidebar-logo">SERVE<span style={{ color: 'var(--color-text)' }}>IQ</span><span className="sidebar-logo-dot" /></div>
+        <div className="sidebar-logo">
+          SERVE<span style={{ color: 'var(--color-text)' }}>IQ</span>
+          <span className="sidebar-logo-dot" />
+        </div>
+
+        {/* Club name if user belongs to a club */}
+        {user?.club?.name && (
+          <div className="sidebar-club-name">{user.club.name}</div>
+        )}
 
         <nav className="sidebar-nav">
           {navItems.map((item) => (
@@ -81,7 +93,7 @@ export default function Sidebar() {
               }
               onClick={handleNavClick}
             >
-              <item.icon size={16} />
+              <span className="sidebar-nav-icon">{item.icon}</span>
               {item.label}
             </NavLink>
           ))}
@@ -100,7 +112,7 @@ export default function Sidebar() {
               {user?.firstName} {user?.lastName}
             </div>
             <div className="sidebar-user-role">
-              {user?.role === 'coach' ? 'Trener' : 'Rodzic'}
+              {roleLabels[user?.role] || user?.role}
             </div>
           </div>
           <button className="sidebar-logout" onClick={handleLogout} title="Wyloguj">
