@@ -6,12 +6,24 @@ import Notification from '../models/Notification.js';
 // ── Coach: get own invite code ─────────────────────────
 export const getMyCode = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    let user = await User.findById(req.user._id);
 
     // Lazy generate for existing coaches without code
     if (!user.coachProfile?.inviteCode) {
-      if (!user.coachProfile) user.coachProfile = {};
-      await user.save(); // pre-save hook generates the code
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code;
+      let exists = true;
+      while (exists) {
+        code = '';
+        for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+        exists = await User.findOne({ 'coachProfile.inviteCode': code });
+      }
+
+      user = await User.findByIdAndUpdate(
+        req.user._id,
+        { 'coachProfile.inviteCode': code, 'coachProfile.inviteActive': true },
+        { new: true }
+      );
     }
 
     res.json({
@@ -49,10 +61,11 @@ export const resetCode = async (req, res) => {
 export const toggleCode = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
-    const newState = !user.coachProfile?.inviteActive;
-    if (!user.coachProfile) user.coachProfile = {};
-    user.coachProfile.inviteActive = newState;
-    await user.save();
+    const newState = !(user.coachProfile?.inviteActive ?? true);
+
+    await User.findByIdAndUpdate(req.user._id, {
+      'coachProfile.inviteActive': newState,
+    });
 
     res.json({ inviteActive: newState });
   } catch (err) {
