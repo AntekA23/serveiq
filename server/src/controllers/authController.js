@@ -197,8 +197,7 @@ export const refresh = async (req, res, next) => {
     const newAccessToken = generateAccessToken(user._id);
     const newRefreshToken = generateRefreshToken(user._id);
 
-    user.refreshToken = newRefreshToken;
-    await user.save();
+    await User.findByIdAndUpdate(user._id, { refreshToken: newRefreshToken });
 
     setRefreshTokenCookie(res, newRefreshToken);
 

@@ -42,8 +42,12 @@ export default function useAuth() {
   }, [])
 
   const checkAuth = useCallback(async () => {
-    // Skip auth check in demo mode - user is already set
     const currentToken = useAuthStore.getState().accessToken
+
+    // No token at all — nothing to check
+    if (!currentToken) return
+
+    // Skip auth check in demo mode - user is already set
     if (currentToken === DEMO_TOKEN) return
 
     try {
@@ -53,7 +57,8 @@ export default function useAuth() {
         setAuth(data.user, data.accessToken)
       }
     } catch {
-      // Not authenticated — do nothing
+      // If refresh also failed, interceptor already called logout.
+      // Nothing more to do here.
     }
   }, [setUser, setAuth])
 
