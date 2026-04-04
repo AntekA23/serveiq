@@ -47,6 +47,15 @@ const userSchema = new mongoose.Schema(
       itfLevel: String,
       bio: String,
       assignedGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
+      inviteCode: {
+        type: String,
+        unique: true,
+        sparse: true,
+      },
+      inviteActive: {
+        type: Boolean,
+        default: true,
+      },
     },
 
     // Profil rodzica
@@ -114,6 +123,30 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Generuj inviteCode dla trenerów
+function generateInviteCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+userSchema.pre('save', async function (next) {
+  if (this.role === 'coach' && !this.coachProfile?.inviteCode) {
+    if (!this.coachProfile) this.coachProfile = {};
+    let code;
+    let exists = true;
+    while (exists) {
+      code = generateInviteCode();
+      exists = await mongoose.model('User').findOne({ 'coachProfile.inviteCode': code });
+    }
+    this.coachProfile.inviteCode = code;
+  }
+  next();
+});
 
 // Pre-save hook: hashuj hasło jeśli zostało zmodyfikowane + ustaw trial dla nowych rodziców
 userSchema.pre('save', async function (next) {

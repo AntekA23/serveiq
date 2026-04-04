@@ -61,6 +61,10 @@ const playerSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    coaches: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    }],
     parents: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -134,6 +138,7 @@ playerSchema.index({ club: 1, pathwayStage: 1 });
 playerSchema.index({ coach: 1 });
 playerSchema.index({ 'parents': 1 });
 playerSchema.index({ club: 1, active: 1 });
+playerSchema.index({ coaches: 1 });
 
 const Player = mongoose.model('Player', playerSchema);
 

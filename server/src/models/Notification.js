@@ -17,6 +17,8 @@ const notificationSchema = new mongoose.Schema(
           'pathway_change',
           'observation_added',
           'goal_completed',
+          'coach_request_new',
+          'coach_request_response',
           'system',
         ],
         message: 'Nieprawidłowy typ powiadomienia',
