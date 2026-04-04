@@ -43,6 +43,7 @@ export default function useAuth() {
 
   const checkAuth = useCallback(async () => {
     const currentToken = useAuthStore.getState().accessToken
+    const currentUser = useAuthStore.getState().user
 
     // No token at all — nothing to check
     if (!currentToken) return
@@ -50,6 +51,24 @@ export default function useAuth() {
     // Skip auth check in demo mode - user is already set
     if (currentToken === DEMO_TOKEN) return
 
+    // We have token + user in localStorage — trust it.
+    // Try to refresh user data from server, but don't logout on failure.
+    if (currentUser) {
+      try {
+        const { data } = await api.get('/auth/me')
+        setUser(data.user)
+        if (data.accessToken) {
+          setAuth(data.user, data.accessToken)
+        }
+      } catch {
+        // Server unreachable or token expired and refresh failed.
+        // Keep using cached user — don't logout.
+        // Interceptor only logouts on explicit 401 from refresh now.
+      }
+      return
+    }
+
+    // Token exists but no user (shouldn't happen, but handle it)
     try {
       const { data } = await api.get('/auth/me')
       setUser(data.user)
@@ -57,8 +76,8 @@ export default function useAuth() {
         setAuth(data.user, data.accessToken)
       }
     } catch {
-      // If refresh also failed, interceptor already called logout.
-      // Nothing more to do here.
+      // No cached user and can't fetch — clear token
+      useAuthStore.getState().logout()
     }
   }, [setUser, setAuth])
 

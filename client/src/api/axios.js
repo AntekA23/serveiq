@@ -57,7 +57,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    // Nie próbuj refresha dla endpointów auth (login/register zwracają 401 przy złych danych)
+    // Don't try refresh for auth endpoints
     const isAuthEndpoint = originalRequest.url?.match(/\/auth\/(login|register|refresh|accept-invite)/)
 
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
@@ -91,7 +91,11 @@ api.interceptors.response.use(
         return api(originalRequest)
       } catch (refreshError) {
         processQueue(refreshError, null)
-        useAuthStore.getState().logout()
+        // Only logout if refresh explicitly returned 401
+        // (not network errors, timeouts, etc.)
+        if (refreshError.response?.status === 401) {
+          useAuthStore.getState().logout()
+        }
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false
