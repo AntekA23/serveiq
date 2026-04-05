@@ -1,5 +1,9 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import useAuthStore, { useHydrated } from './store/authStore'
+import useAuthStore, { ensureHydrated } from './store/authStore'
+
+// Synchronously restore auth from localStorage BEFORE first render.
+// This prevents the blank-screen / redirect-to-login race condition.
+ensureHydrated()
 import AppShell from './components/layout/AppShell'
 import ToastContainer from './components/ui/Toast'
 
@@ -125,12 +129,6 @@ function RootRedirect() {
 }
 
 export default function App() {
-  const hydrated = useHydrated()
-
-  // Wait for zustand to rehydrate from localStorage before rendering anything.
-  // Without this, the store initializes with null values and ProtectedRoute
-  // redirects to /login before the persisted token is available.
-  if (!hydrated) return null
 
   return (
     <>

@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -28,22 +27,22 @@ const useAuthStore = create(
 )
 
 /**
- * Hook that returns true only after zustand has rehydrated from localStorage.
- * Use this to prevent rendering auth-dependent UI before stored state is available.
+ * Synchronously read persisted auth from localStorage.
+ * Called once at app start before React renders.
+ * This avoids the async hydration race condition entirely.
  */
-export function useHydrated() {
-  const [hydrated, setHydrated] = useState(useAuthStore.persist.hasHydrated())
-
-  useEffect(() => {
-    if (useAuthStore.persist.hasHydrated()) {
-      setHydrated(true)
-      return
+export function ensureHydrated() {
+  try {
+    const raw = localStorage.getItem('serveiq-auth')
+    if (!raw) return
+    const parsed = JSON.parse(raw)
+    const state = parsed?.state
+    if (state?.accessToken && state?.user) {
+      useAuthStore.setState({ user: state.user, accessToken: state.accessToken })
     }
-    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true))
-    return unsub
-  }, [])
-
-  return hydrated
+  } catch {
+    // corrupted localStorage — ignore, user will need to login
+  }
 }
 
 export default useAuthStore
