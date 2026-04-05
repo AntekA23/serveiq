@@ -444,6 +444,102 @@ export const DEMO_RESPONSES = {
   },
 }
 
+// --- Demo calendar & upcoming generators ---
+
+const DEMO_ACTIVITY_TYPES = ['class', 'camp', 'tournament', 'training', 'match', 'fitness', 'review', 'other']
+const DEMO_ACTIVITY_TITLES = {
+  class: ['Zajęcia grupowe U14', 'Lekcja tenisa', 'Zajęcia z trenerem'],
+  camp: ['Obóz letni Warszawa', 'Camp szkoleniowy'],
+  tournament: ['Turniej PZT U14', 'Turniej lokalny', 'Puchar Wisły'],
+  training: ['Trening techniczny', 'Praca nad serwisem', 'Trening z trenerem'],
+  match: ['Mecz sparingowy', 'Mecz ligowy'],
+  fitness: ['Siłownia', 'Trening kondycyjny', 'Agility + bieganie'],
+  review: ['Przegląd postępów', 'Analiza wideo'],
+  other: ['Stretching', 'Regeneracja'],
+}
+
+function generateDemoCalendar(queryStr) {
+  const params = new URLSearchParams(queryStr)
+  const monthParam = params.get('month')
+  const now = new Date()
+  const year = monthParam ? parseInt(monthParam.split('-')[0], 10) : now.getFullYear()
+  const mon = monthParam ? parseInt(monthParam.split('-')[1], 10) - 1 : now.getMonth()
+
+  const lastDay = new Date(year, mon + 1, 0).getDate()
+  const seed = hashSeed(`cal-${year}-${mon}`)
+  const rng = seededRandom(seed)
+
+  const days = []
+  for (let d = 1; d <= lastDay; d++) {
+    const dayDate = new Date(year, mon, d)
+    const dow = dayDate.getDay()
+    // Skip some days (Sundays mostly quiet)
+    if (dow === 0 && rng() > 0.2) continue
+    // Random chance of having activities
+    if (rng() > 0.6) continue
+
+    const numActivities = rngInt(rng, 1, Math.min(4, dow === 6 ? 2 : 4))
+    const activities = []
+
+    for (let i = 0; i < numActivities; i++) {
+      const typeIdx = rngInt(rng, 0, DEMO_ACTIVITY_TYPES.length - 1)
+      const type = DEMO_ACTIVITY_TYPES[typeIdx]
+      const titles = DEMO_ACTIVITY_TITLES[type]
+      const title = titles[rngInt(rng, 0, titles.length - 1)]
+      const startHour = rngInt(rng, 8, 17)
+      const startMin = rng() > 0.5 ? '00' : '30'
+      const endHour = Math.min(startHour + rngInt(rng, 1, 2), 20)
+
+      activities.push({
+        _id: `demo-act-${year}${mon}${d}-${i}`,
+        type,
+        title,
+        date: dayDate.toISOString(),
+        startTime: `${String(startHour).padStart(2, '0')}:${startMin}`,
+        endTime: `${String(endHour).padStart(2, '0')}:${startMin}`,
+        players: [{ _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' }],
+        coach: rng() > 0.3 ? { _id: 'demo-coach-001', firstName: 'Tomasz', lastName: 'Nowak' } : null,
+        status: dayDate < now ? 'completed' : 'planned',
+      })
+    }
+
+    const dateStr = `${year}-${String(mon + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+    days.push({ date: dateStr, activities })
+  }
+
+  return { days }
+}
+
+function generateDemoUpcoming() {
+  const now = new Date()
+  const activities = []
+
+  const upcomingItems = [
+    { type: 'training', title: 'Trening techniczny', daysAhead: 1, startTime: '10:00' },
+    { type: 'fitness', title: 'Siłownia — nogi + agility', daysAhead: 2, startTime: '09:00' },
+    { type: 'class', title: 'Zajęcia grupowe U14', daysAhead: 3, startTime: '16:00' },
+    { type: 'tournament', title: 'Turniej PZT U14 Warszawa', daysAhead: 7, startTime: '09:00' },
+    { type: 'match', title: 'Mecz sparingowy z Kubą', daysAhead: 10, startTime: '14:00' },
+  ]
+
+  for (const item of upcomingItems) {
+    const d = new Date(now)
+    d.setDate(d.getDate() + item.daysAhead)
+    activities.push({
+      _id: `demo-upcoming-${item.daysAhead}`,
+      type: item.type,
+      title: item.title,
+      date: d.toISOString(),
+      startTime: item.startTime,
+      players: [{ _id: 'demo-player-001', firstName: 'Kacper', lastName: 'Kowalski' }],
+      coach: { _id: 'demo-coach-001', firstName: 'Tomasz', lastName: 'Nowak' },
+      status: 'planned',
+    })
+  }
+
+  return { activities }
+}
+
 export const DEMO_TOKEN = 'demo-token-serveiq'
 
 export function getDemoUser() {
@@ -603,6 +699,16 @@ export function matchDemoResponse(method, url) {
   // /notifications/read-all
   if (path === '/notifications/read-all' && upperMethod === 'PUT') {
     return { message: 'ok' }
+  }
+
+  // /activities/calendar (GET)
+  if (path === '/activities/calendar' && upperMethod === 'GET') {
+    return generateDemoCalendar(queryStr)
+  }
+
+  // /activities/upcoming (GET)
+  if (path === '/activities/upcoming' && upperMethod === 'GET') {
+    return generateDemoUpcoming()
   }
 
   // /auth/profile (PUT)
