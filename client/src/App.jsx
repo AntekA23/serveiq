@@ -29,6 +29,7 @@ import CoachNewReview from './pages/coach/CoachNewReview'
 import CoachPayments from './pages/coach/CoachPayments'
 import CoachCalendar from './pages/coach/CoachCalendar'
 import CoachTournaments from './pages/coach/Tournaments'
+import CoachMessages from './pages/coach/Messages'
 
 // Parent pages
 import ParentDashboard from './pages/parent/Dashboard'
@@ -113,6 +114,13 @@ function AuthRoute({ children }) {
   }
 
   return children
+}
+
+/** Show coach Messages for coach/clubAdmin, parent Chat for parents */
+function RoleMessages() {
+  const user = useAuthStore((s) => s.user)
+  if (user?.role === 'coach' || user?.role === 'clubAdmin') return <CoachMessages />
+  return <ParentMessages />
 }
 
 function RootRedirect() {
@@ -415,7 +423,7 @@ export default function App() {
           path="/messages"
           element={
             <AuthRoute>
-              <AppShell><ParentMessages /></AppShell>
+              <AppShell><RoleMessages /></AppShell>
             </AuthRoute>
           }
         />
@@ -423,7 +431,7 @@ export default function App() {
           path="/messages/:userId"
           element={
             <AuthRoute>
-              <AppShell><ParentMessages /></AppShell>
+              <AppShell><RoleMessages /></AppShell>
             </AuthRoute>
           }
         />

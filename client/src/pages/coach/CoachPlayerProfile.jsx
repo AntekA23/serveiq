@@ -551,7 +551,7 @@ export default function CoachPlayerProfile() {
           </Button>
           <Button variant="ghost" size="sm" onClick={() => {
             const parentId = player.parents?.[0]?._id || player.parents?.[0]
-            if (parentId) navigate(`/coach/messages/${parentId}`)
+            if (parentId) navigate(`/messages/${parentId}`)
           }}>
             <MessageSquare size={14} /> Rodzic
           </Button>
