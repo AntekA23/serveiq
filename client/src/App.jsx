@@ -15,6 +15,16 @@ import CoachDashboard from './pages/coach/Dashboard'
 import CoachPlayers from './pages/coach/Players'
 import CoachDisabled from './pages/coach/CoachDisabled'
 import CoachRequests from './pages/coach/CoachRequests'
+import CoachPlayerProfile from './pages/coach/CoachPlayerProfile'
+import CoachNewPlayer from './pages/coach/CoachNewPlayer'
+import CoachSessions from './pages/coach/CoachSessions'
+import CoachNewSession from './pages/coach/CoachNewSession'
+import CoachEditSession from './pages/coach/CoachEditSession'
+import CoachReviews from './pages/coach/CoachReviews'
+import CoachNewReview from './pages/coach/CoachNewReview'
+import CoachPayments from './pages/coach/CoachPayments'
+import CoachCalendar from './pages/coach/CoachCalendar'
+import CoachTournaments from './pages/coach/Tournaments'
 
 // Parent pages
 import ParentDashboard from './pages/parent/Dashboard'
@@ -156,6 +166,94 @@ export default function App() {
           element={
             <ProtectedRoute role="coach">
               <AppShell><CoachRequests /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coach/player/:id"
+          element={
+            <ProtectedRoute role="coach">
+              <AppShell><CoachPlayerProfile /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coach/players/new"
+          element={
+            <ProtectedRoute role="coach">
+              <AppShell><CoachNewPlayer /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coach/sessions"
+          element={
+            <ProtectedRoute role="coach">
+              <AppShell><CoachSessions /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coach/sessions/new"
+          element={
+            <ProtectedRoute role="coach">
+              <AppShell><CoachNewSession /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coach/sessions/:id/edit"
+          element={
+            <ProtectedRoute role="coach">
+              <AppShell><CoachEditSession /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coach/reviews"
+          element={
+            <ProtectedRoute role="coach">
+              <AppShell><CoachReviews /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coach/reviews/new"
+          element={
+            <ProtectedRoute role="coach">
+              <AppShell><CoachNewReview /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coach/reviews/:id/edit"
+          element={
+            <ProtectedRoute role="coach">
+              <AppShell><CoachNewReview /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coach/payments"
+          element={
+            <ProtectedRoute role="coach">
+              <AppShell><CoachPayments /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coach/calendar"
+          element={
+            <ProtectedRoute role="coach">
+              <AppShell><CoachCalendar /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/coach/tournaments"
+          element={
+            <ProtectedRoute role="coach">
+              <AppShell><CoachTournaments /></AppShell>
             </ProtectedRoute>
           }
         />
