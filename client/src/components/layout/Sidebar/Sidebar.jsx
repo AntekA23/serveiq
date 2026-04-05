@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, Users, User, CalendarDays, ClipboardList,
+  LayoutDashboard, Users, User, CalendarDays, CalendarClock, ClipboardList,
   Mail, MessageCircle, Settings, LogOut, Baby, Link2,
   Newspaper, Dumbbell,
 } from 'lucide-react'
@@ -12,6 +12,7 @@ import './Sidebar.css'
 
 const coachNav = [
   { to: '/coach/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/coach/calendar', label: 'Kalendarz', icon: CalendarClock },
   { to: '/groups', label: 'Grupy', icon: Users },
   { to: '/players', label: 'Zawodnicy', icon: User },
   { to: '/activities', label: 'Aktywnosci', icon: CalendarDays },
