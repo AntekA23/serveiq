@@ -124,6 +124,11 @@ const playerSchema = new mongoose.Schema(
       focus: [String],
       notes: String,
     },
+    nextStep: {
+      text: String,
+      updatedAt: Date,
+      updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    },
     active: {
       type: Boolean,
       default: true,

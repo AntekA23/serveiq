@@ -47,10 +47,10 @@ router.put('/:id/coach-request', verifyToken, requireRole('coach'), respondCoach
 router.get('/', verifyToken, requireRole('coach', 'parent'), getPlayers);
 router.get('/:id', verifyToken, requireRole('coach', 'parent'), getPlayer);
 
-// Endpointy tylko dla trenera
+// Endpointy dla trenera (tworzenie) i trenera+rodzica (edycja, usuwanie)
 router.post('/', verifyToken, requireRole('coach'), createPlayer);
-router.put('/:id', verifyToken, requireRole('coach'), updatePlayer);
-router.delete('/:id', verifyToken, requireRole('coach'), deletePlayer);
+router.put('/:id', verifyToken, requireRole('coach', 'parent'), updatePlayer);
+router.delete('/:id', verifyToken, requireRole('coach', 'parent'), deletePlayer);
 
 // Cele zawodnika
 router.post('/:id/goals', verifyToken, requireRole('coach'), addGoal);

@@ -281,14 +281,55 @@ export const updatePlayer = async (req, res, next) => {
   try {
     const data = updatePlayerSchema.parse(req.body);
 
+    // Rodzic moze edytowac podstawowe pola swojego dziecka
+    if (req.user.role === 'parent') {
+      const isMyChild = req.user.parentProfile?.children?.some(
+        (c) => c.toString() === req.params.id
+      );
+      if (!isMyChild) {
+        return res.status(403).json({ message: 'Brak dostępu do tego zawodnika' });
+      }
+      const allowedFields = {};
+      if (data.firstName !== undefined) allowedFields.firstName = data.firstName;
+      if (data.lastName !== undefined) allowedFields.lastName = data.lastName;
+      if (data.dateOfBirth !== undefined) allowedFields.dateOfBirth = new Date(data.dateOfBirth);
+      if (data.gender !== undefined) allowedFields.gender = data.gender;
+
+      const updated = await Player.findByIdAndUpdate(req.params.id, allowedFields, { new: true })
+        .populate('parents', 'firstName lastName email phone');
+      return res.json({ message: 'Dane zawodnika zaktualizowane', player: updated });
+    }
+
     const player = await Player.findOne({
       _id: req.params.id,
-      coach: req.user._id,
+      $or: [{ coach: req.user._id }, { coaches: req.user._id }],
       active: true,
     });
 
     if (!player) {
       return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
+    }
+
+    // Zmiana pathwayStage z automatyczna historia
+    if (data.pathwayStage && data.pathwayStage !== player.pathwayStage) {
+      if (!player.pathwayHistory) player.pathwayHistory = [];
+      const last = player.pathwayHistory[player.pathwayHistory.length - 1];
+      if (last && !last.endDate) last.endDate = new Date();
+      player.pathwayHistory.push({
+        stage: data.pathwayStage,
+        startDate: new Date(),
+        notes: data.pathwayStageNotes || '',
+      });
+      player.pathwayStage = data.pathwayStage;
+    }
+
+    // Ustawienie nextStep
+    if (data.nextStep !== undefined) {
+      player.nextStep = {
+        text: data.nextStep,
+        updatedAt: new Date(),
+        updatedBy: req.user._id,
+      };
     }
 
     // Aktualizuj pola podstawowe
@@ -362,11 +403,23 @@ export const updatePlayer = async (req, res, next) => {
  */
 export const deletePlayer = async (req, res, next) => {
   try {
-    const player = await Player.findOne({
-      _id: req.params.id,
-      coach: req.user._id,
-      active: true,
-    });
+    let player;
+
+    if (req.user.role === 'parent') {
+      const isMyChild = req.user.parentProfile?.children?.some(
+        (c) => c.toString() === req.params.id
+      );
+      if (!isMyChild) {
+        return res.status(403).json({ message: 'Brak dostępu' });
+      }
+      player = await Player.findOne({ _id: req.params.id, active: true });
+    } else {
+      player = await Player.findOne({
+        _id: req.params.id,
+        $or: [{ coach: req.user._id }, { coaches: req.user._id }],
+        active: true,
+      });
+    }
 
     if (!player) {
       return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
@@ -374,6 +427,13 @@ export const deletePlayer = async (req, res, next) => {
 
     player.active = false;
     await player.save();
+
+    // Usun z parentProfile.children
+    if (req.user.role === 'parent') {
+      await User.findByIdAndUpdate(req.user._id, {
+        $pull: { 'parentProfile.children': player._id },
+      });
+    }
 
     res.json({ message: 'Zawodnik został usunięty' });
   } catch (error) {
