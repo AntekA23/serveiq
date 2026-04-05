@@ -13,8 +13,8 @@ import './Sidebar.css'
 const coachNav = [
   { to: '/coach/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/coach/calendar', label: 'Kalendarz', icon: CalendarClock },
-  { to: '/groups', label: 'Grupy', icon: Users },
   { to: '/players', label: 'Zawodnicy', icon: User },
+  { to: '/groups', label: 'Grupy', icon: Users },
   { to: '/reviews', label: 'Przeglady', icon: ClipboardList },
   { to: '/coach/requests', label: 'Prosby', icon: Mail },
   { to: '/messages', label: 'Wiadomosci', icon: MessageCircle },

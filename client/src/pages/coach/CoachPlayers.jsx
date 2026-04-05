@@ -7,9 +7,14 @@ import Button from '../../components/ui/Button/Button'
 import { SKILL_NAMES, getSkillLevel } from '../../constants/skillLevels'
 import './Coach.css'
 
-const SKILL_COLORS = {
-  serve: '#4DA6FF', forehand: '#22C55E', backhand: '#F59E0B',
-  volley: '#7C5CFC', tactics: '#1ABC9C', fitness: '#FF6B35',
+const PATHWAY_LABELS = {
+  beginner: 'Poczatkujacy',
+  tennis10_red: 'Tennis 10 Red',
+  tennis10_orange: 'Tennis 10 Orange',
+  tennis10_green: 'Tennis 10 Green',
+  committed: 'Zawodnik',
+  advanced: 'Zaawansowany',
+  performance: 'Performance',
 }
 
 export default function CoachPlayers() {
@@ -85,7 +90,7 @@ export default function CoachPlayers() {
           </div>
           <div className="cp-group-stat">
             <TrendingUp size={14} />
-            <span>Sredni skill: <strong>{avgSkillAll}</strong></span>
+            <span>Sredni poziom: <strong>{getSkillLevel(avgSkillAll).label}</strong></span>
           </div>
           <div className="cp-group-stat">
             <Target size={14} />
@@ -104,7 +109,7 @@ export default function CoachPlayers() {
         )}
         <select className="cp-sort" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
           <option value="name">Imie</option>
-          <option value="skill">Skill ↓</option>
+          <option value="skill">Poziom ↓</option>
           <option value="ranking">Ranking</option>
           <option value="age">Wiek</option>
         </select>
@@ -126,7 +131,8 @@ export default function CoachPlayers() {
                 <div className="coach-player-card-top">
                   <span className="coach-player-name">{p.firstName} {p.lastName}</span>
                   {age && <span className="coach-player-age">{age} lat</span>}
-                  {p.ranking?.pzt && <span className="coach-player-ranking">PZT #{p.ranking.pzt}</span>}
+                  {p.pathwayStage && <span className="coach-player-stage">{PATHWAY_LABELS[p.pathwayStage] || p.pathwayStage}</span>}
+                  {p.ranking?.pzt > 0 && <span className="coach-player-ranking">PZT #{p.ranking.pzt}</span>}
                 </div>
                 {skillEntries.length > 0 && (
                   <div className="coach-player-skills">

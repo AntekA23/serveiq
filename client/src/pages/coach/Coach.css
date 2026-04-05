@@ -78,6 +78,7 @@
 .coach-player-card-body { flex: 1; min-width: 0; }
 .coach-player-card-top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .coach-player-age { font-size: 12px; color: var(--color-text-tertiary); }
+.coach-player-stage { font-size: 11px; color: var(--color-blue); background: var(--color-blue-bg); padding: 1px 8px; border-radius: var(--radius-full); font-weight: 600; }
 .coach-player-ranking { font-size: 11px; color: var(--color-accent); font-weight: 600; }
 .coach-player-skills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .coach-skill-chip { font-size: 10px; padding: 2px 8px; border-radius: var(--radius-full); background: transparent; border: 1px solid var(--color-border-md); font-weight: 600; }
