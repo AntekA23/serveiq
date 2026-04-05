@@ -1,0 +1,162 @@
+/* --- PlayerJourney --- */
+.player-journey {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.player-journey-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+}
+
+.player-journey-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-secondary);
+  margin-bottom: 10px;
+}
+
+.player-journey-card-header svg {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+/* Stage */
+.player-journey-stage {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.player-journey-stage-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+  color: var(--color-text);
+}
+
+.player-journey-stage-duration {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
+/* Goals */
+.player-journey-goals {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.player-journey-goal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.player-journey-goal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.player-journey-goal-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-journey-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  color: #fff;
+  background: var(--color-accent);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.player-journey-see-all {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-accent);
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.player-journey-see-all:hover {
+  text-decoration: underline;
+}
+
+/* Tags */
+.player-journey-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.player-journey-tag {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+/* Next Step */
+.player-journey-next-step-text {
+  font-size: 13px;
+  color: var(--color-text);
+  margin: 0 0 6px;
+  line-height: 1.5;
+}
+
+.player-journey-next-step-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+/* Observation */
+.player-journey-observation-text {
+  font-size: 13px;
+  color: var(--color-text);
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.player-journey-observation-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+/* Empty */
+.player-journey-empty {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}

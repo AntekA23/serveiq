@@ -1,0 +1,112 @@
+/* --- PathwayStepper --- */
+.pathway-stepper {
+  margin-bottom: 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.pathway-stepper-track {
+  display: flex;
+  align-items: flex-start;
+  min-width: max-content;
+  padding: 4px 0 8px;
+}
+
+.pathway-stepper-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  min-width: 90px;
+}
+
+/* connecting line */
+.pathway-stepper-line {
+  position: absolute;
+  top: 14px;
+  right: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--color-border-md);
+  z-index: 0;
+}
+
+.pathway-stepper-line.completed,
+.pathway-stepper-line.current {
+  background: var(--color-green);
+}
+
+/* circle */
+.pathway-stepper-circle {
+  position: relative;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-border-md);
+  background: var(--color-bg-secondary);
+  color: #fff;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.pathway-stepper-circle.completed {
+  border-color: var(--color-green);
+  background: var(--color-green);
+  color: #fff;
+}
+
+.pathway-stepper-circle.current {
+  width: 34px;
+  height: 34px;
+  border-width: 3px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.06);
+}
+
+.pathway-stepper-circle.future {
+  background: transparent;
+}
+
+/* label */
+.pathway-stepper-label {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.pathway-stepper-label.current {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.pathway-stepper-label.future {
+  color: var(--color-text-tertiary);
+}
+
+/* responsive */
+@media (max-width: 600px) {
+  .pathway-stepper-track {
+    flex-wrap: wrap;
+    min-width: unset;
+    gap: 4px 0;
+    justify-content: center;
+  }
+
+  .pathway-stepper-item {
+    min-width: 80px;
+    flex: 0 0 25%;
+  }
+
+  .pathway-stepper-line {
+    display: none;
+  }
+}

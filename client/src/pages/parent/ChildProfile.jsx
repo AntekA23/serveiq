@@ -10,6 +10,8 @@ import {
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import ProgressBar from '../../components/ui/ProgressBar/ProgressBar'
+import PathwayStepper from '../../components/player/PathwayStepper'
+import PlayerJourney from '../../components/player/PlayerJourney'
 import './ChildProfile.css'
 
 const skillLabels = {
@@ -138,6 +140,15 @@ export default function ChildProfile() {
           Historia postepu
         </button>
       </div>
+
+      {/* Pathway Stepper */}
+      <PathwayStepper
+        currentStage={child.pathwayStage}
+        pathwayHistory={child.pathwayHistory}
+      />
+
+      {/* Player Journey */}
+      <PlayerJourney player={child} />
 
       {/* Tennis skills */}
       {child.skills && (
