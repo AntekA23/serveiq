@@ -15,12 +15,17 @@ export default function AddCoach() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const [childrenLoading, setChildrenLoading] = useState(true)
+
   useEffect(() => {
+    setChildrenLoading(true)
     api.get('/players').then(res => {
-      const parentChildren = user?.parentProfile?.children || []
-      const mine = res.data.filter(p => parentChildren.includes(p._id))
-      setChildren(mine)
-    }).catch(() => {})
+      const raw = res.data
+      const players = Array.isArray(raw) ? raw : raw.players || []
+      setChildren(players)
+    }).catch((err) => {
+      console.error('Failed to load children:', err)
+    }).finally(() => setChildrenLoading(false))
   }, [user])
 
   const handleValidateCode = async () => {
@@ -140,10 +145,24 @@ export default function AddCoach() {
             Wybierz dzieci do przypisania:
           </h3>
 
-          {children.length === 0 ? (
+          {childrenLoading ? (
             <p style={{ color: 'var(--color-text-secondary)', fontSize: 14 }}>
-              Najpierw dodaj dziecko w panelu.
+              Ładowanie...
             </p>
+          ) : children.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '16px 0' }}>
+              <p style={{ color: 'var(--color-text-secondary)', fontSize: 14, marginBottom: 12 }}>
+                Najpierw dodaj dziecko, aby móc przypisać je do trenera.
+              </p>
+              <button
+                onClick={() => navigate('/my-children')}
+                style={{
+                  padding: '10px 20px', background: 'var(--color-accent)',
+                  color: '#0B0E14', border: 'none', borderRadius: 8,
+                  fontWeight: 600, fontSize: 14, cursor: 'pointer'
+                }}
+              >Dodaj dziecko</button>
+            </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
               {children.map(child => (

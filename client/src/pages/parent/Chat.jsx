@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Send } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Send, UserPlus, MessageCircle } from 'lucide-react'
 import { io } from 'socket.io-client'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -14,8 +15,10 @@ function formatTime(dateStr) {
 }
 
 export default function Chat() {
+  const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const accessToken = useAuthStore((s) => s.accessToken)
+  const [hasCoach, setHasCoach] = useState(null)
   const [conversations, setConversations] = useState([])
   const [activeConversation, setActiveConversation] = useState(null)
   const [messages, setMessages] = useState([])
@@ -55,6 +58,16 @@ export default function Chat() {
     }
 
     fetchConversations()
+
+    // Check if parent has any coach connected
+    if (user?.role === 'parent') {
+      api.get('/players').then(res => {
+        const raw = res.data
+        const players = Array.isArray(raw) ? raw : raw.players || []
+        const anyCoach = players.some(p => p.coach || (p.coaches && p.coaches.length > 0))
+        setHasCoach(anyCoach)
+      }).catch(() => setHasCoach(false))
+    }
   }, [])
 
   // Load messages for active conversation
@@ -136,8 +149,34 @@ export default function Chat() {
   if (conversations.length === 0 && !activeConversation) {
     return (
       <div className="parent-chat">
-        <div className="parent-chat-empty">
-          Brak konwersacji. Trener skontaktuje się z Tobą wkrótce.
+        <div className="parent-chat-empty" style={{ textAlign: 'center', padding: '48px 24px' }}>
+          {hasCoach === false || (hasCoach === null && user?.role === 'parent') ? (
+            <>
+              <UserPlus size={40} style={{ color: 'var(--color-accent)', marginBottom: 16 }} />
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Połącz się z trenerem</h2>
+              <p style={{ color: 'var(--color-text-secondary)', fontSize: 14, marginBottom: 20, maxWidth: 360, margin: '0 auto 20px' }}>
+                Aby rozpocząć rozmowę, najpierw połącz się z trenerem za pomocą kodu zaproszenia.
+              </p>
+              <button
+                onClick={() => navigate('/parent/add-coach')}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '12px 24px', background: 'var(--color-accent)',
+                  color: '#0B0E14', border: 'none', borderRadius: 8,
+                  fontWeight: 600, fontSize: 15, cursor: 'pointer'
+                }}
+              >
+                <UserPlus size={16} /> Dodaj trenera
+              </button>
+            </>
+          ) : (
+            <>
+              <MessageCircle size={40} style={{ color: 'var(--color-text-tertiary)', marginBottom: 16 }} />
+              <p style={{ color: 'var(--color-text-secondary)', fontSize: 14 }}>
+                Brak konwersacji. Napisz do trenera, aby rozpocząć rozmowę.
+              </p>
+            </>
+          )}
         </div>
       </div>
     )
