@@ -1,108 +1,119 @@
-# Sprint 5 — Development Logic
+# Sprint 5 — Development Logic (Goals + Observations)
 
 **Okres**: 27 kwietnia - 3 maja 2026
 **EPIC**: E5 (Cele i obserwacje)
-**Cel sprintu**: Cele rozwojowe, focus areas i obserwacje dzialajace — trener definiuje cele, loguje postep, rodzic widzi rozwoj dziecka.
+**Cel sprintu**: Pelny workflow celow rozwojowych i obserwacji — trener definiuje, monitoruje, rodzic widzi postep.
+
+---
+
+## Stan zastany
+
+### Backend — GOTOWE (pelne!)
+- DevelopmentGoal model: player, title, description, category (11 opcji), timeframe, status (active/completed/paused/dropped), progress (0-100), startDate, targetDate, visibleToParent
+- goalController: getGoals, createGoal, updateGoal, deleteGoal
+- Observation model: player, activity, author, type (5 opcji), text, engagement/effort/mood (1-5), focusAreas[], goalRef, visibleToParent, pinned
+- observationController: full CRUD
+- Player model ma: skills (8 umiejetnosci), trainingPlan.focus[]
+
+### Frontend — CZESCIOWO
+- CoachPlayerProfile ma tab "Goals" z addGoal/toggleGoal (proste)
+- ChildProfile ma sekcje goals (read-only, podstawowe)
+- Brak pelnej strony zarzadzania celami
+- Brak widoku obserwacji dla rodzica
+- Brak powiazania obserwacji z celami w UI
+- Brak wizualizacji postepu
 
 ---
 
 ## Taski
 
-### A1. Cele rozwojowe per gracz
-**Pliki:**
-- Sprawdzic: `server/src/models/DevelopmentGoal.js` (istnieje)
-- Frontend: sekcja celow w profilu gracza (widok trenera + rodzica)
+### A1. Frontend: Pelny widok celow w CoachPlayerProfile
+**Modyfikacja:** `client/src/pages/coach/CoachPlayerProfile.jsx` — tab Goals
 
-**Co zbudowac:**
-- Trener moze tworzyc cele rozwojowe:
-  - Tytul (np. "Poprawic serwis plaski")
-  - Kategoria (technika, taktyka, kondycja, mentalnosc, inne)
-  - Timeframe (daty od-do)
-  - Status (aktywny, osiagniety, porzucony)
-  - Opis/notatki
-- Cele widoczne w profilu gracza
-- Rodzic widzi cele (read-only)
+**Rozszerzyc o:**
+- Formularz tworzenia celu: tytul, opis, kategoria (select z 11 opcji), timeframe (select), data docelowa, widocznosc dla rodzica
+- API: `POST /api/goals` (istnieje)
+- Lista celow z: tytul, kategoria badge, progress bar (0-100), status badge, data docelowa
+- Slider/input do aktualizacji progress (PUT /api/goals/:id z { progress })
+- Przyciski statusu: "Osiagniety", "Wstrzymany", "Porzucony"
+- Filtr: aktywne / osiagniete / wszystkie
 
 ---
 
-### A2. Focus areas per gracz
-**Pliki:**
-- Modyfikacja Player model jesli trzeba
-- Frontend w profilu gracza
+### A2. Frontend: Widok celow dla rodzica w ChildProfile
+**Modyfikacja:** `client/src/pages/parent/ChildProfile.jsx`
 
-**Co zbudowac:**
-- Aktywne focus areas (max 3-5) — krotkie tagi/etykiety
-- Trener ustawia, rodzic widzi
-- Wyswietlane prominentnie w profilu i player journey
-- Przyklady: "Forehand topspinowy", "Poruszanie sie na korcie", "Pewnosc siebie"
-
----
-
-### A3. Wpisy obserwacji / postepu
-**Pliki:**
-- Sprawdzic: `server/src/models/Observation.js` (istnieje)
-- Frontend: formularz obserwacji w profilu gracza (trener)
-
-**Co zbudowac:**
-- Trener moze dodac obserwacje:
-  - Tekst
-  - Powiazany cel (opcjonalnie)
-  - Powiazana aktywnosc (opcjonalnie)
-  - Typ: obserwacja / postep / wyzwanie
-- Obserwacje pojawiaja sie w timeline
-- Rodzic widzi obserwacje oznaczone jako widoczne
+**Rozszerzyc sekcje Goals:**
+- Fetch: `GET /api/goals?player=:id` (backend juz filtruje visibleToParent)
+- Karty celow: tytul + kategoria badge + progress bar + status
+- Podpis: "Cel ustawiony przez [trener]"
+- Sekcja "Osiagniete cele" (collapsed, expand)
+- Motywujacy empty state: "Trener wkrotce ustawi cele rozwojowe"
 
 ---
 
-### A4. Focus + obserwacja w Player Journey
-**Pliki:**
-- Modyfikacja: `client/src/components/player/PlayerJourney.jsx`
+### A3. Frontend: Obserwacje w CoachPlayerProfile
+**Modyfikacja:** `client/src/pages/coach/CoachPlayerProfile.jsx`
 
-**Co zbudowac:**
-- Sekcja "Aktywne cele" z postepem
-- Sekcja "Aktualny focus" z tagami
-- Ostatnia obserwacja z data i autorem
-- Czytelne karty dla rodzica
-
----
-
-### A5. Proste markery progresji
-**Pliki:**
-- Frontend w profilu gracza
-
-**Co zbudowac:**
-- Wizualne markery: ile celow osiagnietych vs aktywnych
-- Mini-chart lub progress bar per cel
-- "Streak" — ile tygodni z kolei byla aktywnosc
+**Dodac tab "Obserwacje" lub rozszerzyc istniejacy:**
+- Lista obserwacji z filtrami: typ, data
+- Kazda obserwacja: tekst + typ badge + data + engagement/effort/mood dots
+- Jesli powiazana z celem: link "[Cel: tytul]"
+- Jesli powiazana z aktywnoscia: link "[Aktywnosc: tytul]"
+- Przycisk "pin" (oznacz wazne)
+- Rozszerzony formularz dodawania (z A4 z Sprint 4): + powiazanie z celem (select z aktywnych celow), + powiazanie z aktywnoscia (select z ostatnich)
 
 ---
 
-### A6. Realne demo discovery
-**Zadanie manualne:**
-- Przeprowadzic 3-5 demo discovery z cieplymy prospektami
-- Zbierac reakcje w formacie: bol, pilnosc, brakujace elementy, gotowosc do pilotu
-- Dokumentowac w prostym doc/sheet
+### A4. Frontend: Focus areas editor
+**Modyfikacja:** `client/src/pages/coach/CoachPlayerProfile.jsx`
+
+**Dodac w sekcji profilu gracza:**
+- Tag input "Focus areas" — max 5 tagow
+- Dane: Player.trainingPlan.focus[]
+- Save: `PUT /api/players/:id/training-plan` z updated focus
+- Rodzic widzi tagi w PlayerJourney (z Sprint 2)
+
+---
+
+### A5. Frontend: Wizualizacja postepu
+**Modyfikacja:** ChildProfile.jsx + PlayerJourney.jsx
+
+**Dodac:**
+- Mini progress ring per cel (SVG jak skill ring w dashboardzie trenera)
+- Podsumowanie: "3 z 5 celow aktywnych, 2 osiagniete"
+- Streak: "Aktywnosc w 4 z ostatnich 5 tygodni" (obliczone z activities)
+- Engagement trend: sredni engagement z obserwacji ostatnich 4 tygodni (jesli dane sa)
+
+---
+
+### A6. Demo discovery
+- Przeprowadzic 3-5 demo discovery z prospektami
+- Format zbierania: bol, pilnosc, brakujace elementy, gotowosc do pilotu
+- Udokumentowac w prostym formacie
 
 ---
 
 ## Kolejnosc realizacji
 
-| Dzien | Taski |
-|---|---|
-| Pon 28 kwi | A1 (cele rozwojowe — backend + frontend) |
-| Wt 29 kwi | A2 (focus areas) |
-| Sr 30 kwi | A3 (obserwacje) |
-| Czw 1 maj | A4 (player journey update) |
-| Pt 2 maj | A5 (markery) + A6 (demo discovery) |
+| Dzien | Taski | Co powstaje |
+|---|---|---|
+| Pon 28 kwi | A1 (coach goals full UI) | Pelne zarzadzanie celami |
+| Wt 29 kwi | A3 (coach observations UI) | Pelne obserwacje z powiazaniami |
+| Sr 30 kwi | A2 (parent goals view) + A4 (focus areas) | Rodzic widzi cele + focus |
+| Czw 1 maj | A5 (wizualizacja postepu) | Progress rings, streaks |
+| Pt 2 maj | A6 (demo discovery) + polish | Feedback z rynku |
 
 ---
 
 ## Definition of Done
 
-- [ ] Trener moze tworzyc, edytowac i zamykac cele rozwojowe
-- [ ] Focus areas widoczne w profilu gracza
-- [ ] Trener moze logowac obserwacje powiazane z celami
-- [ ] Player Journey pokazuje cele, focus, ostatnia obserwacje
-- [ ] Rodzic widzi postep dziecka bez zargonu
-- [ ] Przeprowadzono min. 2 demo discovery
+- [ ] Trener moze tworzyc cele z kategoria, timeframe, data docelowa
+- [ ] Trener moze aktualizowac progress celu (0-100)
+- [ ] Trener moze zmieniac status celu (completed/paused/dropped)
+- [ ] Obserwacje sa powiazane z celami i aktywnosciami
+- [ ] Focus areas edytowalne przez trenera
+- [ ] Rodzic widzi cele z progress bar i statusem
+- [ ] Wizualizacja: progress rings, streak, podsumowanie
+- [ ] Min. 2 demo discovery przeprowadzone
 - [ ] `vite build` przechodzi bez bledow

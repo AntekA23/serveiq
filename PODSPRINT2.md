@@ -2,209 +2,231 @@
 
 **Okres**: 6-12 kwietnia 2026
 **EPICi**: E1 (Tozsamosc i profile), E2 (Model sciezki gracza)
-**Cel sprintu**: Rodzic moze w pelni zarzadzac swoimi dziecmi, gracz ma widoczna sciezke rozwoju z etapami i markerami progresji.
+**Cel sprintu**: Rodzic moze w pelni zarzadzac swoimi dziecmi po onboardingu. Gracz ma widoczna sciezke rozwoju z etapami i progresja.
 
 ---
 
-## Kontekst — co juz istnieje
+## Stan zastaany (co juz istnieje)
 
-### Backend (gotowe)
-- `POST /api/players/self` — rodzic tworzy dziecko (playerController.createPlayerSelf)
-- `GET /api/players` — lista graczy (filtrowana per rola)
+### Backend — GOTOWE
+- `POST /api/players/self` — rodzic tworzy dziecko (createPlayerSelf, playerController:483-516)
+- `GET /api/players` — lista graczy filtrowana per rola
 - `GET /api/players/:id` — szczegoly gracza
-- `PUT /api/players/:id` — aktualizacja gracza
-- Model Player z polami: firstName, lastName, dateOfBirth, gender, coach, coaches[], parents[], skills, trainingPlan, pathwayStage, pathwayHistory, developmentLevel
-- Model User z parentProfile.children[]
-- Onboarding flow — dodaje 1 dziecko przy rejestracji
-- Coach invite code flow — dzialajacy
+- `PUT /api/players/:id` — aktualizacja gracza (coach only!)
+- `DELETE /api/players/:id` — soft delete (active=false, coach only!)
+- Model Player ma: pathwayStage, pathwayHistory[], developmentLevel
+- Model Club ma: pathwayStages[] z 7 domyslnymi etapami (Czerwony -> Dorosly Rekreacja)
+- Model DevelopmentGoal — pelny CRUD w goalController
 
-### Frontend (gotowe)
-- Onboarding z krokiem "dodaj dziecko" (tylko przy rejestracji)
-- Dashboard rodzica z selektorem dzieci
-- Profil dziecka (ChildProfile.jsx) — podstawowy
-- Sidebar z linkiem "Moje dzieci" -> placeholder "Sprint 03"
+### Backend — BRAKUJE
+- Rodzic NIE MOZE edytowac gracza (PUT /players/:id sprawdza `coach` role)
+- Rodzic NIE MOZE usunac gracza
+- Brak pola `nextStep` na Player (rekomendowany nastepny krok)
+- Brak endpointu do zmiany pathwayStage z automatycznym wpisem do pathwayHistory
 
-### Czego brakuje
-- Strona "Moje dzieci" (CRUD) — placeholder
-- Brak mozliwosci dodania dziecka PO onboardingu
+### Frontend — GOTOWE
+- Onboarding z krokiem "dodaj dziecko" (Onboarding.jsx:124-223)
+- Dashboard z selektorem dzieci i przyciskiem "Dodaj trenera"
+- ChildProfile.jsx — hero + skills + goals (podstawowy)
+
+### Frontend — BRAKUJE
+- `MyChildren.jsx` — placeholder "Sprint 03"
+- Brak mozliwosci dodania dziecka po onboardingu
 - Brak edycji profilu dziecka przez rodzica
-- Brak modelu etapow sciezki w UI
-- Brak widoku podrozy gracza (player journey)
-- Brak markerow progresji w UI
+- Brak widoku etapow sciezki (pathway stepper)
+- Brak PlayerJourney component
+- Brak wyswietlania "nastepny krok" od trenera
 
 ---
 
 ## Taski
 
-### Blok A — Rodzic zarzadza dziecmi (priorytet krytyczny)
+### A1. Backend: Rodzic moze edytowac i usuwac swoje dziecko
+**Plik:** `server/src/controllers/playerController.js`
 
-#### A1. Strona "Moje dzieci" z lista + przycisk dodaj
-**Pliki:**
-- Nadpisac: `client/src/pages/shared/MyChildren.jsx`
+**Co zmienic:**
+- Funkcja `updatePlayer` (~linia 350) — obecnie sprawdza `if (req.user.role !== 'coach')`. Dodac warunek: jesli `parent` i gracz jest w `parentProfile.children`, pozwol na edycje **ograniczonego zestawu pol**: firstName, lastName, dateOfBirth, gender, avatarUrl.
+- Funkcja `deletePlayer` (~linia 440) — obecnie coach only. Dodac: jesli `parent` i gracz jest w `parentProfile.children` i gracz NIE MA przypisanego coach, pozwol na soft delete. Usunac tez z `parentProfile.children`.
 
-**Co zbudowac:**
-- Lista dzieci rodzica z: avatar, imie, nazwisko, wiek, etap rozwoju, przycisk "Zobacz profil"
-- Przycisk "Dodaj dziecko" otwierajacy modal/formularz
-- Fetch z `GET /api/players` filtrowany po parentProfile.children
-- Klikniecie na dziecko -> nawigacja do `/parent/child/:id`
-
-**API:** `GET /api/players` (istnieje)
-
----
-
-#### A2. Modal/formularz dodawania dziecka
-**Pliki:**
-- Nowy: `client/src/components/modals/AddChildModal.jsx`
-- Modyfikacja: `client/src/pages/shared/MyChildren.jsx`
-
-**Co zbudowac:**
-- Formularz: imie (required), nazwisko (required), data urodzenia (date picker), plec (M/F select)
-- Walidacja inline
-- Submit -> `POST /api/players/self`
-- Po sukcesie: odswiezenie listy, toast "Dziecko dodane", zamkniecie modala
-- Stan loading na przycisku
-
-**API:** `POST /api/players/self` (istnieje, dziala)
+**Dokladna zmiana w updatePlayer:**
+```
+// Przed: if (req.user.role !== 'coach') return 403
+// Po:
+if (req.user.role === 'parent') {
+  const isMyChild = req.user.parentProfile?.children?.some(c => c.toString() === req.params.id)
+  if (!isMyChild) return res.status(403).json({ message: 'Brak dostepu' })
+  // Rodzic moze zmieniac tylko podstawowe pola
+  const { firstName, lastName, dateOfBirth, gender } = req.body
+  const player = await Player.findByIdAndUpdate(req.params.id,
+    { firstName, lastName, dateOfBirth, gender }, { new: true })
+  return res.json(player)
+}
+```
 
 ---
 
-#### A3. Edycja profilu dziecka przez rodzica
-**Pliki:**
-- Modyfikacja: `client/src/pages/parent/ChildProfile.jsx`
+### A2. Backend: Pole nextStep na Player
+**Plik:** `server/src/models/Player.js`
 
-**Co zbudowac:**
-- Przycisk "Edytuj" na profilu dziecka
-- Formularz edycji: imie, nazwisko, data urodzenia, plec, avatar
+**Dodac pole:**
+```
+nextStep: {
+  text: String,
+  updatedAt: Date,
+  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+}
+```
+
+**Plik:** `server/src/controllers/playerController.js`
+- W `updatePlayer` dla coach: pozwolic na update `nextStep`
+- Przy ustawieniu nextStep: automatycznie ustawic updatedAt = Date.now, updatedBy = req.user._id
+
+---
+
+### A3. Backend: Zmiana pathwayStage z historia
+**Plik:** `server/src/controllers/playerController.js`
+
+**W updatePlayer dla coach, dodac logike:**
+```
+if (body.pathwayStage && body.pathwayStage !== player.pathwayStage) {
+  // Zamknij poprzedni etap
+  if (player.pathwayHistory?.length > 0) {
+    const last = player.pathwayHistory[player.pathwayHistory.length - 1]
+    if (!last.endDate) last.endDate = new Date()
+  }
+  // Dodaj nowy etap
+  player.pathwayHistory.push({
+    stage: body.pathwayStage,
+    startDate: new Date(),
+    notes: body.pathwayStageNotes || ''
+  })
+  player.pathwayStage = body.pathwayStage
+}
+```
+
+---
+
+### A4. Frontend: Strona "Moje dzieci" z lista + dodawanie
+**Nadpisac:** `client/src/pages/shared/MyChildren.jsx`
+
+**Struktura komponentu:**
+```
+MyChildren
+  ├── Naglowek "Moje dzieci" + przycisk "Dodaj dziecko"
+  ├── Lista dzieci (karty):
+  │     ├── Avatar + imie + nazwisko
+  │     ├── Wiek (obliczony z dateOfBirth)
+  │     ├── Etap sciezki (pathwayStage badge)
+  │     ├── Trener (coach.firstName jesli przypisany, "Brak" jesli nie)
+  │     ├── Przycisk "Zobacz profil" -> /parent/child/:id
+  │     └── Przycisk "Edytuj" -> otwiera modal
+  ├── Empty state: "Dodaj swoje pierwsze dziecko" jesli brak
+  └── AddChildModal (formularz dodawania)
+```
+
+**API calls:**
+- `GET /api/players` — fetch listy, filtruj po parentProfile.children
+- `POST /api/players/self` — dodanie nowego dziecka (body: firstName, lastName, dateOfBirth, gender)
+
+**Formularz AddChildModal:**
+- Pola: imie (required, min 2), nazwisko (required, min 2), data urodzenia (date input), plec (select M/F)
+- Przycisk "Dodaj" z loading state
+- Po sukcesie: odswiezenie listy, toast, zamkniecie
+
+---
+
+### A5. Frontend: Edycja profilu dziecka
+**Nowy:** `client/src/components/modals/EditChildModal.jsx`
+**Uzycie w:** MyChildren.jsx
+
+**Formularz:**
+- Pola: imie, nazwisko, data urodzenia, plec (prefilled z danych dziecka)
 - Submit -> `PUT /api/players/:id`
-- Walidacja: rodzic moze edytowac tylko swoje dzieci (backend juz to sprawdza)
-
-**API:** `PUT /api/players/:id` (istnieje)
+- Po sukcesie: odswiezenie listy, toast
 
 ---
 
-#### A4. Usuwanie dziecka z listy rodzica
-**Pliki:**
-- Modyfikacja: `client/src/pages/shared/MyChildren.jsx`
-- Modyfikacja backend jesli brak: `server/src/controllers/playerController.js`
+### A6. Frontend: Pathway stepper w ChildProfile
+**Modyfikacja:** `client/src/pages/parent/ChildProfile.jsx`
 
-**Co zbudowac:**
-- Przycisk "Usun" z potwierdzeniem (modal "Czy na pewno chcesz usunac?")
-- Endpoint: `DELETE /api/players/:id` (sprawdzic czy istnieje, jesli nie — dodac)
-- Usuniecie gracza z Player collection + z parentProfile.children
+**Co dodac:**
+- Komponent wizualny pod hero section:
+  - 7 etapow z Club.pathwayStages (lub hardcoded defaults):
+    `Czerwony -> Pomaranczowy -> Zielony -> Tennis 10 Open -> Zawodnik -> Performance -> Dorosly`
+  - Aktualny etap podswietlony (accent color)
+  - Poprzednie etapy zaznaczone jako ukonczone
+  - Przyszle etapy wyszarzone
+- Pod stepperem: `developmentLevel` badge
 
-**Uwaga:** Sprawdzic czy endpoint DELETE istnieje. Jesli nie — dodac w playerController.
-
----
-
-### Blok B — Model sciezki gracza (pathway)
-
-#### B1. Etapy sciezki w profilu gracza
-**Pliki:**
-- Modyfikacja: `client/src/pages/parent/ChildProfile.jsx`
-
-**Co zbudowac:**
-- Wizualna prezentacja aktualnego etapu (pathwayStage):
-  - `beginner` -> Tennis 10 -> `committed` -> `advanced` -> `performance`
-- Progressbar lub stepper z podswietlonym aktualnym etapem
-- Pod spodem: developmentLevel z modelu Player
-- Sekcja "Historia sciezki" z pathwayHistory (jesli istnieje)
-
-**Dane:** Player.pathwayStage, Player.pathwayHistory, Player.developmentLevel (pola istnieja w modelu)
+**Dane:** Player.pathwayStage, Player.developmentLevel (juz w modelu)
 
 ---
 
-#### B2. Widok podrozy gracza (Player Journey Summary)
-**Pliki:**
-- Nowy: `client/src/components/player/PlayerJourney.jsx`
-- Uzycie w: `client/src/pages/parent/ChildProfile.jsx`
+### A7. Frontend: Player Journey Summary
+**Nowy:** `client/src/components/player/PlayerJourney.jsx`
+**Uzycie w:** ChildProfile.jsx
 
-**Co zbudowac:**
-- Komponent pokazujacy:
-  - Aktualny etap sciezki
-  - Aktywne cele (z DevelopmentGoal jesli istnieja)
-  - Ostatnia aktywnosc/sesja
-  - Ostatni przeglad (jesli istnieje)
-  - Rekomendowany nastepny krok (pole tekstowe, ustawiane przez trenera)
-- Ukladany jako karta w profilu dziecka
+**Struktura:**
+```
+PlayerJourney
+  ├── Karta "Aktualny etap" — pathwayStage + od kiedy (z pathwayHistory)
+  ├── Karta "Aktywne cele" — fetch z GET /api/goals?player=X&status=active
+  │     └── Lista: tytul + kategoria badge + progress bar
+  ├── Karta "Aktualny focus" — Player.trainingPlan.focus[] jako tagi
+  ├── Karta "Nastepny krok" — Player.nextStep.text (read-only, ustawiony przez trenera)
+  │     └── "Ustawiony przez [imie trenera] dnia [data]"
+  └── Karta "Ostatnia obserwacja" — fetch z GET /api/observations?player=X (limit 1, sort desc)
+```
 
----
-
-#### B3. Pole "Nastepny krok" (trener moze ustawic)
-**Pliki:**
-- Modyfikacja: `server/src/models/Player.js` — dodac pole `nextStep: String`
-- Modyfikacja: `server/src/controllers/playerController.js` — pozwolic trenerowi na update tego pola
-- Wyswietlanie: w PlayerJourney i ChildProfile
-
-**Co zbudowac:**
-- Na backendzie: nowe pole `nextStep` w Player schema
-- Trener moze ustawic przez PUT /api/players/:id
-- Rodzic widzi w profilu dziecka (read-only)
+**API calls:**
+- `GET /api/goals?player=:id&status=active`
+- `GET /api/observations?player=:id` (limit 1)
+- Dane z Player object: pathwayStage, pathwayHistory, trainingPlan.focus, nextStep
 
 ---
 
-#### B4. Przypisanie/zmiana etapu sciezki (trener)
-**Pliki:**
-- Modyfikacja: widok trenera profilu gracza (sprawdzic jaki plik)
+### A8. Frontend: Przycisk "Dodaj dziecko" na Dashboard
+**Modyfikacja:** `client/src/pages/parent/Dashboard.jsx`
 
-**Co zbudowac:**
-- Trener moze zmienic pathwayStage gracza (dropdown/select)
-- Zmiana automatycznie dodaje wpis do pathwayHistory z data i notatka
-- Backend: obsluga w PUT /api/players/:id (dodac logike historii)
+**Co zmienic:**
+- Obok istniejacego "Dodaj trenera" dodac "Dodaj dziecko" (link do /my-children)
+- Empty state (brak dzieci): zmienic tekst z "Poprosu trenera..." na "Dodaj swoje pierwsze dziecko" z przyciskiem -> /my-children
 
 ---
 
-### Blok C — Poprawki UX i nawigacja
+### A9. Frontend: Trener moze ustawic nextStep i pathwayStage
+**Modyfikacja:** `client/src/pages/coach/CoachPlayerProfile.jsx`
 
-#### C1. Aktualizacja Dashboard rodzica
-**Pliki:**
-- Modyfikacja: `client/src/pages/parent/Dashboard.jsx`
-
-**Co zbudowac:**
-- Dodac przycisk "Dodaj dziecko" obok "Dodaj trenera"
-- Jesli brak dzieci: zmiana empty state na "Dodaj swoje pierwsze dziecko" z przyciskiem do /my-children
-- Wyswietlic etap sciezki dziecka pod imieniem w selektorze
-
----
-
-#### C2. Aktualizacja Sidebar
-**Pliki:**
-- Modyfikacja: `client/src/components/layout/Sidebar/Sidebar.jsx`
-
-**Co zbudowac:**
-- Upewnic sie ze "Moje dzieci" link dziala (wskazuje na /my-children)
-- Rozwazyc dodanie badge z liczba dzieci
+**Co dodac:**
+- W headerze gracza: dropdown do zmiany pathwayStage (select z etapami)
+- Nowa sekcja/tab "Sciezka" z:
+  - Aktualny etap
+  - Input "Nastepny krok" (textarea) z przyciskiem "Zapisz"
+  - Historia etapow (pathwayHistory lista)
+- Submit -> `PUT /api/players/:id` z body `{ pathwayStage, nextStep: { text } }`
 
 ---
 
-## Kolejnosc realizacji (priorytet)
+## Kolejnosc realizacji
 
-| Dzien | Taski | Dlaczego |
+| Dzien | Taski | Co powstaje |
 |---|---|---|
-| Pon 7 kwi | A1, A2 | Krytyczne — rodzic musi moc dodac dzieci |
-| Wt 8 kwi | A3, A4 | Pelne CRUD na dzieciach |
-| Sr 9 kwi | B1, B3 | Etapy sciezki + pole nastepny krok |
-| Czw 10 kwi | B2, B4 | Widok podrozy + trener zmienia etap |
-| Pt 11 kwi | C1, C2 | Polish + nawigacja + demo check |
+| Pon 7 kwi | A1, A2, A3 | Backend gotowy: parent CRUD + nextStep + pathway history |
+| Wt 8 kwi | A4 (MyChildren + AddChildModal) | Rodzic dodaje dzieci |
+| Sr 9 kwi | A5 (EditChildModal) + A8 (Dashboard button) | Pelny CRUD + nawigacja |
+| Czw 10 kwi | A6 (Pathway stepper) + A7 (PlayerJourney) | Widok sciezki gracza |
+| Pt 11 kwi | A9 (Trener: nextStep + pathwayStage) + testy | Zamknieta petla trener-rodzic |
 
 ---
 
 ## Definition of Done
 
-- [ ] Rodzic moze dodac dziecko z poziomu "Moje dzieci" (nie tylko onboarding)
-- [ ] Rodzic moze edytowac profil dziecka
-- [ ] Rodzic widzi liste swoich dzieci z podstawowymi info
-- [ ] Profil dziecka pokazuje aktualny etap sciezki (stepper/progressbar)
-- [ ] Profil dziecka pokazuje "Nastepny krok" ustawiony przez trenera
-- [ ] Trener moze zmienic etap sciezki gracza
-- [ ] Trener moze ustawic pole "Nastepny krok"
-- [ ] Dashboard rodzica ma przycisk "Dodaj dziecko"
-- [ ] Empty state Dashboard prowadzi do dodania dziecka
+- [ ] Rodzic moze dodac dziecko z /my-children (nie tylko onboarding)
+- [ ] Rodzic moze edytowac imie/nazwisko/date/plec dziecka
+- [ ] Lista "Moje dzieci" wyswietla wszystkie dzieci z info
+- [ ] Profil dziecka pokazuje pathway stepper z aktualnym etapem
+- [ ] PlayerJourney pokazuje: etap, cele, focus, nastepny krok, obserwacje
+- [ ] Trener moze zmienic pathwayStage (z automatyczna historia)
+- [ ] Trener moze ustawic nextStep widoczny dla rodzica
+- [ ] Dashboard rodzica ma "Dodaj dziecko" + lepszy empty state
 - [ ] `vite build` przechodzi bez bledow
-
----
-
-## Metryki sukcesu sprintu
-
-**Produkt:** Rodzic moze w pelni zarzadzac dziecmi i widziec ich sciezke rozwoju bez pomocy trenera.
-
-**Demo:** Mozna pokazac pelna podroz: rejestracja rodzica -> dodanie dziecka -> widok sciezki -> trener ustawia etap i nastepny krok -> rodzic widzi aktualizacje.

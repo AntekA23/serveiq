@@ -2,116 +2,175 @@
 
 **Okres**: 13-19 kwietnia 2026
 **EPIC**: E3 (Planowanie aktywnosci)
-**Cel sprintu**: Generyczny model aktywnosci dzialajacy end-to-end — trener i rodzic moga planowac, przegladac i zarzadzac aktywnosciami przypisanymi do graczy.
+**Cel sprintu**: Aktywnosci dzialaja end-to-end — trener tworzy/zarzadza, rodzic widzi plan dziecka, kalendarz dziala.
 
 ---
 
-## Kontekst
+## Stan zastany
 
-Model Activity juz istnieje (`server/src/models/Activity.js`), controller (`activityController.js`), route (`activities.js`). Trzeba zweryfikowac kompletnosc i zbudowac pelny frontend.
+### Backend — GOTOWE (pelne!)
+- Model Activity z 8 typami: class, camp, tournament, training, match, fitness, review, other
+- activityController: getActivities, createActivity, getActivity, updateActivity, deleteActivity, updateAttendance, getCalendar, getUpcoming
+- Routes: GET/POST/PUT/DELETE + /calendar + /upcoming + /:id/attendance
+- Attendance tracking z statusami: present, absent, late, excused
+- Zod walidacja: createActivitySchema, updateActivitySchema
+- Filtry: per klub, gracz, typ, miesiac, grupa
+- visibleToParent field
+- tournamentData embedded (category, drawSize, result)
+
+### Frontend — BRAKUJE (placeholder "Aktywnosci")
+- `client/src/pages/shared/Activities.jsx` — placeholder
+- `client/src/pages/shared/Calendar.jsx` — placeholder
+- Brak formularza tworzenia aktywnosci (trener)
+- Brak widoku aktywnosci w profilu dziecka (rodzic)
+- Brak kalendarza
 
 ---
 
 ## Taski
 
-### A1. Weryfikacja i rozszerzenie modelu Activity
-**Pliki:** `server/src/models/Activity.js`, `server/src/controllers/activityController.js`
+### A1. Strona Aktywnosci dla trenera
+**Nadpisac:** `client/src/pages/shared/Activities.jsx`
 
-**Wymagane typy aktywnosci:**
-- `class` (zajecia)
-- `camp` (oboz)
-- `tournament` (turniej)
-- `training` (trening)
-- `match` (mecz)
-- `fitness` (kondycja)
-- `review` (przeglad)
-- `other` (inne)
+**Struktura:**
+```
+Activities (widok zalezny od roli)
+  ├── Naglowek + przycisk "Nowa aktywnosc" (tylko coach/clubAdmin)
+  ├── Filtry: typ (select multi), miesiac (date picker), gracz (select)
+  ├── Lista aktywnosci:
+  │     ├── Kolorowa kropka wg typu (class=zielony, camp=niebieski, tournament=czerwony, training=zolty, match=fiolet, fitness=pomarancz)
+  │     ├── Tytul + typ badge
+  │     ├── Data + czas + czas trwania
+  │     ├── Gracze (avatary/inicjaly, max 5 + "+N")
+  │     ├── Status badge (planned/completed/cancelled)
+  │     └── Klikniecie -> szczegoly/edycja
+  └── Empty state: "Zaplanuj pierwsza aktywnosc"
+```
 
-**Wymagane pola:**
-- title, type, date, startTime, endTime, durationMinutes
-- players[] (ref Player)
-- coach (ref User)
-- notes, status (planned/completed/cancelled)
-- location (opcjonalnie)
+**API:** `GET /api/activities` (istnieje, filtry: type, month, player)
 
-**Do sprawdzenia:** Czy istniejacy model pokrywa wszystkie typy i pola. Jesli nie — rozszerzyc.
-
----
-
-### A2. CRUD aktywnosci — frontend trenera
-**Pliki:**
-- Nowy: `client/src/pages/coach/Activities.jsx` lub modyfikacja istniejacego
-- Sprawdzic czy `client/src/pages/shared/Activities.jsx` jest placeholderem
-
-**Co zbudowac:**
-- Lista aktywnosci trenera (filtrowanie po typie, dacie)
-- Formularz tworzenia aktywnosci (typ, tytul, data, czas, gracze, notatki)
-- Edycja istniejaceej aktywnosci
-- Usuwanie z potwierdzeniem
-- Multi-select graczy przy tworzeniu
+**Widok per rola:**
+- Coach: widzi swoje aktywnosci, moze tworzyc/edytowac/usuwac
+- Parent: widzi aktywnosci swoich dzieci z visibleToParent=true
+- ClubAdmin: widzi wszystkie aktywnosci klubu
 
 ---
 
-### A3. Widok aktywnosci dla rodzica
-**Pliki:**
-- Modyfikacja: `client/src/pages/parent/ChildProfile.jsx` lub nowa sekcja
+### A2. Formularz tworzenia/edycji aktywnosci
+**Nowy:** `client/src/components/activities/ActivityForm.jsx`
 
-**Co zbudowac:**
-- Lista nadchodzacych aktywnosci dziecka (read-only)
-- Historia aktywnosci (ostatnie)
-- Filtr po typie
-- Klikniecie -> szczegoly aktywnosci
+**Pola formularza:**
+- Typ (select z 8 opcji) — required
+- Tytul (text) — required
+- Data (date) — required
+- Czas start (time) — opcjonalny
+- Czas konca (time) — opcjonalny
+- Czas trwania w minutach (number) — opcjonalny, auto-calculated z start/end
+- Gracze (multi-select z listy graczy trenera) — required min 1
+- Grupa (select z grup trenera) — opcjonalny, auto-wypelnia graczy
+- Lokalizacja (text) — opcjonalny
+- Nawierzchnia (select: clay, hard, grass, carpet, indoor-hard) — opcjonalny
+- Focus areas (tag input) — opcjonalny
+- Notatki trenera (textarea) — opcjonalny
+- Notatki dla rodzicow (textarea) — opcjonalny, pole parentNotes
+- Widoczne dla rodzica (toggle) — default true
 
----
+**Dla turniejow (typ=tournament) dodatkowe pola:**
+- Kategoria
+- Wielkosc drabinki (drawSize)
 
-### A4. Przypisywanie aktywnosci do graczy
-**Pliki:** controller + frontend
-
-**Co zbudowac:**
-- Przy tworzeniu aktywnosci: checkbox lista graczy trenera
-- Mozliwosc dodania/usuniecia graczy po fakcie (edycja)
-- Widok "Kto uczestniczy" w szczegolach aktywnosci
-
----
-
-### A5. Timeline/lista aktywnosci per gracz
-**Pliki:**
-- Modyfikacja: `client/src/pages/parent/ChildProfile.jsx`
-- Komponent: reuzywalna lista aktywnosci
-
-**Co zbudowac:**
-- Sekcja "Nadchodzace" i "Ostatnie" w profilu dziecka
-- Kolorowe kropki wg typu (jak w SessionRow na dashboardzie trenera)
-- Sortowanie po dacie
+**API:**
+- Tworzenie: `POST /api/activities`
+- Edycja: `PUT /api/activities/:id`
 
 ---
 
-### A6. Walidacja modelu vs scenariusze
-**Zadanie manualne:**
-- Sprawdzic czy model obsluguje scenariusz Tennis 10 (klasy, obozy, eventy)
-- Sprawdzic czy model obsluguje scenariusz Sonia (treningi, turnieje, fitness, przeglady)
-- Udokumentowac luki jesli sa
+### A3. Szczegoly aktywnosci + attendance
+**Nowy:** `client/src/components/activities/ActivityDetail.jsx`
+
+**Sekcje:**
+- Header: typ badge + tytul + data/czas
+- Info: lokalizacja, nawierzchnia, czas trwania, focus areas
+- Lista graczy z attendance:
+  - Kazdy gracz: avatar + imie + status (present/absent/late/excused)
+  - Trener moze zmienic status -> `PUT /api/activities/:id/attendance`
+- Notatki trenera
+- Notatki dla rodzicow
+- Przyciski: Edytuj, Usun (z potwierdzeniem), Zmien status (completed/cancelled)
+
+---
+
+### A4. Kalendarz aktywnosci
+**Nadpisac:** `client/src/pages/shared/Calendar.jsx`
+
+**Struktura:**
+- Widok miesieczny (siatka 7x5/6)
+- Kazdy dzien: kolorowe kropki wg aktywnosci
+- Klikniecie na dzien: lista aktywnosci tego dnia
+- Nawigacja: poprzedni/nastepny miesiac
+- Filtr per typ (opcjonalny)
+
+**API:** `GET /api/activities/calendar?month=2026-04` (istnieje, grupuje po dacie)
+
+**Widok per rola:**
+- Trener: wszystkie swoje aktywnosci
+- Rodzic: aktywnosci swoich dzieci
+- ClubAdmin: wszystkie aktywnosci klubu
+
+---
+
+### A5. Nadchodzace aktywnosci w profilu dziecka
+**Modyfikacja:** `client/src/pages/parent/ChildProfile.jsx`
+
+**Dodac sekcje "Nadchodzace":**
+- Fetch: `GET /api/activities/upcoming?player=:id&limit=5` (endpoint istnieje!)
+- Lista: typ badge + tytul + data + czas
+- Link "Zobacz wszystkie" -> /calendar
+
+**Dodac sekcje "Ostatnie aktywnosci":**
+- Fetch: `GET /api/activities?player=:id&month=current` z filtrem status=completed
+- Lista: typ badge + tytul + data + attendance status dziecka
+
+---
+
+### A6. Walidacja scenariuszy
+**Zadanie manualne — sprawdzic:**
+
+**Scenariusz Tennis 10:**
+- Trener tworzy aktywnosc typ "class" dla grupy Tennis 10
+- Przypisuje 8 dzieci
+- Rodzic widzi zajecia w kalendarzu i profilu dziecka
+- Trener oznacza obecnosc
+- Rodzic widzi "nastepne zajecia" w profilu
+
+**Scenariusz Sonia:**
+- Trener tworzy: training (pon, sr, pt), fitness (wt), tournament (weekend)
+- Rozne focus areas per aktywnosc
+- Turniej z danymi: kategoria, wynik
+- Rodzic widzi pelny tydzien w kalendarzu
 
 ---
 
 ## Kolejnosc realizacji
 
-| Dzien | Taski | Dlaczego |
+| Dzien | Taski | Co powstaje |
 |---|---|---|
-| Pon 14 kwi | A1 | Fundament — model musi byc kompletny |
-| Wt 15 kwi | A2 (lista + tworzenie) | Trener musi moc planowac |
-| Sr 16 kwi | A2 (edycja + usuwanie), A4 | Pelny CRUD + przypisanie graczy |
-| Czw 17 kwi | A3, A5 | Rodzic widzi aktywnosci dziecka |
-| Pt 18 kwi | A6 + polish | Walidacja scenariuszy + czyszczenie |
+| Pon 14 kwi | A2 (ActivityForm) | Trener moze tworzyc aktywnosci |
+| Wt 15 kwi | A1 (Activities page + lista) | Pelna strona aktywnosci z filtrami |
+| Sr 16 kwi | A3 (ActivityDetail + attendance) | Szczegoly + obecnosc |
+| Czw 17 kwi | A4 (Calendar) | Kalendarz miesieczny |
+| Pt 18 kwi | A5 (ChildProfile integration) + A6 (walidacja) | Aktywnosci w profilu dziecka |
 
 ---
 
 ## Definition of Done
 
-- [ ] Trener moze tworzyc aktywnosci z wyborem typu i przypisaniem graczy
-- [ ] Trener moze edytowac i usuwac aktywnosci
-- [ ] Rodzic widzi nadchodzace i ostatnie aktywnosci dziecka
-- [ ] Aktywnosci wyswietlaja sie w profilu gracza
-- [ ] Model obsluguje wszystkie 8 typow aktywnosci
-- [ ] Scenariusze Tennis 10 i Sonia sa pokryte
+- [ ] Trener moze tworzyc aktywnosci z wyborem typu, graczy, daty
+- [ ] Trener moze edytowac, usuwac, zmienic status aktywnosci
+- [ ] Trener moze zaznaczac obecnosc graczy
+- [ ] Rodzic widzi aktywnosci dziecka (nadchodzace + ostatnie) w profilu
+- [ ] Kalendarz miesieczny dziala dla obu rol
+- [ ] 8 typow aktywnosci jest obsluzone
+- [ ] visibleToParent kontroluje widocznosc dla rodzica
+- [ ] Scenariusze Tennis 10 i Sonia zwalidowane
 - [ ] `vite build` przechodzi bez bledow

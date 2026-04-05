@@ -2,107 +2,188 @@
 
 **Okres**: 11-17 maja 2026
 **EPIC**: E7 (Dashboard klubu)
-**Cel sprintu**: Wlasciciel klubu widzi wartosc — dashboard z widokiem grup, etapow, aktywnosci i graczy wymagajacych uwagi.
+**Cel sprintu**: Wlasciciel klubu widzi wartosc — dashboard z grupami, etapami, metrykam ciaglosci sciezki, graczami wymagajacymi uwagi.
+
+---
+
+## Stan zastany
+
+### Backend — CZESCIOWO
+- Club model z pathwayStages[] (7 domyslnych etapow z kolorami i age ranges)
+- clubController: createClub, getClub, updateClub, getDashboard
+- **getDashboard** (GET /clubs/:id/dashboard) juz zwraca:
+  - playersByStage (aggregation)
+  - attendanceRate (biezacy miesiac)
+  - pendingRecommendations (count)
+  - recentReviews (count)
+  - totalPlayers
+  - totalActivities
+- Group model z: coach, players[], schedule, maxPlayers, pathwayStage
+- groupController: full CRUD
+
+### Frontend — CZESCIOWO
+- ClubDashboard.jsx (istnieje ale moze byc placeholder)
+- CoachesList.jsx (istnieje)
+- Groups.jsx — placeholder
+
+### Co trzeba zbudowac
+- Rozbudowac ClubDashboard o metryki ciaglosci sciezki
+- Backend: endpoint "gracze wymagajacy uwagi"
+- Frontend: pelny widok grup
+- Frontend: narracja Tennis 10
 
 ---
 
 ## Taski
 
-### A1. Dashboard klubu / grup
-**Pliki:**
-- Modyfikacja: `client/src/pages/club/ClubDashboard.jsx`
-- Backend: `server/src/controllers/clubController.js`
+### A1. Backend: Gracze wymagajacy uwagi
+**Plik:** `server/src/controllers/clubController.js`
 
-**Co zbudowac:**
-- Widok glowny dla clubAdmin:
-  - Liczba graczy (total, per etap)
-  - Liczba aktywnych trenerow
-  - Nadchodzace aktywnosci
-  - Gracze bez aktywnosci w ostatnich 2 tygodniach
-  - Mini-chart: nowi gracze / miesiac
+**Nowy endpoint:** `GET /api/clubs/:id/attention`
 
----
+**Logika:**
+```
+Gracz "wymaga uwagi" jesli spelnia jedno z:
+1. Brak aktywnosci w ostatnich 14 dniach
+2. Brak przegladu w ostatnich 30 dniach
+3. Brak aktywnego celu rozwojowego
+4. Etap "beginner" lub pierwszy etap > 90 dni bez zmiany
+5. Brak trenera przypisanego
+```
 
-### A2. Grupowanie graczy wg etapu
-**Pliki:**
-- Nowy komponent lub sekcja w ClubDashboard
+**Response:**
+```json
+{
+  "players": [
+    {
+      "_id": "...",
+      "firstName": "Jan",
+      "lastName": "Kowalski",
+      "pathwayStage": "beginner",
+      "reasons": ["no_recent_activity", "no_goals"],
+      "lastActivity": "2026-03-15",
+      "coach": { "firstName": "Adam" }
+    }
+  ]
+}
+```
 
-**Co zbudowac:**
-- Tabela/karty grupujace graczy po pathwayStage:
-  - Beginner | Tennis 10 | Committed | Advanced | Performance
-- Dla kazdej grupy: liczba graczy, sredni wiek, ostatnia aktywnosc
-- Klikniecie na grupe -> lista graczy
-
----
-
-### A3. Ostatnia aktywnosc / nastepna aktywnosc
-**Pliki:**
-- ClubDashboard lub osobna sekcja
-
-**Co zbudowac:**
-- Lista nadchodzacych aktywnosci klubu (wszystkie typy)
-- Filtr po typie i trenerze
-- Lista ostatnich aktywnosci z uczestnictwem
-
----
-
-### A4. Gracze wymagajacy uwagi
-**Pliki:**
-- Backend: nowy endpoint lub logika w clubController
-- Frontend: sekcja w ClubDashboard
-
-**Co zbudowac:**
-- Algorytm "wymaga uwagi":
-  - Brak aktywnosci > 14 dni
-  - Brak przegladu > 30 dni
-  - Brak celu rozwojowego
-  - Etap "beginner" > 3 miesiace bez zmiany
-- Lista z imieniem, powodem, przyciskiem "Zobacz profil"
+**Route:** Dodac w `server/src/routes/clubs.js`:
+```
+router.get('/:id/attention', requireRole('clubAdmin'), getPlayersNeedingAttention)
+```
 
 ---
 
-### A5. Wskazniki ciaglosci sciezki (pathway continuity)
-**Pliki:**
-- ClubDashboard
+### A2. Backend: Metryki ciaglosci sciezki
+**Rozszerzyc:** `getDashboard` w clubController
 
-**Co zbudowac:**
-- Metryki:
-  - % graczy z aktywnym celem
-  - % graczy z przegladem w ostatnich 30 dniach
-  - % graczy z zaplanowana nastepna aktywnoscia
-  - Konwersja: beginner -> tennis10 -> committed (liczby)
-- Proste liczby/karty, bez skomplikowanych chartow
+**Dodac do response:**
+```json
+{
+  "pathwayContinuity": {
+    "playersWithActiveGoal": 18,
+    "playersWithRecentReview": 12,
+    "playersWithUpcomingActivity": 22,
+    "totalPlayers": 30,
+    "conversions": {
+      "beginner_to_tennis10": 5,
+      "tennis10_to_committed": 3,
+      "committed_to_advanced": 1
+    }
+  }
+}
+```
+
+**Logika:**
+- playersWithActiveGoal: DevelopmentGoal.distinct('player', { club, status: 'active' }).length
+- playersWithRecentReview: ReviewSummary.distinct('player', { club, status: 'published', publishedAt > 30 days ago }).length
+- playersWithUpcomingActivity: Activity.distinct('players', { club, date > now, status: 'planned' }).length
+- conversions: count z Player.pathwayHistory where stage changed w ostatnich 90 dniach
 
 ---
 
-### A6. Narracja Tennis 10 w UI
-**Zadanie design:**
-- Upewnic sie ze dashboard "mowi jezykiem klubu":
-  - "Program Tennis 10" nie "Etap beginner"
-  - "Rodziny" nie "Uzytkownicy"
-  - "Sciezka rozwoju" nie "Pipeline"
-- Dostosowac etykiety i empty states
+### A3. Frontend: Rozbudowa ClubDashboard
+**Modyfikacja:** `client/src/pages/club/ClubDashboard.jsx`
+
+**Sekcje:**
+
+**1. Metryki glowne (4 karty):**
+- Gracze (total) + ikona
+- Aktywnosci (biezacy miesiac) + ikona
+- Przeglady (biezacy miesiac) + ikona
+- Obecnosc (%) + ikona
+
+**2. Gracze wg etapu (horizontal bar chart lub karty):**
+- Kazdy etap z Club.pathwayStages: nazwa + kolor + liczba graczy
+- Klikniecie -> filtrowana lista graczy
+
+**3. Ciaglosc sciezki (3 metryki procentowe):**
+- "% graczy z aktywnym celem" — ring chart
+- "% graczy z przegladem (30 dni)" — ring chart
+- "% graczy z zaplanowana aktywnoscia" — ring chart
+
+**4. Konwersje sciezki:**
+- "Beginner -> Tennis 10: 5 graczy" (ostatnie 90 dni)
+- Prosta lista z licznikami
+
+**5. Gracze wymagajacy uwagi (alert section):**
+- Fetch: `GET /api/clubs/:id/attention`
+- Lista: avatar + imie + powod (badge) + link do profilu
+- Powody przetlumaczone: "Brak aktywnosci > 14 dni", "Brak celow", etc.
+
+**6. Nadchodzace aktywnosci:**
+- Fetch: `GET /api/activities?club=:id&status=planned` (limit 5, sort date asc)
+- Lista: typ badge + tytul + data + trener
+
+---
+
+### A4. Frontend: Strona Grupy
+**Nadpisac:** `client/src/pages/shared/Groups.jsx`
+
+**Widok per rola:**
+
+**Coach/ClubAdmin:**
+- Lista grup z: nazwa, trener, liczba graczy, pathwayStage badge, schedule
+- Przycisk "Nowa grupa" -> formularz: nazwa, opis, trener (select), pathwayStage (select), maxPlayers
+- Klikniecie na grupe: lista graczy, edycja, dodawanie/usuwanie graczy
+- API: `GET /api/groups`, `POST /api/groups`, `PUT /api/groups/:id`
+
+**Parent:**
+- Lista grup swoich dzieci (read-only)
+- Kazda grupa: nazwa, trener, harmonogram, inni gracze (imiona)
+
+---
+
+### A5. Narracja Tennis 10 w UI
+**Modyfikacje jezykowe:**
+- ClubDashboard: "Programy juniorskie" nie "Etapy"
+- Pathway stages: uzywac nazw z Club.pathwayStages (np. "Czerwony kort", "Pomaranczowy kort") zamiast technicznych
+- Empty states: "Dodaj pierwszego gracza do programu Tennis 10" nie "Brak graczy"
+- Metryki: "Rodziny" nie "Uzytkownicy", "Sciezka rozwoju" nie "Pipeline"
+- Sekcja "Gracze wymagajacy uwagi" -> "Wymagaja Twojej uwagi"
 
 ---
 
 ## Kolejnosc realizacji
 
-| Dzien | Taski |
-|---|---|
-| Pon 12 maj | A1 (dashboard skeleton + metryki) |
-| Wt 13 maj | A2 (grupowanie po etapach) |
-| Sr 14 maj | A3 (aktywnosci klubu) |
-| Czw 15 maj | A4 (gracze wymagajacy uwagi) |
-| Pt 16 maj | A5 (wskazniki ciaglosci) + A6 (narracja) |
+| Dzien | Taski | Co powstaje |
+|---|---|---|
+| Pon 12 maj | A1 (backend attention endpoint) + A2 (continuity metrics) | Backend gotowy |
+| Wt 13 maj | A3 (ClubDashboard — metryki + etapy + ciaglosc) | Dashboard skeleton |
+| Sr 14 maj | A3 cont (attention section + nadchodzace) | Dashboard pelny |
+| Czw 15 maj | A4 (Groups page) | Zarzadzanie grupami |
+| Pt 16 maj | A5 (narracja Tennis 10) + polish | Jezyk klubowy |
 
 ---
 
 ## Definition of Done
 
-- [ ] ClubAdmin widzi dashboard z metrykamii grup
-- [ ] Gracze pogrupowani wg etapu sciezki
-- [ ] Widoczne nadchodzace i ostatnie aktywnosci
-- [ ] Lista graczy wymagajacych uwagi z powodami
-- [ ] Wskazniki ciaglosci sciezki wyswietlone
-- [ ] Jezyk UI dopasowany do kontekstu klubu
+- [ ] ClubAdmin widzi dashboard z 4 metrykam glownymi
+- [ ] Gracze pogrupowani wg etapow z Club.pathwayStages
+- [ ] Metryki ciaglosci sciezki: % z celami, % z przegladami, % z aktywnosciami
+- [ ] Konwersje sciezki widoczne (ile graczy awansowalo)
+- [ ] Lista "Wymagaja uwagi" z powodami
+- [ ] Strona Grupy dziala z CRUD (coach/admin) i read-only (parent)
+- [ ] Jezyk UI dopasowany do kontekstu klubu Tennis 10
 - [ ] `vite build` przechodzi bez bledow
