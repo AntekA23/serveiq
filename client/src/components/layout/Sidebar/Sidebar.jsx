@@ -15,7 +15,6 @@ const coachNav = [
   { to: '/coach/calendar', label: 'Kalendarz', icon: CalendarClock },
   { to: '/groups', label: 'Grupy', icon: Users },
   { to: '/players', label: 'Zawodnicy', icon: User },
-  { to: '/activities', label: 'Aktywnosci', icon: CalendarDays },
   { to: '/reviews', label: 'Przeglady', icon: ClipboardList },
   { to: '/coach/requests', label: 'Prosby', icon: Mail },
   { to: '/messages', label: 'Wiadomosci', icon: MessageCircle },
@@ -35,10 +34,10 @@ const parentNav = [
 
 const clubAdminNav = [
   { to: '/club/dashboard', label: 'Panel Klubu', icon: LayoutDashboard },
+  { to: '/calendar', label: 'Kalendarz', icon: CalendarClock },
   { to: '/groups', label: 'Grupy', icon: Users },
   { to: '/players', label: 'Zawodnicy', icon: User },
   { to: '/coaches', label: 'Trenerzy', icon: Dumbbell },
-  { to: '/activities', label: 'Aktywnosci', icon: CalendarDays },
   { to: '/reviews', label: 'Przeglady', icon: ClipboardList },
   { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]
