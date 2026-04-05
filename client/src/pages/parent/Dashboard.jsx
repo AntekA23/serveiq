@@ -6,6 +6,8 @@ import {
   Target,
   AlertCircle,
   FileText,
+  Plus,
+  Link,
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -159,8 +161,20 @@ export default function Dashboard() {
         <h1 className="page-title">Pulpit</h1>
         <div className="parent-dashboard-empty">
           <AlertCircle size={32} />
-          <p>Brak przypisanych zawodnikow.</p>
-          <p className="parent-dashboard-empty-sub">Poprosu trenera o dolaczenie do platformy.</p>
+          <h2 style={{ margin: '8px 0 4px' }}>Witaj w ServeIQ!</h2>
+          <p>Dodaj swoje pierwsze dziecko, aby rozpocząć.</p>
+          <button
+            onClick={() => navigate('/my-children')}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '8px 16px', background: 'var(--color-accent)',
+              color: '#fff', border: 'none',
+              borderRadius: 8, fontSize: 13, fontWeight: 600,
+              cursor: 'pointer', marginTop: 12
+            }}
+          >
+            <Plus size={16} /> Dodaj dziecko
+          </button>
         </div>
       </div>
     )
@@ -188,20 +202,31 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Add coach button */}
-      <a
-        href="/parent/add-coach"
-        onClick={(e) => { e.preventDefault(); navigate('/parent/add-coach') }}
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          padding: '8px 16px', background: 'var(--color-accent-muted)',
-          color: 'var(--color-accent)', border: '1px solid var(--color-accent)',
-          borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none',
-          marginBottom: 16
-        }}
-      >
-        🔗 Dodaj trenera
-      </a>
+      {/* Action buttons */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <button
+          onClick={() => navigate('/my-children')}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '8px 16px', background: 'var(--color-accent-muted)',
+            color: 'var(--color-accent)', border: '1px solid var(--color-accent)',
+            borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer'
+          }}
+        >
+          <Plus size={16} /> Dodaj dziecko
+        </button>
+        <button
+          onClick={() => navigate('/parent/add-coach')}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '8px 16px', background: 'var(--color-accent-muted)',
+            color: 'var(--color-accent)', border: '1px solid var(--color-accent)',
+            borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer'
+          }}
+        >
+          <Link size={16} /> Dodaj trenera
+        </button>
+      </div>
 
       {/* Hero section: child info */}
       <div className="dashboard-hero">

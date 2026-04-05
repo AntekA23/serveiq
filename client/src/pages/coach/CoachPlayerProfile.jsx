@@ -100,6 +100,18 @@ function CoachPlanTab({ playerId, player, toast }) {
   )
 }
 
+const PATHWAY_STAGES = [
+  { value: 'beginner', label: 'Początkujący' },
+  { value: 'tennis10_red', label: 'Czerwony kort' },
+  { value: 'tennis10_orange', label: 'Pomarańczowy kort' },
+  { value: 'tennis10_green', label: 'Zielony kort' },
+  { value: 'committed', label: 'Zawodnik' },
+  { value: 'advanced', label: 'Zaawansowany' },
+  { value: 'performance', label: 'Performance' },
+]
+
+const PATHWAY_LABEL_MAP = Object.fromEntries(PATHWAY_STAGES.map((s) => [s.value, s.label]))
+
 const SKILL_NAMES = {
   serve: 'Serwis',
   forehand: 'Forhend',
@@ -169,6 +181,10 @@ export default function CoachPlayerProfile() {
   const [aiLoading, setAiLoading] = useState(false)
   const [health, setHealth] = useState(null)
   const [healthHistory, setHealthHistory] = useState([])
+  const [pathwayStage, setPathwayStage] = useState('')
+  const [nextStepText, setNextStepText] = useState('')
+  const [pathwaySaving, setPathwaySaving] = useState(false)
+  const [nextStepSaving, setNextStepSaving] = useState(false)
 
   useEffect(() => {
     const fetch = async () => {
@@ -180,7 +196,10 @@ export default function CoachPlayerProfile() {
           api.get(`/wearables/data/${id}/latest`).catch(() => ({ data: {} })),
           api.get(`/wearables/data/${id}?type=daily_summary`).catch(() => ({ data: { data: [] } })),
         ])
-        setPlayer(playerRes.data.player || playerRes.data)
+        const p = playerRes.data.player || playerRes.data
+        setPlayer(p)
+        setPathwayStage(p.pathwayStage || '')
+        setNextStepText(p.nextStep?.text || '')
         setSessions((sessionsRes.data.sessions || sessionsRes.data || []).sort((a, b) => new Date(b.date) - new Date(a.date)))
         setReviews((reviewsRes.data.reviews || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)))
         const latest = healthRes.data?.latest || {}
@@ -228,6 +247,32 @@ export default function CoachPlayerProfile() {
       toast.error(msg)
     }
     setAiLoading(false)
+  }
+
+  const handlePathwayChange = async (newStage) => {
+    setPathwayStage(newStage)
+    setPathwaySaving(true)
+    try {
+      const { data } = await api.put(`/players/${id}`, { pathwayStage: newStage })
+      setPlayer(data.player || data)
+      toast.success('Etap sciezki zapisany')
+    } catch {
+      toast.error('Nie udalo sie zapisac etapu')
+      setPathwayStage(player?.pathwayStage || '')
+    }
+    setPathwaySaving(false)
+  }
+
+  const handleNextStepSave = async () => {
+    setNextStepSaving(true)
+    try {
+      const { data } = await api.put(`/players/${id}`, { nextStep: nextStepText })
+      setPlayer(data.player || data)
+      toast.success('Nastepny krok zapisany')
+    } catch {
+      toast.error('Nie udalo sie zapisac nastepnego kroku')
+    }
+    setNextStepSaving(false)
   }
 
   const handleToggleGoal = async (goalId, completed) => {
@@ -311,6 +356,73 @@ export default function CoachPlayerProfile() {
           }}>
             <MessageSquare size={14} /> Rodzic
           </Button>
+        </div>
+      </div>
+
+      {/* Pathway & Next Step */}
+      <div style={{
+        background: 'var(--color-surface)', borderRadius: 12, padding: '16px 20px',
+        marginBottom: 16, border: '1px solid var(--color-border)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <Target size={16} style={{ color: 'var(--color-primary)' }} />
+          <span style={{ fontWeight: 600, fontSize: 15 }}>Sciezka rozwoju</span>
+          {pathwayStage && (
+            <span style={{
+              background: 'var(--color-primary-light, rgba(59,130,246,0.1))',
+              color: 'var(--color-primary)',
+              padding: '2px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+            }}>
+              {PATHWAY_LABEL_MAP[pathwayStage] || pathwayStage}
+            </span>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          {/* Pathway Stage */}
+          <div style={{ flex: '0 0 auto' }}>
+            <label style={{ fontSize: 12, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 4 }}>
+              Etap sciezki
+            </label>
+            <select
+              value={pathwayStage}
+              onChange={(e) => handlePathwayChange(e.target.value)}
+              disabled={pathwaySaving}
+              style={{
+                padding: '8px 12px', borderRadius: 8, border: '1px solid var(--color-border)',
+                background: 'var(--color-background)', color: 'var(--color-text)',
+                fontSize: 14, cursor: 'pointer', minWidth: 180,
+              }}
+            >
+              <option value="">— Wybierz etap —</option>
+              {PATHWAY_STAGES.map((s) => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Next Step */}
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <label style={{ fontSize: 12, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 4 }}>
+              Nastepny krok
+            </label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <textarea
+                value={nextStepText}
+                onChange={(e) => setNextStepText(e.target.value)}
+                placeholder="Wpisz nastepny krok dla zawodnika..."
+                rows={2}
+                style={{
+                  flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--color-border)',
+                  background: 'var(--color-background)', color: 'var(--color-text)',
+                  fontSize: 14, resize: 'vertical', fontFamily: 'inherit',
+                }}
+              />
+              <Button variant="primary" size="sm" onClick={handleNextStepSave} loading={nextStepSaving} style={{ alignSelf: 'flex-end' }}>
+                <Save size={14} /> Zapisz
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
