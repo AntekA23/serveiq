@@ -11,7 +11,7 @@ const coachNav = [
   { to: '/groups', label: 'Grupy', icon: '\u{1F465}' },
   { to: '/players', label: 'Zawodnicy', icon: '\u{1F464}' },
   { to: '/activities', label: 'Aktywno\u015Bci', icon: '\u{1F4C5}' },
-  { to: '/reviews', label: 'Recenzje', icon: '\u{1F4CB}' },
+  { to: '/reviews', label: 'Przegl\u0105dy', icon: '\u{1F4CB}' },
   { to: '/coach/requests', label: 'Pro\u015Bby', icon: '\u{1F4E9}' },
   { to: '/messages', label: 'Wiadomo\u015Bci', icon: '\u{1F4AC}' },
   { to: '/settings', label: 'Ustawienia', icon: '\u2699\uFE0F' },
@@ -22,6 +22,7 @@ const parentNav = [
   { to: '/my-children', label: 'Moje dzieci', icon: '\u{1F476}' },
   { to: '/parent/add-coach', label: 'Dodaj trenera', icon: '\u{1F517}' },
   { to: '/calendar', label: 'Kalendarz', icon: '\u{1F4C5}' },
+  { to: '/reviews', label: 'Przegl\u0105dy', icon: '\u{1F4CB}' },
   { to: '/timeline', label: 'Timeline', icon: '\u{1F4F0}' },
   { to: '/messages', label: 'Wiadomo\u015Bci', icon: '\u{1F4AC}' },
   { to: '/settings', label: 'Ustawienia', icon: '\u2699\uFE0F' },
@@ -33,7 +34,7 @@ const clubAdminNav = [
   { to: '/players', label: 'Zawodnicy', icon: '\u{1F464}' },
   { to: '/coaches', label: 'Trenerzy', icon: '\u{1F3CB}\uFE0F' },
   { to: '/activities', label: 'Aktywno\u015Bci', icon: '\u{1F4C5}' },
-  { to: '/reviews', label: 'Recenzje', icon: '\u{1F4CB}' },
+  { to: '/reviews', label: 'Przegl\u0105dy', icon: '\u{1F4CB}' },
   { to: '/settings', label: 'Ustawienia', icon: '\u2699\uFE0F' },
 ]
 
