@@ -4,12 +4,9 @@ import { Plus, Search, ChevronRight, Users, TrendingUp, Target } from 'lucide-re
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import Button from '../../components/ui/Button/Button'
+import { SKILL_NAMES, getSkillLevel } from '../../constants/skillLevels'
 import './Coach.css'
 
-const SKILL_LABELS = {
-  serve: 'Serwis', forehand: 'Forhend', backhand: 'Bekhend',
-  volley: 'Wolej', tactics: 'Taktyka', fitness: 'Kondycja',
-}
 const SKILL_COLORS = {
   serve: '#4DA6FF', forehand: '#22C55E', backhand: '#F59E0B',
   volley: '#7C5CFC', tactics: '#1ABC9C', fitness: '#FF6B35',
@@ -133,11 +130,14 @@ export default function CoachPlayers() {
                 </div>
                 {skillEntries.length > 0 && (
                   <div className="coach-player-skills">
-                    {skillEntries.slice(0, 4).map(([name, data]) => (
-                      <span key={name} className="coach-skill-chip" style={{ borderColor: SKILL_COLORS[name] || 'var(--color-text-tertiary)', color: SKILL_COLORS[name] }}>
-                        {SKILL_LABELS[name] || name}: {data.score}
-                      </span>
-                    ))}
+                    {skillEntries.slice(0, 4).map(([name, data]) => {
+                      const lvl = getSkillLevel(data.score)
+                      return (
+                        <span key={name} className="coach-skill-chip" style={{ borderColor: lvl.dot, color: lvl.dot }}>
+                          {SKILL_NAMES[name] || name}: {lvl.label}
+                        </span>
+                      )
+                    })}
                     {skillEntries.length > 4 && <span className="coach-skill-chip">+{skillEntries.length - 4}</span>}
                   </div>
                 )}
@@ -148,12 +148,12 @@ export default function CoachPlayers() {
                 )}
               </div>
               <div className="cp-player-avg">
-                <svg viewBox="0 0 36 36" className="cp-avg-ring">
-                  <circle cx="18" cy="18" r="15" fill="none" stroke="var(--color-bg-tertiary)" strokeWidth="3" />
-                  <circle cx="18" cy="18" r="15" fill="none" stroke="var(--color-accent)" strokeWidth="3"
-                    strokeDasharray={`${avgSkill * 0.94} 100`} strokeLinecap="round" transform="rotate(-90 18 18)" />
-                </svg>
-                <span className="cp-avg-val">{avgSkill}</span>
+                {(() => { const lvl = getSkillLevel(avgSkill); return (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: lvl.color, background: lvl.bg, padding: '4px 10px', borderRadius: 'var(--radius-full)' }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: lvl.dot }} />
+                    {lvl.label}
+                  </span>
+                )})()}
               </div>
               <ChevronRight size={16} className="coach-player-arrow" />
             </div>

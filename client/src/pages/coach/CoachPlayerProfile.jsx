@@ -7,6 +7,7 @@ import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import Button from '../../components/ui/Button/Button'
 import useToast from '../../hooks/useToast'
+import { SKILL_LEVELS, SKILL_NAMES } from '../../constants/skillLevels'
 import './Coach.css'
 
 const DAY_NAMES = ['Pon', 'Wt', 'Sr', 'Czw', 'Pt', 'Sb', 'Nd']
@@ -112,14 +113,7 @@ const PATHWAY_STAGES = [
 
 const PATHWAY_LABEL_MAP = Object.fromEntries(PATHWAY_STAGES.map((s) => [s.value, s.label]))
 
-const SKILL_NAMES = {
-  serve: 'Serwis',
-  forehand: 'Forhend',
-  backhand: 'Bekhend',
-  volley: 'Wolej',
-  tactics: 'Taktyka',
-  fitness: 'Kondycja',
-}
+// SKILL_NAMES imported from constants/skillLevels
 
 const SESSION_TYPE_LABELS = {
   kort: 'Kort', sparing: 'Sparing', kondycja: 'Kondycja',
@@ -160,7 +154,7 @@ const TIMEFRAME_OPTIONS = [
 
 function SkillBar({ name, label, score, notes, onUpdate }) {
   const [editing, setEditing] = useState(false)
-  const [val, setVal] = useState(score)
+  const [val, setVal] = useState(Math.round(score) || 1)
   const [noteVal, setNoteVal] = useState(notes || '')
 
   const handleSave = () => {
@@ -168,24 +162,32 @@ function SkillBar({ name, label, score, notes, onUpdate }) {
     setEditing(false)
   }
 
+  const level = SKILL_LEVELS.find((l) => l.value === Math.round(score)) || SKILL_LEVELS[0]
+
   return (
     <div className="coach-skill-row">
       <div className="coach-skill-header" onClick={() => setEditing(!editing)}>
         <span className="coach-skill-name">{label}</span>
-        <div className="coach-skill-bar-wrap">
-          <div className="coach-skill-bar">
-            <div className="coach-skill-fill" style={{ width: `${score}%` }} />
-          </div>
-          <span className="coach-skill-score">{score}</span>
-        </div>
+        <span className="coach-skill-level" style={{ color: level.color, background: level.bg }}>
+          <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: level.dot, marginRight: 6 }} />
+          {level.label}
+        </span>
         {editing ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
       </div>
       {editing && (
         <div className="coach-skill-edit">
-          <div className="coach-skill-edit-row">
-            <label>Wynik:</label>
-            <input type="range" min={0} max={100} value={val} onChange={(e) => setVal(Number(e.target.value))} />
-            <span className="coach-skill-edit-val">{val}</span>
+          <div className="coach-skill-level-selector">
+            {SKILL_LEVELS.map((l) => (
+              <button
+                key={l.value}
+                className={`coach-skill-level-btn ${val === l.value ? 'active' : ''}`}
+                style={val === l.value ? { background: l.bg, color: l.color, borderColor: l.color } : {}}
+                onClick={() => setVal(l.value)}
+              >
+                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: l.dot, marginRight: 6 }} />
+                {l.label}
+              </button>
+            ))}
           </div>
           <input
             className="coach-skill-note"

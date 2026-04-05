@@ -4,6 +4,7 @@ import { ArrowLeft, Save } from 'lucide-react'
 import api from '../../api/axios'
 import Button from '../../components/ui/Button/Button'
 import useToast from '../../hooks/useToast'
+import { SKILL_NAMES, SKILL_LEVELS } from '../../constants/skillLevels'
 import './Coach.css'
 
 const SESSION_TYPES = [
@@ -24,11 +25,6 @@ const SURFACES = [
 ]
 
 const SURFACE_TYPES = ['kort', 'sparing', 'mecz']
-
-const SKILL_NAMES = {
-  serve: 'Serwis', forehand: 'Forhend', backhand: 'Bekhend',
-  volley: 'Wolej', tactics: 'Taktyka', fitness: 'Kondycja',
-}
 
 export default function CoachNewSession() {
   const navigate = useNavigate()
@@ -229,15 +225,31 @@ export default function CoachNewSession() {
                 ))}
               </div>
               {skillUpdates.map((su) => (
-                <div key={su.skill} className="coach-skill-update-row">
-                  <span className="coach-skill-update-name">{SKILL_NAMES[su.skill]}</span>
-                  <label>Przed:</label>
-                  <input type="number" min={0} max={100} value={su.scoreBefore}
-                    onChange={(e) => updateSkill(su.skill, 'scoreBefore', e.target.value)} />
-                  <label>Po:</label>
-                  <input type="number" min={0} max={100} value={su.scoreAfter}
-                    onChange={(e) => updateSkill(su.skill, 'scoreAfter', e.target.value)} />
-                  <button className="coach-skill-remove" onClick={() => removeSkillUpdate(su.skill)}>×</button>
+                <div key={su.skill} className="coach-skill-update-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span className="coach-skill-update-name">{SKILL_NAMES[su.skill]}</span>
+                    <button className="coach-skill-remove" onClick={() => removeSkillUpdate(su.skill)}>×</button>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                    <label style={{ fontSize: 11, color: 'var(--color-text-tertiary)', minWidth: 40 }}>Przed:</label>
+                    {SKILL_LEVELS.map((l) => (
+                      <button key={l.value} className={`coach-skill-level-btn ${su.scoreBefore === l.value ? 'active' : ''}`}
+                        style={su.scoreBefore === l.value ? { background: l.bg, color: l.color, borderColor: l.color } : {}}
+                        onClick={() => updateSkill(su.skill, 'scoreBefore', l.value)}>
+                        {l.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                    <label style={{ fontSize: 11, color: 'var(--color-text-tertiary)', minWidth: 40 }}>Po:</label>
+                    {SKILL_LEVELS.map((l) => (
+                      <button key={l.value} className={`coach-skill-level-btn ${su.scoreAfter === l.value ? 'active' : ''}`}
+                        style={su.scoreAfter === l.value ? { background: l.bg, color: l.color, borderColor: l.color } : {}}
+                        onClick={() => updateSkill(su.skill, 'scoreAfter', l.value)}>
+                        {l.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>

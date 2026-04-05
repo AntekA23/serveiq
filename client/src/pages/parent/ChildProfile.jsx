@@ -10,29 +10,11 @@ import {
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
-import ProgressBar from '../../components/ui/ProgressBar/ProgressBar'
 import PathwayStepper from '../../components/player/PathwayStepper'
 import PlayerJourney from '../../components/player/PlayerJourney'
 import PlayerTimeline from '../../components/player/PlayerTimeline'
+import { SKILL_NAMES, getSkillLevel } from '../../constants/skillLevels'
 import './ChildProfile.css'
-
-const skillLabels = {
-  serve: 'Serwis',
-  forehand: 'Forhend',
-  backhand: 'Bekhend',
-  volley: 'Wolej',
-  tactics: 'Taktyka',
-  fitness: 'Kondycja',
-}
-
-const skillColors = {
-  serve: 'blue',
-  forehand: 'green',
-  backhand: 'amber',
-  volley: 'blue',
-  tactics: 'green',
-  fitness: 'amber',
-}
 
 const ACTIVITY_TYPE_COLORS = {
   class: '#22c55e',
@@ -369,18 +351,21 @@ export default function ChildProfile() {
             Umiejetnosci tenisowe
           </h2>
           <div className="child-profile-skills">
-            {Object.entries(skillLabels).map(([key, label]) => {
+            {Object.entries(SKILL_NAMES).map(([key, label]) => {
               const skillData = child.skills?.[key]
               const value = typeof skillData === 'object' ? (skillData?.score ?? 0) : (skillData ?? 0)
               const notes = typeof skillData === 'object' ? skillData?.notes : null
+              const level = getSkillLevel(value)
 
               return (
                 <div key={key} className="child-profile-skill">
                   <div className="child-profile-skill-header">
                     <span>{label}</span>
-                    <span className="child-profile-skill-score">{value}%</span>
+                    <span className="child-profile-skill-level" style={{ color: level.color, background: level.bg, padding: '2px 10px', borderRadius: 'var(--radius-full)', fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: level.dot }} />
+                      {level.label}
+                    </span>
                   </div>
-                  <ProgressBar value={value} color={skillColors[key]} />
                   {notes && <div className="child-profile-skill-notes">{notes}</div>}
                 </div>
               )

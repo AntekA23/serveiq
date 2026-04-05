@@ -113,16 +113,13 @@
 .coach-skill-header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; }
 .coach-skill-header:hover { background: var(--color-bg-tertiary); }
 .coach-skill-name { font-size: 13px; font-weight: 600; color: var(--color-text); min-width: 80px; }
-.coach-skill-bar-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
-.coach-skill-bar { flex: 1; height: 6px; background: var(--color-bg-tertiary); border-radius: var(--radius-full); overflow: hidden; }
-.coach-skill-fill { height: 100%; background: var(--color-accent); border-radius: var(--radius-full); transition: width 0.3s; }
-.coach-skill-score { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--color-text); min-width: 30px; text-align: right; }
+.coach-skill-level { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-full); margin-left: auto; }
 
 .coach-skill-edit { padding: 12px 16px; background: var(--color-bg-tertiary); display: flex; flex-direction: column; gap: 8px; }
-.coach-skill-edit-row { display: flex; align-items: center; gap: 10px; }
-.coach-skill-edit-row label { font-size: 12px; color: var(--color-text-tertiary); }
-.coach-skill-edit-row input[type="range"] { flex: 1; }
-.coach-skill-edit-val { font-weight: 700; min-width: 30px; text-align: center; }
+.coach-skill-level-selector { display: flex; gap: 4px; flex-wrap: wrap; }
+.coach-skill-level-btn { display: inline-flex; align-items: center; padding: 6px 12px; border: 1px solid var(--color-border-md); border-radius: var(--radius-full); background: transparent; color: var(--color-text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.coach-skill-level-btn:hover { border-color: var(--color-text-tertiary); }
+.coach-skill-level-btn.active { font-weight: 700; }
 .coach-skill-note { width: 100%; padding: 8px 12px; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); background: var(--color-bg-secondary); color: var(--color-text); font-size: 13px; box-sizing: border-box; }
 
 /* Sessions list (profile) */

@@ -26,8 +26,9 @@ import ReviewSummary from '../models/ReviewSummary.js';
  * Uzycie: npm run seed
  */
 
-const randomSkill = () => +(Math.random() * 2 + 1.5).toFixed(1); // 1.5-3.5 range for beginners
-const advancedSkill = () => +(Math.random() * 1.5 + 3).toFixed(1); // 3.0-4.5 range for advanced
+// Skill levels: 1=Nowe, 2=Poznaje, 3=Ćwiczy, 4=Stabilne, 5=Mocne
+const beginnerSkill = () => Math.floor(Math.random() * 2) + 2; // 2-3
+const advancedSkill = () => Math.floor(Math.random() * 2) + 4; // 4-5
 
 const seed = async () => {
   try {
@@ -192,14 +193,14 @@ const seed = async () => {
       developmentLevel: 'tennis10',
       ranking: { pzt: 0 },
       skills: {
-        serve: { score: randomSkill(), notes: 'Uczy sie tossu' },
-        forehand: { score: randomSkill(), notes: 'Dobry kontakt z pilka' },
-        backhand: { score: randomSkill(), notes: 'Podstawy obourecznego' },
-        volley: { score: randomSkill(), notes: '' },
-        movement: { score: randomSkill(), notes: 'Naturalna koordynacja' },
-        tactics: { score: randomSkill(), notes: '' },
-        mental: { score: randomSkill(), notes: 'Bardzo zaangazowany' },
-        fitness: { score: randomSkill(), notes: '' },
+        serve: { score: beginnerSkill(), notes: 'Uczy sie tossu' },
+        forehand: { score: beginnerSkill(), notes: 'Dobry kontakt z pilka' },
+        backhand: { score: beginnerSkill(), notes: 'Podstawy obourecznego' },
+        volley: { score: beginnerSkill(), notes: '' },
+        movement: { score: beginnerSkill(), notes: 'Naturalna koordynacja' },
+        tactics: { score: beginnerSkill(), notes: '' },
+        mental: { score: beginnerSkill(), notes: 'Bardzo zaangazowany' },
+        fitness: { score: beginnerSkill(), notes: '' },
       },
       trainingPlan: {
         weeklySchedule: [
@@ -244,7 +245,7 @@ const seed = async () => {
         movement: { score: advancedSkill(), notes: 'Szybka, dobry footwork' },
         tactics: { score: advancedSkill(), notes: 'Czyta gre rywala' },
         mental: { score: advancedSkill(), notes: 'Musi pracowac nad opanowaniem w tie-breakach' },
-        fitness: { score: +(Math.random() * 1 + 2.5).toFixed(1), notes: '3-setowe mecze — wymaga poprawy wydolnosci' },
+        fitness: { score: 3, notes: '3-setowe mecze — wymaga poprawy wydolnosci' },
       },
       trainingPlan: {
         weeklySchedule: [
@@ -581,8 +582,8 @@ const seed = async () => {
         notes: 'Praca nad plaskim serwisem. Return z bekhendu wymaga korekty glebokosci.',
         focusAreas: ['serwis', 'return'],
         skillUpdates: [
-          { skill: 'serve', scoreBefore: 3.5, scoreAfter: 3.8 },
-          { skill: 'backhand', scoreBefore: 3.2, scoreAfter: 3.4 },
+          { skill: 'serve', scoreBefore: 3, scoreAfter: 4 },
+          { skill: 'backhand', scoreBefore: 3, scoreAfter: 3 },
         ],
       },
       {
@@ -596,7 +597,7 @@ const seed = async () => {
         notes: 'Symulacja meczowa. Julia gra bardziej agresywnie na returnach.',
         focusAreas: ['taktyka', 'return'],
         skillUpdates: [
-          { skill: 'tactics', scoreBefore: 3.4, scoreAfter: 3.7 },
+          { skill: 'tactics', scoreBefore: 3, scoreAfter: 4 },
         ],
       },
       {
@@ -609,7 +610,7 @@ const seed = async () => {
         notes: 'Interwaly + core. Widac poprawe wydolnosci.',
         focusAreas: ['kondycja', 'szybkosc'],
         skillUpdates: [
-          { skill: 'fitness', scoreBefore: 2.8, scoreAfter: 3.0 },
+          { skill: 'fitness', scoreBefore: 2, scoreAfter: 3 },
         ],
       },
     ];

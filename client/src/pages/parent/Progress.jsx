@@ -3,17 +3,8 @@ import { CheckCircle2, Circle } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
 import Avatar from '../../components/ui/Avatar/Avatar'
-import ProgressBar from '../../components/ui/ProgressBar/ProgressBar'
+import { SKILL_NAMES, getSkillLevel } from '../../constants/skillLevels'
 import './Progress.css'
-
-const skillLabels = {
-  serve: 'Serwis',
-  forehand: 'Forhend',
-  backhand: 'Bekhend',
-  volley: 'Wolej',
-  tactics: 'Taktyka',
-  fitness: 'Kondycja',
-}
 
 const skillColors = {
   serve: 'blue',
@@ -96,21 +87,21 @@ export default function Progress() {
             </div>
 
             <div className="progress-skills">
-              {Object.entries(skillLabels).map(([key, label]) => {
+              {Object.entries(SKILL_NAMES).map(([key, label]) => {
                 const skillData = child.skills?.[key]
                 const value = typeof skillData === 'object' ? (skillData?.score ?? 0) : (skillData ?? 0)
                 const notes = typeof skillData === 'object' ? skillData?.notes : null
+                const level = getSkillLevel(value)
 
                 return (
                   <div key={key} className="progress-skill-item">
                     <div className="progress-skill-header">
                       <span className="progress-skill-name">{label}</span>
-                      <span className="progress-skill-score">{value}%</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, color: level.color, background: level.bg, padding: '2px 10px', borderRadius: 'var(--radius-full)' }}>
+                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: level.dot }} />
+                        {level.label}
+                      </span>
                     </div>
-                    <ProgressBar
-                      value={value}
-                      color={skillColors[key]}
-                    />
                     {notes && (
                       <div className="progress-skill-notes">{notes}</div>
                     )}

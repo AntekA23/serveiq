@@ -2,29 +2,32 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import api from '../../api/axios'
+import { SKILL_NAMES, SKILL_LEVELS, getSkillLevel } from '../../constants/skillLevels'
 import './SkillProgress.css'
-
-const SKILL_NAMES = {
-  serve: 'Serwis', forehand: 'Forhend', backhand: 'Bekhend',
-  volley: 'Wolej', tactics: 'Taktyka', fitness: 'Kondycja',
-}
 
 const SKILL_COLORS = {
   serve: '#4A90D9',
   forehand: '#27AE60',
   backhand: '#F5A623',
   volley: '#9B59B6',
+  movement: '#1ABC9C',
   tactics: '#1ABC9C',
+  mental: '#3B82F6',
   fitness: '#E74C3C',
 }
 
 function SkillChart({ skill, label, color, dataPoints, currentScore }) {
+  const level = getSkillLevel(currentScore)
+
   if (!dataPoints || dataPoints.length === 0) {
     return (
       <div className="sp-skill-card">
         <div className="sp-skill-header">
           <span className="sp-skill-name" style={{ color }}>{label}</span>
-          <span className="sp-skill-current">{currentScore}</span>
+          <span className="sp-skill-level-badge" style={{ color: level.color, background: level.bg }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: level.dot, display: 'inline-block' }} />
+            {level.label}
+          </span>
         </div>
         <div className="sp-skill-empty">Brak danych historycznych</div>
       </div>
@@ -42,9 +45,9 @@ function SkillChart({ skill, label, color, dataPoints, currentScore }) {
     scores.push({ date: new Date(), score: currentScore, label: 'Aktualny' })
   }
 
-  const min = Math.min(...scores.map((s) => s.score)) - 5
-  const max = Math.max(...scores.map((s) => s.score)) + 5
-  const range = max - min || 1
+  const min = 0.5
+  const max = 5.5
+  const range = max - min
 
   const width = 320
   const height = 100
@@ -62,7 +65,7 @@ function SkillChart({ skill, label, color, dataPoints, currentScore }) {
   const areaD = pathD + ` L ${points[points.length - 1].x} ${height - padding.bottom} L ${points[0].x} ${height - padding.bottom} Z`
 
   const firstScore = scores[0].score
-  const change = currentScore - firstScore
+  const change = Math.round(currentScore) - Math.round(firstScore)
   const TrendIcon = change > 0 ? TrendingUp : change < 0 ? TrendingDown : Minus
   const trendClass = change > 0 ? 'up' : change < 0 ? 'down' : 'stable'
 
@@ -71,11 +74,16 @@ function SkillChart({ skill, label, color, dataPoints, currentScore }) {
       <div className="sp-skill-header">
         <span className="sp-skill-name" style={{ color }}>{label}</span>
         <div className="sp-skill-trend-wrap">
-          <span className={`sp-skill-change ${trendClass}`}>
-            <TrendIcon size={12} />
-            {change > 0 ? '+' : ''}{change}
+          {change !== 0 && (
+            <span className={`sp-skill-change ${trendClass}`}>
+              <TrendIcon size={12} />
+              {change > 0 ? '+' : ''}{change}
+            </span>
+          )}
+          <span className="sp-skill-level-badge" style={{ color: level.color, background: level.bg }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: level.dot, display: 'inline-block' }} />
+            {level.label}
           </span>
-          <span className="sp-skill-current">{currentScore}</span>
         </div>
       </div>
       <svg viewBox={`0 0 ${width} ${height}`} className="sp-chart-svg">
@@ -116,14 +124,14 @@ function RadarChart({ currentSkills }) {
 
   const getPoint = (i, value) => {
     const angle = startAngle + i * angleStep
-    const dist = (value / 100) * r
+    const dist = (value / 5) * r
     return {
       x: cx + dist * Math.cos(angle),
       y: cy + dist * Math.sin(angle),
     }
   }
 
-  const gridLevels = [25, 50, 75, 100]
+  const gridLevels = [1, 2, 3, 4, 5]
 
   const dataPoints = skills.map(([key], i) => {
     const val = currentSkills[key] || 0
@@ -145,8 +153,8 @@ function RadarChart({ currentSkills }) {
           />
         ))}
         {skills.map(([key, label], i) => {
-          const p = getPoint(i, 100)
-          const labelP = getPoint(i, 118)
+          const p = getPoint(i, 5)
+          const labelP = getPoint(i, 5.9)
           return (
             <g key={key}>
               <line x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="var(--color-border)" strokeWidth="1" opacity="0.3" />
@@ -163,10 +171,11 @@ function RadarChart({ currentSkills }) {
         ))}
         {skills.map(([key], i) => {
           const val = currentSkills[key] || 0
+          const lvl = getSkillLevel(val)
           const p = getPoint(i, val)
           return (
-            <text key={`val-${key}`} x={p.x} y={p.y - 10} fill="var(--color-text)" fontSize="11" fontWeight="700" textAnchor="middle">
-              {val}
+            <text key={`val-${key}`} x={p.x} y={p.y - 10} fill={lvl.dot} fontSize="9" fontWeight="700" textAnchor="middle">
+              {lvl.label}
             </text>
           )
         })}
@@ -206,6 +215,7 @@ export default function SkillProgress() {
 
   const skillValues = Object.values(currentSkills).filter((v) => v > 0)
   const avgScore = skillValues.length > 0 ? Math.round(skillValues.reduce((a, b) => a + b, 0) / skillValues.length) : 0
+  const avgLevel = getSkillLevel(avgScore)
 
   return (
     <div className="sp-page">
@@ -220,8 +230,8 @@ export default function SkillProgress() {
         <div className="sp-radar-container">
           <RadarChart currentSkills={currentSkills} />
           <div className="sp-avg">
-            <span className="sp-avg-value">{avgScore}</span>
-            <span className="sp-avg-label">Srednia</span>
+            <span className="sp-avg-value" style={{ color: avgLevel.color }}>{avgLevel.label}</span>
+            <span className="sp-avg-label">Sredni poziom</span>
           </div>
         </div>
       </div>
