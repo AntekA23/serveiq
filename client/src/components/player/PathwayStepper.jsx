@@ -11,9 +11,15 @@ const DEFAULT_STAGES = [
   { key: 'performance', label: 'Performance', color: '#eab308' },
 ]
 
-export default function PathwayStepper({ currentStage, pathwayHistory }) {
+export default function PathwayStepper({ currentStage, pathwayHistory = [] }) {
   const stages = DEFAULT_STAGES
   const currentIndex = stages.findIndex((s) => s.key === currentStage)
+
+  // Build a map of history entries by stage for displaying dates
+  const historyMap = {}
+  for (const entry of pathwayHistory) {
+    historyMap[entry.stage] = entry
+  }
 
   return (
     <div className="pathway-stepper">
@@ -22,6 +28,7 @@ export default function PathwayStepper({ currentStage, pathwayHistory }) {
           const isCompleted = currentIndex > idx
           const isCurrent = currentIndex === idx
           const isFuture = currentIndex < idx
+          const historyEntry = historyMap[stage.key]
 
           return (
             <div key={stage.key} className="pathway-stepper-item">
@@ -47,6 +54,12 @@ export default function PathwayStepper({ currentStage, pathwayHistory }) {
               >
                 {stage.label}
               </span>
+              {historyEntry && (isCompleted || isCurrent) && (
+                <span className="pathway-stepper-date">
+                  {new Date(historyEntry.startDate).toLocaleDateString('pl-PL', { month: 'short', year: '2-digit' })}
+                  {historyEntry.endDate && ` — ${new Date(historyEntry.endDate).toLocaleDateString('pl-PL', { month: 'short', year: '2-digit' })}`}
+                </span>
+              )}
             </div>
           )
         })}

@@ -92,6 +92,14 @@
   color: var(--color-text-tertiary);
 }
 
+.pathway-stepper-date {
+  font-size: 9px;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
 /* responsive */
 @media (max-width: 600px) {
   .pathway-stepper-track {

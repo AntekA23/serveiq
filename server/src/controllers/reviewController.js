@@ -9,6 +9,7 @@ import DevelopmentGoal from '../models/DevelopmentGoal.js';
 const createReviewSchema = z.object({
   player: z.string().min(1, 'Zawodnik jest wymagany'),
   club: z.string().optional(),
+  title: z.string().optional(),
   periodType: z.enum(['weekly', 'monthly', 'quarterly', 'seasonal', 'ad-hoc']).optional(),
   periodStart: z.string().min(1, 'Data początkowa okresu jest wymagana'),
   periodEnd: z.string().min(1, 'Data końcowa okresu jest wymagana'),
@@ -22,6 +23,7 @@ const createReviewSchema = z.object({
 });
 
 const updateReviewSchema = z.object({
+  title: z.string().optional().nullable(),
   periodType: z.enum(['weekly', 'monthly', 'quarterly', 'seasonal', 'ad-hoc']).optional(),
   periodStart: z.string().optional(),
   periodEnd: z.string().optional(),
@@ -173,7 +175,7 @@ export const updateReview = async (req, res, next) => {
     }
 
     const fields = [
-      'periodType', 'whatHappened', 'whatWentWell', 'whatNeedsFocus',
+      'title', 'periodType', 'whatHappened', 'whatWentWell', 'whatNeedsFocus',
       'nextSteps', 'goalsReviewed', 'observations', 'activitiesCount',
       'aiGenerated', 'aiDraft', 'status', 'visibleToParent',
     ];

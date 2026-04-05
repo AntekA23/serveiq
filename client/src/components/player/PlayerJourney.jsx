@@ -36,6 +36,14 @@ const STAGE_LABELS = {
   performance: 'Performance',
 }
 
+const LEVEL_LABELS = {
+  beginner: 'Poczatkujacy',
+  tennis10: 'Tennis 10',
+  committed: 'Zawodnik',
+  advanced: 'Zaawansowany',
+  performance: 'Performance',
+}
+
 const CATEGORY_COLORS = {
   technical: 'var(--color-blue)',
   tactical: 'var(--color-green)',
@@ -101,10 +109,30 @@ export default function PlayerJourney({ player }) {
           <span className="player-journey-stage-name">
             {STAGE_LABELS[player.pathwayStage] || player.pathwayStage || 'Nie ustawiono'}
           </span>
+          {player.developmentLevel && (
+            <span className="player-journey-badge" style={{ background: 'var(--color-accent)' }}>
+              {LEVEL_LABELS[player.developmentLevel] || player.developmentLevel}
+            </span>
+          )}
           {stageDuration && (
             <span className="player-journey-stage-duration">od {stageDuration}</span>
           )}
         </div>
+        {pathwayHistory.length > 1 && (
+          <div className="player-journey-history">
+            {pathwayHistory.slice(0, -1).reverse().map((entry, idx) => (
+              <div key={idx} className="player-journey-history-entry">
+                <span className="player-journey-history-stage">
+                  {STAGE_LABELS[entry.stage] || entry.stage}
+                </span>
+                <span className="player-journey-history-dates">
+                  {entry.startDate && new Date(entry.startDate).toLocaleDateString('pl-PL', { month: 'short', year: 'numeric' })}
+                  {entry.endDate && ` — ${new Date(entry.endDate).toLocaleDateString('pl-PL', { month: 'short', year: 'numeric' })}`}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Active Goals */}

@@ -16,6 +16,10 @@ const reviewSummarySchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    title: {
+      type: String,
+      trim: true,
+    },
     periodType: {
       type: String,
       enum: ['weekly', 'monthly', 'quarterly', 'seasonal', 'ad-hoc'],

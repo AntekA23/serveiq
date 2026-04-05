@@ -1,23 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Save, Send, Star, Trash2, Sparkles, Database } from 'lucide-react'
+import { ArrowLeft, Save, Send, Trash2, Sparkles, Database } from 'lucide-react'
 import api from '../../api/axios'
 import Button from '../../components/ui/Button/Button'
 import useToast from '../../hooks/useToast'
 import './Coach.css'
 
-const REVIEW_TYPES = [
-  { value: 'monthly', label: 'Miesieczna' },
-  { value: 'quarterly', label: 'Kwartalna' },
-  { value: 'tournament', label: 'Turniejowa' },
-  { value: 'milestone', label: 'Kamien milowy' },
-  { value: 'general', label: 'Ogolna' },
+const PERIOD_TYPES = [
+  { value: 'monthly', label: 'Miesieczny' },
+  { value: 'quarterly', label: 'Kwartalny' },
+  { value: 'seasonal', label: 'Sezonowy' },
+  { value: 'weekly', label: 'Tygodniowy' },
+  { value: 'ad-hoc', label: 'Dorazny' },
 ]
-
-const SKILL_NAMES = {
-  serve: 'Serwis', forehand: 'Forhend', backhand: 'Bekhend',
-  volley: 'Wolej', tactics: 'Taktyka', fitness: 'Kondycja',
-}
 
 export default function CoachNewReview() {
   const navigate = useNavigate()
@@ -38,19 +33,17 @@ export default function CoachNewReview() {
     player: searchParams.get('player') || '',
     periodStart: monthAgo,
     periodEnd: today,
-    type: 'monthly',
+    periodType: 'monthly',
     title: '',
-    strengths: '',
-    areasToImprove: '',
-    recommendations: '',
-    notes: '',
-    overallRating: 0,
+    whatHappened: '',
+    whatWentWell: '',
+    whatNeedsFocus: '',
+    nextSteps: '',
     visibleToParent: true,
   })
 
   const [prefilling, setPrefilling] = useState(false)
   const [prefillData, setPrefillData] = useState(null)
-  const [skillRatings, setSkillRatings] = useState({})
 
   useEffect(() => {
     const fetch = async () => {
@@ -65,20 +58,18 @@ export default function CoachNewReview() {
             player: typeof r.player === 'object' ? r.player._id : r.player,
             periodStart: r.periodStart ? new Date(r.periodStart).toISOString().split('T')[0] : monthAgo,
             periodEnd: r.periodEnd ? new Date(r.periodEnd).toISOString().split('T')[0] : today,
-            type: r.type || 'monthly',
+            periodType: r.periodType || 'monthly',
             title: r.title || '',
-            strengths: r.strengths || '',
-            areasToImprove: r.areasToImprove || '',
-            recommendations: r.recommendations || '',
-            notes: r.notes || '',
-            overallRating: r.overallRating || 0,
+            whatHappened: r.whatHappened || '',
+            whatWentWell: r.whatWentWell || '',
+            whatNeedsFocus: r.whatNeedsFocus || '',
+            nextSteps: r.nextSteps || '',
             visibleToParent: r.visibleToParent !== false,
           })
-          if (r.skillRatings) setSkillRatings(r.skillRatings)
         }
       } catch {
         if (isEdit) {
-          toast.error('Nie udalo sie zaladowac oceny')
+          toast.error('Nie udalo sie zaladowac przegladu')
           navigate('/coach/reviews')
         }
       }
@@ -86,22 +77,6 @@ export default function CoachNewReview() {
     }
     fetch()
   }, [editId])
-
-  // Load player skills when player selected
-  useEffect(() => {
-    if (!isEdit && form.player) {
-      const player = players.find((p) => p._id === form.player)
-      if (player?.skills) {
-        const ratings = {}
-        for (const [key, val] of Object.entries(player.skills)) {
-          if (val && typeof val.score === 'number') {
-            ratings[key] = val.score
-          }
-        }
-        setSkillRatings(ratings)
-      }
-    }
-  }, [form.player, players])
 
   const handlePrefill = async () => {
     if (!form.player) {
@@ -169,11 +144,10 @@ export default function CoachNewReview() {
       setForm((prev) => ({
         ...prev,
         title: r.title || prev.title,
-        strengths: r.strengths || prev.strengths,
-        areasToImprove: r.areasToImprove || prev.areasToImprove,
-        recommendations: r.recommendations || prev.recommendations,
-        notes: r.notes || prev.notes,
-        overallRating: r.overallRating || prev.overallRating,
+        whatHappened: r.whatHappened || r.notes || prev.whatHappened,
+        whatWentWell: r.whatWentWell || r.strengths || prev.whatWentWell,
+        whatNeedsFocus: r.whatNeedsFocus || r.areasToImprove || prev.whatNeedsFocus,
+        nextSteps: r.nextSteps || r.recommendations || prev.nextSteps,
       }))
       toast.success('Szkic wygenerowany przez AI')
     } catch (err) {
@@ -193,38 +167,45 @@ export default function CoachNewReview() {
       return
     }
     if (!form.title) {
-      toast.error('Podaj tytul oceny')
+      toast.error('Podaj tytul przegladu')
       return
     }
     setSaving(true)
     try {
       const payload = {
-        ...form,
+        player: form.player,
+        periodType: form.periodType,
+        periodStart: form.periodStart,
+        periodEnd: form.periodEnd,
+        title: form.title,
+        whatHappened: form.whatHappened,
+        whatWentWell: form.whatWentWell,
+        whatNeedsFocus: form.whatNeedsFocus,
+        nextSteps: form.nextSteps,
+        visibleToParent: form.visibleToParent,
         status,
-        skillRatings: Object.keys(skillRatings).length > 0 ? skillRatings : undefined,
-        overallRating: form.overallRating > 0 ? form.overallRating : undefined,
       }
 
       if (isEdit) {
         const { player, ...updatePayload } = payload
         await api.put(`/reviews/${editId}`, updatePayload)
-        toast.success(status === 'published' ? 'Ocena opublikowana' : 'Ocena zapisana')
+        toast.success(status === 'published' ? 'Przeglad opublikowany' : 'Przeglad zapisany')
       } else {
         await api.post('/reviews', payload)
-        toast.success(status === 'published' ? 'Ocena opublikowana' : 'Szkic zapisany')
+        toast.success(status === 'published' ? 'Przeglad opublikowany' : 'Szkic zapisany')
       }
       navigate('/coach/reviews')
     } catch {
-      toast.error('Nie udalo sie zapisac oceny')
+      toast.error('Nie udalo sie zapisac przegladu')
     }
     setSaving(false)
   }
 
   const handleDelete = async () => {
-    if (!window.confirm('Usunac te ocene?')) return
+    if (!window.confirm('Usunac ten przeglad?')) return
     try {
       await api.delete(`/reviews/${editId}`)
-      toast.success('Ocena usunieta')
+      toast.success('Przeglad usuniety')
       navigate('/coach/reviews')
     } catch {
       toast.error('Blad usuwania')
@@ -242,7 +223,7 @@ export default function CoachNewReview() {
       </button>
 
       <div className="coach-header">
-        <h1 className="page-title">{isEdit ? 'Edytuj ocene' : 'Nowa ocena'}</h1>
+        <h1 className="page-title">{isEdit ? 'Edytuj przeglad' : 'Nowy przeglad'}</h1>
         {isEdit && (
           <Button variant="danger" size="sm" onClick={handleDelete}>
             <Trash2 size={14} /> Usun
@@ -264,14 +245,14 @@ export default function CoachNewReview() {
           </div>
         )}
 
-        {/* Type */}
+        {/* Period Type */}
         <div className="coach-form-group">
-          <label>Typ oceny</label>
+          <label>Typ przegladu</label>
           <div className="coach-type-grid">
-            {REVIEW_TYPES.map((t) => (
+            {PERIOD_TYPES.map((t) => (
               <button key={t.value}
-                className={`coach-type-btn ${form.type === t.value ? 'active' : ''}`}
-                onClick={() => handleChange('type', t.value)}>
+                className={`coach-type-btn ${form.periodType === t.value ? 'active' : ''}`}
+                onClick={() => handleChange('periodType', t.value)}>
                 {t.label}
               </button>
             ))}
@@ -371,7 +352,7 @@ export default function CoachNewReview() {
                     fontSize: 12, color: 'var(--color-text-secondary)',
                     padding: '4px 0', lineHeight: 1.5,
                   }}>
-                    • {g.title}{g.progress != null ? ` (${g.progress}%)` : ''}
+                    {g.title}{g.progress != null ? ` (${g.progress}%)` : ''}
                   </div>
                 ))}
               </div>
@@ -382,71 +363,34 @@ export default function CoachNewReview() {
         {/* Title */}
         <div className="coach-form-group">
           <label>Tytul *</label>
-          <input type="text" placeholder="np. Ocena miesieczna — marzec 2026" value={form.title}
+          <input type="text" placeholder="np. Przeglad miesieczny — marzec 2026" value={form.title}
             onChange={(e) => handleChange('title', e.target.value)} />
         </div>
 
-        {/* Overall rating */}
+        {/* Structured narrative */}
         <div className="coach-form-group">
-          <label>Ocena ogolna</label>
-          <div className="coach-rating-stars">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <button key={s} className="coach-star-btn" onClick={() => handleChange('overallRating', s === form.overallRating ? 0 : s)}>
-                <Star size={24} fill={s <= form.overallRating ? 'var(--color-amber)' : 'none'}
-                  stroke={s <= form.overallRating ? 'var(--color-amber)' : 'var(--color-text-tertiary)'} />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Structured assessment */}
-        <div className="coach-form-group">
-          <label>Mocne strony</label>
-          <textarea rows={3} placeholder="Co zawodnik robi dobrze..." value={form.strengths}
-            onChange={(e) => handleChange('strengths', e.target.value)} />
+          <label>Co sie dzialo</label>
+          <textarea rows={3} placeholder="Podsumowanie aktywnosci w okresie..." value={form.whatHappened}
+            onChange={(e) => handleChange('whatHappened', e.target.value)} />
         </div>
 
         <div className="coach-form-group">
-          <label>Obszary do poprawy</label>
-          <textarea rows={3} placeholder="Nad czym nalezy pracowac..." value={form.areasToImprove}
-            onChange={(e) => handleChange('areasToImprove', e.target.value)} />
+          <label>Co poszlo dobrze</label>
+          <textarea rows={3} placeholder="Mocne strony, postepy, sukcesy..." value={form.whatWentWell}
+            onChange={(e) => handleChange('whatWentWell', e.target.value)} />
         </div>
 
         <div className="coach-form-group">
-          <label>Rekomendacje</label>
-          <textarea rows={3} placeholder="Zalecenia na nastepny okres..." value={form.recommendations}
-            onChange={(e) => handleChange('recommendations', e.target.value)} />
+          <label>Na czym skupic</label>
+          <textarea rows={3} placeholder="Obszary do poprawy, priorytety..." value={form.whatNeedsFocus}
+            onChange={(e) => handleChange('whatNeedsFocus', e.target.value)} />
         </div>
 
         <div className="coach-form-group">
-          <label>Dodatkowe notatki</label>
-          <textarea rows={2} value={form.notes}
-            onChange={(e) => handleChange('notes', e.target.value)} />
+          <label>Nastepne kroki</label>
+          <textarea rows={3} placeholder="Rekomendacje na nastepny okres..." value={form.nextSteps}
+            onChange={(e) => handleChange('nextSteps', e.target.value)} />
         </div>
-
-        {/* Skill snapshot */}
-        {Object.keys(skillRatings).length > 0 && (
-          <div className="coach-form-group">
-            <label>Umiejetnosci (snapshot)</label>
-            <div className="coach-skill-snapshot">
-              {Object.entries(SKILL_NAMES).map(([key, label]) => {
-                const val = skillRatings[key]
-                if (val === undefined) return null
-                return (
-                  <div key={key} className="coach-skill-snap-row">
-                    <span className="coach-skill-snap-name">{label}</span>
-                    <div className="coach-skill-bar-wrap">
-                      <div className="coach-skill-bar">
-                        <div className="coach-skill-fill" style={{ width: `${val}%` }} />
-                      </div>
-                      <span className="coach-skill-score">{val}</span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Visibility */}
         <label className="coach-checkbox">

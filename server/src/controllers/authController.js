@@ -314,7 +314,8 @@ export const getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id)
       .select('-password -refreshToken -resetPasswordToken -resetPasswordExpires -inviteToken -inviteExpires')
-      .populate('parentProfile.children');
+      .populate('parentProfile.children')
+      .populate('club');
 
     if (!user) {
       return res.status(404).json({ message: 'Użytkownik nie znaleziony' });

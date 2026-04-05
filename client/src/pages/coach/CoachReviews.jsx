@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Star, Eye, EyeOff, FileText, ChevronRight } from 'lucide-react'
+import { Plus, Eye, EyeOff, FileText, ChevronRight } from 'lucide-react'
 import api from '../../api/axios'
 import Button from '../../components/ui/Button/Button'
 import './Coach.css'
 
 const TYPE_LABELS = {
-  monthly: 'Miesieczna', quarterly: 'Kwartalna', tournament: 'Turniejowa',
-  milestone: 'Kamien milowy', general: 'Ogolna',
+  weekly: 'Tygodniowy', monthly: 'Miesieczny', quarterly: 'Kwartalny',
+  seasonal: 'Sezonowy', 'ad-hoc': 'Dorazny',
 }
 
 export default function CoachReviews() {
@@ -78,23 +78,16 @@ export default function CoachReviews() {
               <div key={r._id} className="coach-review-card" onClick={() => navigate(`/coach/reviews/${r._id}/edit`)}>
                 <div className="coach-review-card-top">
                   <span className="coach-review-player">{playerName}</span>
-                  <span className="coach-review-type">{TYPE_LABELS[r.type] || r.type}</span>
+                  <span className="coach-review-type">{TYPE_LABELS[r.periodType] || r.periodType}</span>
                   <span className={`coach-review-status ${r.status}`}>
-                    {r.status === 'draft' ? 'Szkic' : 'Opublikowana'}
+                    {r.status === 'draft' ? 'Szkic' : 'Opublikowany'}
                   </span>
                   {r.visibleToParent ? <Eye size={12} className="coach-review-vis" /> : <EyeOff size={12} className="coach-review-vis" />}
                 </div>
-                <div className="coach-review-title">{r.title}</div>
+                <div className="coach-review-title">{r.title || `Przeglad ${TYPE_LABELS[r.periodType] || ''}`}</div>
                 <div className="coach-review-period">
                   {new Date(r.periodStart).toLocaleDateString('pl-PL')} — {new Date(r.periodEnd).toLocaleDateString('pl-PL')}
                 </div>
-                {r.overallRating && (
-                  <div className="coach-review-rating">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} size={12} fill={s <= r.overallRating ? 'var(--color-amber)' : 'none'} stroke={s <= r.overallRating ? 'var(--color-amber)' : 'var(--color-text-tertiary)'} />
-                    ))}
-                  </div>
-                )}
                 <ChevronRight size={16} className="coach-review-arrow" />
               </div>
             )
