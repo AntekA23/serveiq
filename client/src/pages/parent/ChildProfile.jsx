@@ -13,6 +13,7 @@ import Avatar from '../../components/ui/Avatar/Avatar'
 import ProgressBar from '../../components/ui/ProgressBar/ProgressBar'
 import PathwayStepper from '../../components/player/PathwayStepper'
 import PlayerJourney from '../../components/player/PlayerJourney'
+import PlayerTimeline from '../../components/player/PlayerTimeline'
 import './ChildProfile.css'
 
 const skillLabels = {
@@ -314,6 +315,51 @@ export default function ChildProfile() {
 
       {/* Upcoming Activities */}
       <UpcomingActivities activities={upcomingActivities} />
+
+      {/* Ostatnie aktualizacje */}
+      <div style={{
+        background: 'var(--color-surface, #fff)',
+        borderRadius: 12,
+        border: '1px solid var(--color-border, #e5e7eb)',
+        padding: '1.25rem',
+        marginTop: '1.25rem',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '1rem',
+        }}>
+          <h2 style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontSize: '1rem',
+            fontWeight: 700,
+            color: 'var(--color-text, #111827)',
+            margin: 0,
+          }}>
+            <Clock size={16} />
+            Ostatnie aktualizacje
+          </h2>
+          <Link
+            to="/timeline"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+              fontSize: '0.8125rem',
+              fontWeight: 600,
+              color: 'var(--color-primary, #6366f1)',
+              textDecoration: 'none',
+            }}
+          >
+            Zobacz pelna historie
+            <ChevronRight size={14} />
+          </Link>
+        </div>
+        <PlayerTimeline playerId={child._id} limit={5} />
+      </div>
 
       {/* Tennis skills */}
       {child.skills && (

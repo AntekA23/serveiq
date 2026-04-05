@@ -6,6 +6,7 @@ import Activity from '../models/Activity.js';
 import Observation from '../models/Observation.js';
 import ReviewSummary from '../models/ReviewSummary.js';
 import Recommendation from '../models/Recommendation.js';
+import DevelopmentGoal from '../models/DevelopmentGoal.js';
 
 // ====== Domyślne etapy ścieżki ======
 
@@ -268,6 +269,15 @@ export const getDashboard = async (req, res, next) => {
       date: { $gte: monthStart, $lte: monthEnd },
     });
 
+    // Pathway continuity metrics
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const [playersWithActiveGoal, playersWithRecentReview, playersWithUpcomingActivity] = await Promise.all([
+      DevelopmentGoal.distinct('player', { club: club._id, status: 'active' }),
+      ReviewSummary.distinct('player', { club: club._id, status: 'published', publishedAt: { $gte: thirtyDaysAgo } }),
+      Activity.distinct('players', { club: club._id, date: { $gte: now }, status: 'planned' }),
+    ]);
+
     res.json({
       dashboard: {
         totalPlayers,
@@ -276,8 +286,68 @@ export const getDashboard = async (req, res, next) => {
         totalActivities,
         pendingRecommendations,
         recentReviews,
+        pathwayContinuity: {
+          playersWithActiveGoal: playersWithActiveGoal.length,
+          playersWithRecentReview: playersWithRecentReview.length,
+          playersWithUpcomingActivity: playersWithUpcomingActivity.length,
+          totalPlayers,
+        },
       },
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/clubs/:id/attention
+ * Gracze wymagający uwagi — tylko clubAdmin
+ */
+export const getPlayersNeedingAttention = async (req, res, next) => {
+  try {
+    const clubId = req.params.id;
+
+    const club = await Club.findById(clubId);
+    if (!club) {
+      return res.status(404).json({ message: 'Klub nie znaleziony' });
+    }
+
+    const players = await Player.find({ club: clubId, active: true })
+      .select('firstName lastName pathwayStage coach dateOfBirth')
+      .lean();
+
+    const now = new Date();
+    const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const results = [];
+
+    for (const player of players) {
+      const reasons = [];
+
+      const [recentActivity, recentReview, activeGoal] = await Promise.all([
+        Activity.findOne({ players: player._id, date: { $gte: fourteenDaysAgo } }).select('_id').lean(),
+        ReviewSummary.findOne({ player: player._id, status: 'published', publishedAt: { $gte: thirtyDaysAgo } }).select('_id').lean(),
+        DevelopmentGoal.findOne({ player: player._id, status: 'active' }).select('_id').lean(),
+      ]);
+
+      if (!recentActivity) reasons.push('no_recent_activity');
+      if (!recentReview) reasons.push('no_review');
+      if (!activeGoal) reasons.push('no_goals');
+      if (!player.coach) reasons.push('no_coach');
+
+      if (reasons.length > 0) {
+        results.push({
+          _id: player._id,
+          firstName: player.firstName,
+          lastName: player.lastName,
+          pathwayStage: player.pathwayStage,
+          reasons,
+        });
+      }
+    }
+
+    res.json({ players: results });
   } catch (error) {
     next(error);
   }

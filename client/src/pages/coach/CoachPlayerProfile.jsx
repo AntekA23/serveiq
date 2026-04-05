@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare, FileText, Sparkles, Loader, ClipboardList, Trash2, Clock, Heart
+  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare, FileText, Sparkles, Loader, ClipboardList, Trash2, Clock, Heart, Eye, EyeOff
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -126,6 +126,13 @@ const SESSION_TYPE_LABELS = {
   rozciaganie: 'Rozciaganie', mecz: 'Mecz', inne: 'Inne',
 }
 
+const OBS_TYPES = [
+  { value: 'progress', label: 'Postep', color: '#22c55e' },
+  { value: 'concern', label: 'Uwaga', color: '#ef4444' },
+  { value: 'highlight', label: 'Wyroznienie', color: '#eab308' },
+  { value: 'general', label: 'Ogolna', color: '#6b7280' },
+]
+
 function SkillBar({ name, label, score, notes, onUpdate }) {
   const [editing, setEditing] = useState(false)
   const [val, setVal] = useState(score)
@@ -185,6 +192,13 @@ export default function CoachPlayerProfile() {
   const [nextStepText, setNextStepText] = useState('')
   const [pathwaySaving, setPathwaySaving] = useState(false)
   const [nextStepSaving, setNextStepSaving] = useState(false)
+  const [obsText, setObsText] = useState('')
+  const [obsType, setObsType] = useState('general')
+  const [obsEngagement, setObsEngagement] = useState(0)
+  const [obsEffort, setObsEffort] = useState(0)
+  const [obsMood, setObsMood] = useState(0)
+  const [obsVisible, setObsVisible] = useState(true)
+  const [obsSaving, setObsSaving] = useState(false)
 
   useEffect(() => {
     const fetch = async () => {
@@ -273,6 +287,33 @@ export default function CoachPlayerProfile() {
       toast.error('Nie udalo sie zapisac nastepnego kroku')
     }
     setNextStepSaving(false)
+  }
+
+  const handleObservationSubmit = async () => {
+    if (!obsText.trim()) return
+    setObsSaving(true)
+    try {
+      const body = {
+        player: id,
+        text: obsText.trim(),
+        type: obsType,
+        visibleToParent: obsVisible,
+      }
+      if (obsEngagement > 0) body.engagement = obsEngagement
+      if (obsEffort > 0) body.effort = obsEffort
+      if (obsMood > 0) body.mood = obsMood
+      await api.post('/observations', body)
+      toast.success('Obserwacja dodana')
+      setObsText('')
+      setObsType('general')
+      setObsEngagement(0)
+      setObsEffort(0)
+      setObsMood(0)
+      setObsVisible(true)
+    } catch {
+      toast.error('Nie udalo sie dodac obserwacji')
+    }
+    setObsSaving(false)
   }
 
   const handleToggleGoal = async (goalId, completed) => {
@@ -423,6 +464,93 @@ export default function CoachPlayerProfile() {
               </Button>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Quick Observation */}
+      <div style={{
+        background: 'var(--color-surface)', borderRadius: 12, padding: '16px 20px',
+        marginBottom: 16, border: '1px solid var(--color-border)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <MessageSquare size={16} style={{ color: 'var(--color-primary)' }} />
+          <span style={{ fontWeight: 600, fontSize: 15 }}>Szybka notatka</span>
+        </div>
+
+        <textarea
+          value={obsText}
+          onChange={(e) => setObsText(e.target.value)}
+          placeholder="Dodaj obserwacje o graczu..."
+          rows={3}
+          style={{
+            width: '100%', padding: '10px 12px', borderRadius: 8,
+            border: '1px solid var(--color-border)', background: 'var(--color-background)',
+            color: 'var(--color-text)', fontSize: 14, resize: 'vertical',
+            fontFamily: 'inherit', boxSizing: 'border-box',
+          }}
+        />
+
+        {/* Type badges */}
+        <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+          {OBS_TYPES.map((t) => (
+            <button
+              key={t.value}
+              onClick={() => setObsType(t.value)}
+              style={{
+                padding: '4px 12px', borderRadius: 20, fontSize: 13, fontWeight: 600,
+                border: obsType === t.value ? `2px solid ${t.color}` : '2px solid transparent',
+                background: obsType === t.value ? `${t.color}18` : 'var(--color-background)',
+                color: obsType === t.value ? t.color : 'var(--color-text-secondary)',
+                cursor: 'pointer', transition: 'all 0.15s',
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Engagement / Effort / Mood sliders */}
+        <div style={{ display: 'flex', gap: 20, marginTop: 12, flexWrap: 'wrap' }}>
+          {[
+            { label: 'Zaangazowanie', value: obsEngagement, set: setObsEngagement, color: '#3b82f6' },
+            { label: 'Wysilek', value: obsEffort, set: setObsEffort, color: '#22c55e' },
+            { label: 'Nastroj', value: obsMood, set: setObsMood, color: '#eab308' },
+          ].map((s) => (
+            <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 12, color: 'var(--color-text-secondary)', fontWeight: 500 }}>{s.label}</span>
+              {[1, 2, 3, 4, 5].map((dot) => (
+                <span
+                  key={dot}
+                  onClick={() => s.set(s.value === dot ? 0 : dot)}
+                  style={{
+                    width: 10, height: 10, borderRadius: '50%', cursor: 'pointer',
+                    background: dot <= s.value ? s.color : 'var(--color-border)',
+                    transition: 'background 0.15s',
+                  }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+
+        {/* Visibility toggle + submit */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, flexWrap: 'wrap', gap: 10 }}>
+          <button
+            onClick={() => setObsVisible(!obsVisible)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '6px 12px', borderRadius: 8, fontSize: 13, fontWeight: 500,
+              border: '1px solid var(--color-border)', background: 'var(--color-background)',
+              color: obsVisible ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+              cursor: 'pointer',
+            }}
+          >
+            {obsVisible ? <Eye size={14} /> : <EyeOff size={14} />}
+            Widoczne dla rodzica
+          </button>
+          <Button variant="primary" size="sm" onClick={handleObservationSubmit} loading={obsSaving} disabled={!obsText.trim()}>
+            <Plus size={14} /> Dodaj
+          </Button>
         </div>
       </div>
 

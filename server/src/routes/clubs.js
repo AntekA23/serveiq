@@ -4,6 +4,7 @@ import {
   getClub,
   updateClub,
   getDashboard,
+  getPlayersNeedingAttention,
 } from '../controllers/clubController.js';
 import { verifyToken, requireRole } from '../middleware/auth.js';
 
@@ -23,5 +24,8 @@ router.put('/:id', requireRole('clubAdmin', 'coach'), updateClub);
 
 // GET - dashboard (clubAdmin)
 router.get('/:id/dashboard', requireRole('clubAdmin'), getDashboard);
+
+// GET - players needing attention (clubAdmin)
+router.get('/:id/attention', requireRole('clubAdmin'), getPlayersNeedingAttention);
 
 export default router;
