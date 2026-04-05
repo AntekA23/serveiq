@@ -184,12 +184,12 @@
 .coach-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .coach-type-btn { padding: 10px; border: 2px solid var(--color-border-md); border-radius: var(--radius-sm); background: transparent; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
 .coach-type-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
-.coach-type-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+.coach-type-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-accent-contrast); }
 
 .coach-surface-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .coach-surface-btn { padding: 8px 14px; border: 1px solid var(--color-border-md); border-radius: var(--radius-full); background: transparent; color: var(--color-text-secondary); font-size: 12px; cursor: pointer; transition: all 0.15s; }
 .coach-surface-btn:hover { border-color: var(--color-accent); }
-.coach-surface-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+.coach-surface-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-accent-contrast); }
 
 .coach-checkbox { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-text-secondary); cursor: pointer; margin-bottom: 16px; }
 .coach-checkbox input { accent-color: var(--color-accent); }

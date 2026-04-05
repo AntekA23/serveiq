@@ -665,7 +665,7 @@ export default function CoachPlayerProfile() {
                 disabled={focusSaving || !focusInput.trim()}
                 style={{
                   padding: '4px 10px', borderRadius: 8, border: 'none',
-                  background: 'var(--color-primary)', color: '#fff',
+                  background: 'var(--color-accent)', color: '#0B0E14',
                   fontSize: 13, cursor: 'pointer', opacity: focusInput.trim() ? 1 : 0.5,
                 }}
               >

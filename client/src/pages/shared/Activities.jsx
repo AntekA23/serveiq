@@ -98,7 +98,7 @@ const addBtn = {
   gap: 6,
   padding: '8px 16px',
   background: 'var(--color-accent)',
-  color: '#fff',
+  color: '#0B0E14',
   border: 'none',
   borderRadius: 8,
   fontSize: 13,
@@ -730,7 +730,7 @@ export default function Activities() {
                       onClick={() => handleSaveAttendance(act._id)}
                       disabled={savingAttendance}
                       style={{
-                        ...actionBtn('var(--color-accent)', '#fff'),
+                        ...actionBtn('var(--color-accent)', '#0B0E14'),
                         marginTop: 12,
                         opacity: savingAttendance ? 0.7 : 1,
                       }}

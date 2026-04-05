@@ -168,7 +168,7 @@ export default function Dashboard() {
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               padding: '8px 16px', background: 'var(--color-accent)',
-              color: '#fff', border: 'none',
+              color: '#0B0E14', border: 'none',
               borderRadius: 8, fontSize: 13, fontWeight: 600,
               cursor: 'pointer', marginTop: 12
             }}

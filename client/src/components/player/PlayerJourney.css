@@ -86,7 +86,7 @@
   font-weight: 600;
   padding: 2px 8px;
   border-radius: var(--radius-full);
-  color: #fff;
+  color: var(--color-accent-contrast);
   background: var(--color-accent);
   white-space: nowrap;
   flex-shrink: 0;

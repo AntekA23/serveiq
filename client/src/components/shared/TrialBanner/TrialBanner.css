@@ -42,7 +42,7 @@
 
 .trial-banner.trialing .trial-banner-cta {
   background: var(--color-accent);
-  color: #fff;
+  color: var(--color-accent-contrast);
 }
 
 .trial-banner.expired .trial-banner-cta {

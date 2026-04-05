@@ -130,7 +130,7 @@ const btnCancel = {
 const btnSubmit = {
   ...btnBase,
   background: 'var(--color-accent)',
-  color: '#fff',
+  color: '#0B0E14',
 }
 
 const chipContainer = {
@@ -157,7 +157,7 @@ const chip = {
 const chipSelected = {
   ...chip,
   background: 'var(--color-accent)',
-  color: '#fff',
+  color: '#0B0E14',
 }
 
 const errStyle = {

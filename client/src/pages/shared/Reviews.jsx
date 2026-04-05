@@ -56,7 +56,7 @@ const addBtn = {
   gap: 6,
   padding: '8px 16px',
   background: 'var(--color-accent)',
-  color: '#fff',
+  color: '#0B0E14',
   border: 'none',
   borderRadius: 8,
   fontSize: 13,

@@ -75,7 +75,7 @@ const addBtn = {
   gap: 6,
   padding: '8px 16px',
   background: 'var(--color-accent)',
-  color: '#fff',
+  color: '#0B0E14',
   border: 'none',
   borderRadius: 8,
   fontSize: 13,
@@ -343,7 +343,7 @@ const btnCancel = {
 const btnPrimary = {
   ...btnBase,
   background: 'var(--color-accent)',
-  color: '#fff',
+  color: '#0B0E14',
 }
 
 const multiSelectContainer = {
@@ -743,7 +743,7 @@ function GroupForm({ group, onClose, onSaved, clubId }) {
                         {isSelected && (
                           <span
                             style={{
-                              color: '#fff',
+                              color: '#0B0E14',
                               fontSize: 11,
                               lineHeight: 1,
                             }}

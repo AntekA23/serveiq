@@ -26,7 +26,7 @@
 .tp-controls { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
 .tp-view-toggle { display: flex; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); overflow: hidden; }
 .tp-view-toggle button { padding: 7px 18px; border: none; background: transparent; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-.tp-view-toggle button.active { background: var(--color-accent); color: #fff; }
+.tp-view-toggle button.active { background: var(--color-accent); color: var(--color-accent-contrast); }
 .tp-nav { display: flex; align-items: center; gap: 10px; }
 .tp-nav-btn { background: none; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); color: var(--color-text-secondary); padding: 6px; cursor: pointer; display: flex; transition: all 0.15s; }
 .tp-nav-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
@@ -104,7 +104,7 @@
 .tp-month-cell:not(.empty):hover { background: var(--color-bg-tertiary); }
 .tp-month-cell.empty { cursor: default; }
 .tp-month-cell.today { background: var(--color-accent-muted); color: var(--color-accent); font-weight: 700; }
-.tp-month-cell.selected { background: var(--color-accent); color: #fff; font-weight: 700; }
+.tp-month-cell.selected { background: var(--color-accent); color: var(--color-accent-contrast); font-weight: 700; }
 .tp-month-cell.filled { background: var(--color-bg-tertiary); }
 .tp-month-cell.scheduled { border: 1.5px dashed var(--color-border-md); }
 .tp-month-dots { display: flex; gap: 2px; }
@@ -128,12 +128,12 @@
 .tp-add-durations { display: flex; gap: 4px; }
 .tp-dur-btn { padding: 7px 14px; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); background: transparent; color: var(--color-text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
 .tp-dur-btn:hover { border-color: var(--color-accent); }
-.tp-dur-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+.tp-dur-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-accent-contrast); }
 .tp-add-notes { width: 100%; padding: 8px 12px; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); background: var(--color-bg-secondary); color: var(--color-text); font-size: 13px; margin-bottom: 12px; box-sizing: border-box; }
 .tp-add-surfaces { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
 .tp-surface-btn { padding: 6px 12px; border: 1px solid var(--color-border-md); border-radius: var(--radius-full); background: transparent; color: var(--color-text-secondary); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 4px; }
 .tp-surface-btn:hover { border-color: var(--color-accent); }
-.tp-surface-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+.tp-surface-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-accent-contrast); }
 .tp-entry-surface { font-size: 10px; color: var(--color-text-tertiary); }
 .tp-add-actions { display: flex; gap: 10px; align-items: center; }
 
@@ -183,7 +183,7 @@
 .tp-focus-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
 .tp-focus-tag { padding: 6px 14px; border: 1px solid var(--color-border-md); border-radius: var(--radius-full); background: transparent; color: var(--color-text-secondary); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
 .tp-focus-tag:hover { border-color: var(--color-accent); }
-.tp-focus-tag.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+.tp-focus-tag.active { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-accent-contrast); }
 .tp-focus-custom { display: flex; gap: 6px; margin-bottom: 10px; }
 .tp-focus-custom input { flex: 1; padding: 7px 12px; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); background: var(--color-bg-secondary); color: var(--color-text); font-size: 13px; }
 .tp-focus-custom button { background: var(--color-bg-tertiary); border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); color: var(--color-text-secondary); padding: 7px 10px; cursor: pointer; display: flex; }
