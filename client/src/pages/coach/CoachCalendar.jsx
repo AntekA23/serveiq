@@ -1,190 +1,226 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import FullCalendar from '@fullcalendar/react'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import timeGridPlugin from '@fullcalendar/timegrid'
+import listPlugin from '@fullcalendar/list'
+import interactionPlugin from '@fullcalendar/interaction'
 import api from '../../api/axios'
-import Button from '../../components/ui/Button/Button'
+import useToast from '../../hooks/useToast'
 import './CoachCalendar.css'
 
 const TYPE_COLORS = {
-  kort: '#22C55E', sparing: '#F59E0B', kondycja: '#4DA6FF',
-  rozciaganie: '#7C5CFC', mecz: '#FF4757', inne: '#505870',
-}
-const TYPE_LABELS = {
-  kort: 'K', sparing: 'S', kondycja: 'F', rozciaganie: 'R', mecz: 'M', inne: '?',
-}
-
-const DAY_NAMES = ['Pon', 'Wt', 'Sr', 'Czw', 'Pt', 'Sb', 'Nd']
-const MONTH_NAMES = [
-  'Styczen', 'Luty', 'Marzec', 'Kwiecien', 'Maj', 'Czerwiec',
-  'Lipiec', 'Sierpien', 'Wrzesien', 'Pazdziernik', 'Listopad', 'Grudzien',
-]
-
-function getMonthDays(year, month) {
-  const firstDay = new Date(year, month, 1)
-  const lastDay = new Date(year, month + 1, 0)
-  let startDay = firstDay.getDay() - 1
-  if (startDay < 0) startDay = 6
-
-  const days = []
-  // Previous month padding
-  for (let i = startDay - 1; i >= 0; i--) {
-    const d = new Date(year, month, -i)
-    days.push({ date: d, isOtherMonth: true })
-  }
-  // Current month
-  for (let i = 1; i <= lastDay.getDate(); i++) {
-    days.push({ date: new Date(year, month, i), isOtherMonth: false })
-  }
-  // Next month padding
-  const remaining = 7 - (days.length % 7)
-  if (remaining < 7) {
-    for (let i = 1; i <= remaining; i++) {
-      days.push({ date: new Date(year, month + 1, i), isOtherMonth: true })
-    }
-  }
-  return days
+  class: '#22c55e',
+  camp: '#3b82f6',
+  tournament: '#ef4444',
+  training: '#eab308',
+  match: '#8b5cf6',
+  fitness: '#f97316',
+  review: '#06b6d4',
+  other: '#6b7280',
 }
 
-function dateKey(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+const SESSION_COLORS = {
+  kort: '#22c55e',
+  sparing: '#8b5cf6',
+  kondycja: '#f97316',
+  rozciaganie: '#06b6d4',
+  mecz: '#ef4444',
+  inne: '#6b7280',
+}
+
+function parseTimeToDate(dateStr, timeStr) {
+  if (!timeStr) return null
+  const [h, m] = timeStr.split(':').map(Number)
+  const d = new Date(dateStr)
+  d.setHours(h, m, 0, 0)
+  return d
+}
+
+function addMinutes(date, mins) {
+  return new Date(date.getTime() + mins * 60000)
 }
 
 export default function CoachCalendar() {
   const navigate = useNavigate()
-  const [month, setMonth] = useState(new Date())
-  const [sessions, setSessions] = useState([])
-  const [players, setPlayers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selectedDay, setSelectedDay] = useState(null)
+  const toast = useToast()
+  const calendarRef = useRef(null)
+  const [events, setEvents] = useState([])
 
-  const year = month.getFullYear()
-  const mon = month.getMonth()
+  const fetchEvents = useCallback(async () => {
+    try {
+      const [actRes, sesRes, plRes] = await Promise.all([
+        api.get('/activities', { params: { limit: 200 } }).catch(() => ({ data: { activities: [] } })),
+        api.get('/sessions').catch(() => ({ data: [] })),
+        api.get('/players').catch(() => ({ data: { players: [] } })),
+      ])
 
-  useEffect(() => {
-    const fetch = async () => {
-      setLoading(true)
-      try {
-        const m = `${year}-${String(mon + 1).padStart(2, '0')}`
-        const [sessRes, plRes] = await Promise.all([
-          api.get(`/sessions?month=${m}`),
-          api.get('/players'),
-        ])
-        const pl = plRes.data.players || plRes.data || []
-        setPlayers(pl)
+      const players = plRes.data.players || plRes.data || []
+      const playerMap = {}
+      for (const p of players) {
+        playerMap[p._id] = `${p.firstName} ${p.lastName?.[0] || ''}.`
+      }
 
-        const playerMap = {}
-        pl.forEach((p) => { playerMap[p._id] = `${p.firstName} ${p.lastName}` })
+      const activities = (actRes.data.activities || []).map((a) => {
+        const start = parseTimeToDate(a.date, a.startTime) || new Date(a.date)
+        const end = a.endTime ? parseTimeToDate(a.date, a.endTime) : (a.durationMinutes ? addMinutes(start, a.durationMinutes) : addMinutes(start, 60))
+        const playerNames = (a.players || []).map((p) => {
+          const id = typeof p === 'object' ? p._id : p
+          return playerMap[id] || (typeof p === 'object' ? p.firstName : '')
+        }).filter(Boolean).join(', ')
 
-        const s = sessRes.data.sessions || sessRes.data || []
-        setSessions(s.map((sess) => ({
-          ...sess,
-          playerName: playerMap[typeof sess.player === 'object' ? sess.player._id : sess.player] || 'Zawodnik',
-          playerId: typeof sess.player === 'object' ? sess.player._id : sess.player,
-        })))
-      } catch { /* silent */ }
-      setLoading(false)
+        return {
+          id: `act-${a._id}`,
+          title: a.title || 'Aktywnosc',
+          start,
+          end,
+          backgroundColor: TYPE_COLORS[a.type] || '#6b7280',
+          borderColor: 'transparent',
+          textColor: '#fff',
+          extendedProps: {
+            source: 'activity',
+            activityType: a.type,
+            playerNames,
+            location: a.location,
+            _id: a._id,
+          },
+        }
+      })
+
+      const sessionsRaw = Array.isArray(sesRes.data) ? sesRes.data : sesRes.data.sessions || []
+      const sessions = sessionsRaw.map((s) => {
+        const start = parseTimeToDate(s.date, s.startTime) || new Date(s.date)
+        const end = s.durationMinutes ? addMinutes(start, s.durationMinutes) : addMinutes(start, 60)
+        const playerId = typeof s.player === 'object' ? s.player._id : s.player
+        const playerName = playerMap[playerId] || (typeof s.player === 'object' ? s.player.firstName : '')
+
+        return {
+          id: `ses-${s._id}`,
+          title: s.title || 'Sesja',
+          start,
+          end,
+          backgroundColor: SESSION_COLORS[s.sessionType] || '#6b7280',
+          borderColor: 'transparent',
+          textColor: '#fff',
+          extendedProps: {
+            source: 'session',
+            sessionType: s.sessionType,
+            playerNames: playerName,
+            _id: s._id,
+          },
+        }
+      })
+
+      setEvents([...activities, ...sessions])
+    } catch {
+      // silent
     }
-    fetch()
-  }, [year, mon])
+  }, [])
 
-  const days = useMemo(() => getMonthDays(year, mon), [year, mon])
+  const handleEventClick = (info) => {
+    const props = info.event.extendedProps
+    if (props.source === 'session') {
+      navigate(`/coach/sessions/${props._id}/edit`)
+    }
+  }
 
-  const sessionsByDate = useMemo(() => {
-    const map = {}
-    sessions.forEach((s) => {
-      const key = dateKey(new Date(s.date))
-      if (!map[key]) map[key] = []
-      map[key].push(s)
-    })
-    return map
-  }, [sessions])
+  const handleDateClick = (info) => {
+    navigate(`/coach/sessions/new?date=${info.dateStr.slice(0, 10)}`)
+  }
 
-  const today = dateKey(new Date())
-  const selectedSessions = selectedDay ? (sessionsByDate[selectedDay] || []) : []
+  const handleEventDrop = async (info) => {
+    const props = info.event.extendedProps
+    if (props.source !== 'session') {
+      info.revert()
+      return
+    }
+    try {
+      const newDate = info.event.start.toISOString()
+      const newTime = `${String(info.event.start.getHours()).padStart(2, '0')}:${String(info.event.start.getMinutes()).padStart(2, '0')}`
+      await api.put(`/sessions/${props._id}`, { date: newDate, startTime: newTime })
+      toast.success('Sesja przeniesiona')
+    } catch {
+      info.revert()
+      toast.error('Nie udalo sie przeniesc sesji')
+    }
+  }
 
-  const prevMonth = () => setMonth(new Date(year, mon - 1, 1))
-  const nextMonth = () => setMonth(new Date(year, mon + 1, 1))
+  const handleEventResize = async (info) => {
+    const props = info.event.extendedProps
+    if (props.source !== 'session') {
+      info.revert()
+      return
+    }
+    try {
+      const durationMs = info.event.end - info.event.start
+      const durationMinutes = Math.round(durationMs / 60000)
+      await api.put(`/sessions/${props._id}`, { durationMinutes })
+      toast.success('Czas trwania zaktualizowany')
+    } catch {
+      info.revert()
+      toast.error('Nie udalo sie zmienic czasu trwania')
+    }
+  }
+
+  function renderEventContent(eventInfo) {
+    const props = eventInfo.event.extendedProps
+    return (
+      <div className="ccal-event">
+        <div className="ccal-event-title">{eventInfo.event.title}</div>
+        {props.playerNames && <div className="ccal-event-player">{props.playerNames}</div>}
+        {props.location && <div className="ccal-event-location">{props.location}</div>}
+      </div>
+    )
+  }
 
   return (
-    <div className="ccal-page">
-      <div className="ccal-header">
-        <h1 className="page-title">Kalendarz</h1>
-        <Button variant="primary" size="sm" onClick={() => navigate('/coach/sessions/new')}>
-          <Plus size={14} /> Nowa sesja
-        </Button>
+    <div className="coach-calendar-page">
+      <div className="coach-calendar-wrapper">
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+          initialView="timeGridWeek"
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'timeGridWeek,dayGridMonth,listWeek',
+          }}
+          buttonText={{
+            today: 'Dzis',
+            week: 'Tydzien',
+            month: 'Miesiac',
+            list: 'Lista',
+          }}
+          locale="pl"
+          firstDay={1}
+          height="auto"
+          contentHeight={700}
+          slotMinTime="07:00:00"
+          slotMaxTime="21:00:00"
+          slotDuration="00:30:00"
+          slotLabelInterval="01:00"
+          slotLabelFormat={{
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          }}
+          allDaySlot={false}
+          nowIndicator
+          events={events}
+          datesSet={fetchEvents}
+          eventClick={handleEventClick}
+          dateClick={handleDateClick}
+          eventDrop={handleEventDrop}
+          eventResize={handleEventResize}
+          eventContent={renderEventContent}
+          editable
+          eventDurationEditable
+          dayMaxEvents={4}
+          moreLinkText={(n) => `+${n}`}
+          noEventsText="Brak wydarzen"
+          eventDisplay="block"
+        />
       </div>
-
-      {/* Month nav */}
-      <div className="ccal-nav">
-        <button className="ccal-nav-btn" onClick={prevMonth}><ChevronLeft size={18} /></button>
-        <span className="ccal-nav-label">{MONTH_NAMES[mon]} {year}</span>
-        <button className="ccal-nav-btn" onClick={nextMonth}><ChevronRight size={18} /></button>
-      </div>
-
-      {/* Calendar grid */}
-      <div className="ccal-grid">
-        {DAY_NAMES.map((d) => (
-          <div key={d} className="ccal-day-name">{d}</div>
-        ))}
-        {days.map(({ date, isOtherMonth }, i) => {
-          const key = dateKey(date)
-          const daySessions = sessionsByDate[key] || []
-          const isToday = key === today
-          const isSelected = key === selectedDay
-
-          return (
-            <div
-              key={i}
-              className={`ccal-cell ${isOtherMonth ? 'other' : ''} ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${daySessions.length > 0 ? 'has-sessions' : ''}`}
-              onClick={() => setSelectedDay(isSelected ? null : key)}
-            >
-              <span className="ccal-cell-num">{date.getDate()}</span>
-              {daySessions.length > 0 && (
-                <div className="ccal-cell-dots">
-                  {daySessions.slice(0, 4).map((s, j) => (
-                    <span key={j} className="ccal-dot" style={{ background: TYPE_COLORS[s.sessionType] || TYPE_COLORS.inne }} title={`${s.playerName}: ${s.title}`} />
-                  ))}
-                  {daySessions.length > 4 && <span className="ccal-dot-more">+{daySessions.length - 4}</span>}
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Selected day detail */}
-      {selectedDay && (
-        <div className="ccal-detail">
-          <div className="ccal-detail-header">
-            <span>{new Date(selectedDay + 'T00:00').toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
-            <Button size="sm" onClick={() => navigate(`/coach/sessions/new?date=${selectedDay}`)}>
-              <Plus size={12} /> Dodaj
-            </Button>
-          </div>
-          {selectedSessions.length === 0 ? (
-            <div className="ccal-detail-empty">Brak sesji w tym dniu</div>
-          ) : (
-            <div className="ccal-detail-list">
-              {selectedSessions.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || '')).map((s) => (
-                <div key={s._id} className="ccal-detail-item" onClick={() => navigate(`/coach/sessions/${s._id}/edit`)}>
-                  <div className="ccal-detail-dot" style={{ background: TYPE_COLORS[s.sessionType] || TYPE_COLORS.inne }} />
-                  <div className="ccal-detail-body">
-                    <span className="ccal-detail-title">{s.title || 'Trening'}</span>
-                    <span className="ccal-detail-meta">
-                      {s.playerName} {s.startTime && `· ${s.startTime}`} · {s.durationMinutes}min
-                    </span>
-                  </div>
-                  <span className="ccal-detail-type" style={{ color: TYPE_COLORS[s.sessionType] }}>
-                    {TYPE_LABELS[s.sessionType]}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {loading && <div className="ccal-loading-overlay" />}
     </div>
   )
 }
