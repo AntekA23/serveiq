@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Save, Send, Star, Trash2, Sparkles } from 'lucide-react'
+import { ArrowLeft, Save, Send, Star, Trash2, Sparkles, Database } from 'lucide-react'
 import api from '../../api/axios'
 import Button from '../../components/ui/Button/Button'
 import useToast from '../../hooks/useToast'
@@ -48,6 +48,8 @@ export default function CoachNewReview() {
     visibleToParent: true,
   })
 
+  const [prefilling, setPrefilling] = useState(false)
+  const [prefillData, setPrefillData] = useState(null)
   const [skillRatings, setSkillRatings] = useState({})
 
   useEffect(() => {
@@ -100,6 +102,57 @@ export default function CoachNewReview() {
       }
     }
   }, [form.player, players])
+
+  const handlePrefill = async () => {
+    if (!form.player) {
+      toast.error('Najpierw wybierz zawodnika')
+      return
+    }
+    setPrefilling(true)
+    try {
+      if (isEdit) {
+        const { data } = await api.get(`/reviews/${editId}/prefill`)
+        setPrefillData(data.prefill)
+      } else {
+        const [activitiesRes, observationsRes, goalsRes] = await Promise.all([
+          api.get('/activities', { params: { player: form.player } }),
+          api.get('/observations', { params: { player: form.player } }),
+          api.get('/goals', { params: { player: form.player, status: 'active' } }),
+        ])
+
+        const start = new Date(form.periodStart)
+        const end = new Date(form.periodEnd)
+        end.setHours(23, 59, 59, 999)
+
+        const allActivities = activitiesRes.data.activities || activitiesRes.data || []
+        const periodActivities = allActivities.filter((a) => {
+          const d = new Date(a.date)
+          return d >= start && d <= end
+        })
+
+        const allObs = observationsRes.data.observations || observationsRes.data || []
+        const periodObs = allObs.filter((o) => {
+          const d = new Date(o.createdAt)
+          return d >= start && d <= end
+        })
+
+        const activeGoals = goalsRes.data.goals || goalsRes.data || []
+
+        setPrefillData({
+          activitiesCount: periodActivities.length,
+          observations: periodObs,
+          activeGoals,
+          attendanceRate: null,
+          periodStart: form.periodStart,
+          periodEnd: form.periodEnd,
+        })
+      }
+      toast.success('Dane okresu zaladowane')
+    } catch {
+      toast.error('Nie udalo sie pobrac danych')
+    }
+    setPrefilling(false)
+  }
 
   const handleAiGenerate = async () => {
     if (!form.player) {
@@ -237,13 +290,92 @@ export default function CoachNewReview() {
           </div>
         </div>
 
-        {/* AI Generate */}
-        {!isEdit && (
-          <div className="coach-ai-generate">
-            <Button size="sm" onClick={handleAiGenerate} loading={aiGenerating}>
-              <Sparkles size={14} /> Generuj z AI
-            </Button>
-            <span className="coach-ai-hint">AI wygeneruje szkic na podstawie danych zawodnika</span>
+        {/* AI Toolbar */}
+        <div className="coach-ai-generate">
+          <Button size="sm" variant="secondary" onClick={handlePrefill} loading={prefilling}
+            disabled={!form.player || !form.periodStart || !form.periodEnd}>
+            <Database size={14} /> Wypelnij danymi
+          </Button>
+          <Button size="sm" onClick={handleAiGenerate} loading={aiGenerating}
+            disabled={!form.player || !form.periodStart || !form.periodEnd}>
+            <Sparkles size={14} /> {aiGenerating ? 'Generowanie draftu AI...' : 'Wygeneruj draft AI'}
+          </Button>
+          <span className="coach-ai-hint">Pobierz dane okresu lub wygeneruj szkic AI</span>
+        </div>
+
+        {/* Prefill stats */}
+        {prefillData && (
+          <div className="coach-ai-section" style={{ marginBottom: 16 }}>
+            <div className="coach-ai-header">
+              <Database size={14} />
+              <span>Dane okresu</span>
+              <button className="coach-ai-close" onClick={() => setPrefillData(null)}>&times;</button>
+            </div>
+            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 8 }}>
+              <div style={{
+                padding: '8px 14px', borderRadius: 'var(--radius-sm)',
+                background: 'var(--color-bg-tertiary)', fontSize: 13,
+              }}>
+                <span style={{ fontWeight: 700, color: 'var(--color-accent)' }}>{prefillData.activitiesCount}</span>
+                <span style={{ color: 'var(--color-text-secondary)', marginLeft: 6 }}>aktywnosci</span>
+              </div>
+              <div style={{
+                padding: '8px 14px', borderRadius: 'var(--radius-sm)',
+                background: 'var(--color-bg-tertiary)', fontSize: 13,
+              }}>
+                <span style={{ fontWeight: 700, color: 'var(--color-accent)' }}>{(prefillData.observations || []).length}</span>
+                <span style={{ color: 'var(--color-text-secondary)', marginLeft: 6 }}>obserwacji</span>
+              </div>
+              <div style={{
+                padding: '8px 14px', borderRadius: 'var(--radius-sm)',
+                background: 'var(--color-bg-tertiary)', fontSize: 13,
+              }}>
+                <span style={{ fontWeight: 700, color: 'var(--color-accent)' }}>{(prefillData.activeGoals || []).length}</span>
+                <span style={{ color: 'var(--color-text-secondary)', marginLeft: 6 }}>aktywnych celow</span>
+              </div>
+              {prefillData.attendanceRate !== null && prefillData.attendanceRate !== undefined && (
+                <div style={{
+                  padding: '8px 14px', borderRadius: 'var(--radius-sm)',
+                  background: 'var(--color-bg-tertiary)', fontSize: 13,
+                }}>
+                  <span style={{ fontWeight: 700, color: 'var(--color-accent)' }}>{prefillData.attendanceRate}%</span>
+                  <span style={{ color: 'var(--color-text-secondary)', marginLeft: 6 }}>frekwencja</span>
+                </div>
+              )}
+            </div>
+            {(prefillData.observations || []).length > 0 && (
+              <div style={{ marginTop: 8 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 6 }}>
+                  Ostatnie obserwacje:
+                </div>
+                {prefillData.observations.slice(0, 5).map((obs, i) => (
+                  <div key={obs._id || i} style={{
+                    fontSize: 12, color: 'var(--color-text-secondary)',
+                    padding: '4px 0', borderBottom: '1px solid var(--color-border-light)',
+                    lineHeight: 1.5,
+                  }}>
+                    <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{obs.type || 'general'}</span>
+                    {' — '}{typeof obs.text === 'string' ? obs.text.slice(0, 120) : ''}
+                    {obs.text?.length > 120 ? '...' : ''}
+                  </div>
+                ))}
+              </div>
+            )}
+            {(prefillData.activeGoals || []).length > 0 && (
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 6 }}>
+                  Aktywne cele:
+                </div>
+                {prefillData.activeGoals.slice(0, 5).map((g, i) => (
+                  <div key={g._id || i} style={{
+                    fontSize: 12, color: 'var(--color-text-secondary)',
+                    padding: '4px 0', lineHeight: 1.5,
+                  }}>
+                    • {g.title}{g.progress != null ? ` (${g.progress}%)` : ''}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

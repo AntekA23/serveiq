@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare, FileText, Sparkles, Loader, ClipboardList, Trash2, Clock, Heart, Eye, EyeOff
+  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare, FileText, Sparkles, Loader, ClipboardList, Trash2, Clock, Heart, Eye, EyeOff, Pin, X, Edit3, Check, Pause, XCircle, Tag
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -130,7 +130,32 @@ const OBS_TYPES = [
   { value: 'progress', label: 'Postep', color: '#22c55e' },
   { value: 'concern', label: 'Uwaga', color: '#ef4444' },
   { value: 'highlight', label: 'Wyroznienie', color: '#eab308' },
+  { value: 'participation', label: 'Uczestnictwo', color: '#3b82f6' },
   { value: 'general', label: 'Ogolna', color: '#6b7280' },
+]
+
+const GOAL_CATEGORIES = [
+  { value: 'fundamentals', label: 'Podstawy', color: '#22c55e' },
+  { value: 'movement', label: 'Ruch', color: '#3b82f6' },
+  { value: 'consistency', label: 'Regularnosc', color: '#eab308' },
+  { value: 'confidence', label: 'Pewnosc', color: '#8b5cf6' },
+  { value: 'match-routines', label: 'Rutyny meczowe', color: '#ef4444' },
+  { value: 'recovery', label: 'Regeneracja', color: '#06b6d4' },
+  { value: 'school-balance', label: 'Szkola/Balans', color: '#f97316' },
+  { value: 'fitness', label: 'Kondycja', color: '#ec4899' },
+  { value: 'tactics', label: 'Taktyka', color: '#6366f1' },
+  { value: 'serve', label: 'Serwis', color: '#14b8a6' },
+  { value: 'other', label: 'Inne', color: '#6b7280' },
+]
+
+const GOAL_CATEGORY_MAP = Object.fromEntries(GOAL_CATEGORIES.map((c) => [c.value, c]))
+
+const TIMEFRAME_OPTIONS = [
+  { value: 'weekly', label: 'Tygodniowy' },
+  { value: 'monthly', label: 'Miesieczny' },
+  { value: 'quarterly', label: 'Kwartalny' },
+  { value: 'seasonal', label: 'Sezonowy' },
+  { value: 'yearly', label: 'Roczny' },
 ]
 
 function SkillBar({ name, label, score, notes, onUpdate }) {
@@ -200,22 +225,52 @@ export default function CoachPlayerProfile() {
   const [obsVisible, setObsVisible] = useState(true)
   const [obsSaving, setObsSaving] = useState(false)
 
+  // Goals state (new API-based)
+  const [devGoals, setDevGoals] = useState([])
+  const [goalFilter, setGoalFilter] = useState('active') // active / completed / all
+  const [showGoalForm, setShowGoalForm] = useState(false)
+  const [goalForm, setGoalForm] = useState({ title: '', description: '', category: 'fundamentals', timeframe: 'monthly', targetDate: '', visibleToParent: true })
+  const [goalSaving, setGoalSaving] = useState(false)
+  const [expandedGoal, setExpandedGoal] = useState(null)
+  const [editingGoal, setEditingGoal] = useState(null)
+
+  // Observations state
+  const [observations, setObservations] = useState([])
+  const [obsGoalRef, setObsGoalRef] = useState('')
+  const [obsActivityRef, setObsActivityRef] = useState('')
+  const [recentActivities, setRecentActivities] = useState([])
+  const [editingObs, setEditingObs] = useState(null)
+  const [editObsText, setEditObsText] = useState('')
+  const [editObsType, setEditObsType] = useState('general')
+
+  // Focus areas state
+  const [focusTags, setFocusTags] = useState([])
+  const [focusInput, setFocusInput] = useState('')
+  const [focusSaving, setFocusSaving] = useState(false)
+
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       try {
-        const [playerRes, sessionsRes, reviewsRes, healthRes, historyRes] = await Promise.all([
+        const [playerRes, sessionsRes, reviewsRes, healthRes, historyRes, goalsRes, obsRes, activitiesRes] = await Promise.all([
           api.get(`/players/${id}`),
           api.get(`/sessions?player=${id}`),
           api.get(`/reviews?player=${id}`),
           api.get(`/wearables/data/${id}/latest`).catch(() => ({ data: {} })),
           api.get(`/wearables/data/${id}?type=daily_summary`).catch(() => ({ data: { data: [] } })),
+          api.get(`/goals?player=${id}`).catch(() => ({ data: { goals: [] } })),
+          api.get(`/observations?player=${id}`).catch(() => ({ data: { observations: [] } })),
+          api.get(`/activities?player=${id}`).catch(() => ({ data: { activities: [] } })),
         ])
         const p = playerRes.data.player || playerRes.data
         setPlayer(p)
         setPathwayStage(p.pathwayStage || '')
         setNextStepText(p.nextStep?.text || '')
+        setFocusTags(p.trainingPlan?.focus || [])
         setSessions((sessionsRes.data.sessions || sessionsRes.data || []).sort((a, b) => new Date(b.date) - new Date(a.date)))
         setReviews((reviewsRes.data.reviews || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)))
+        setDevGoals(goalsRes.data.goals || [])
+        setObservations(obsRes.data.observations || [])
+        setRecentActivities((activitiesRes.data.activities || []).slice(0, 10))
         const latest = healthRes.data?.latest || {}
         const recovery = latest.recovery?.metrics?.recovery || {}
         const sleep = latest.sleep?.metrics?.sleep || {}
@@ -229,7 +284,7 @@ export default function CoachPlayerProfile() {
       } catch { /* silent */ }
       setLoading(false)
     }
-    fetch()
+    fetchData()
   }, [id])
 
   const handleSkillUpdate = async (skillName, score, notes) => {
@@ -241,14 +296,60 @@ export default function CoachPlayerProfile() {
     } catch { /* silent */ }
   }
 
-  const handleAddGoal = async () => {
-    const text = prompt('Tekst nowego celu:')
-    if (!text?.trim()) return
+  const handleCreateGoal = async () => {
+    if (!goalForm.title.trim()) return
+    setGoalSaving(true)
     try {
-      await api.post(`/players/${id}/goals`, { text })
-      const { data } = await api.get(`/players/${id}`)
-      setPlayer(data.player || data)
-    } catch { /* silent */ }
+      const body = {
+        player: id,
+        title: goalForm.title.trim(),
+        description: goalForm.description.trim() || undefined,
+        category: goalForm.category,
+        timeframe: goalForm.timeframe,
+        targetDate: goalForm.targetDate || undefined,
+        visibleToParent: goalForm.visibleToParent,
+      }
+      const { data } = await api.post('/goals', body)
+      setDevGoals((prev) => [data.goal, ...prev])
+      setGoalForm({ title: '', description: '', category: 'fundamentals', timeframe: 'monthly', targetDate: '', visibleToParent: true })
+      setShowGoalForm(false)
+      toast.success('Cel utworzony')
+    } catch {
+      toast.error('Nie udalo sie utworzyc celu')
+    }
+    setGoalSaving(false)
+  }
+
+  const handleUpdateGoal = async (goalId, updates) => {
+    try {
+      const { data } = await api.put(`/goals/${goalId}`, updates)
+      setDevGoals((prev) => prev.map((g) => g._id === goalId ? data.goal : g))
+    } catch {
+      toast.error('Nie udalo sie zaktualizowac celu')
+    }
+  }
+
+  const handleDeleteGoal = async (goalId) => {
+    if (!confirm('Usunac ten cel?')) return
+    try {
+      await api.delete(`/goals/${goalId}`)
+      setDevGoals((prev) => prev.filter((g) => g._id !== goalId))
+      toast.success('Cel usuniety')
+    } catch {
+      toast.error('Nie udalo sie usunac celu')
+    }
+  }
+
+  const handleSaveEditGoal = async (goalId) => {
+    if (!editingGoal) return
+    try {
+      const { data } = await api.put(`/goals/${goalId}`, editingGoal)
+      setDevGoals((prev) => prev.map((g) => g._id === goalId ? data.goal : g))
+      setEditingGoal(null)
+      toast.success('Cel zaktualizowany')
+    } catch {
+      toast.error('Nie udalo sie zapisac zmian')
+    }
   }
 
   const handleAiRecommendations = async () => {
@@ -302,7 +403,10 @@ export default function CoachPlayerProfile() {
       if (obsEngagement > 0) body.engagement = obsEngagement
       if (obsEffort > 0) body.effort = obsEffort
       if (obsMood > 0) body.mood = obsMood
-      await api.post('/observations', body)
+      if (obsGoalRef) body.goalRef = obsGoalRef
+      if (obsActivityRef) body.activity = obsActivityRef
+      const { data } = await api.post('/observations', body)
+      setObservations((prev) => [data.observation, ...prev])
       toast.success('Obserwacja dodana')
       setObsText('')
       setObsType('general')
@@ -310,21 +414,74 @@ export default function CoachPlayerProfile() {
       setObsEffort(0)
       setObsMood(0)
       setObsVisible(true)
+      setObsGoalRef('')
+      setObsActivityRef('')
     } catch {
       toast.error('Nie udalo sie dodac obserwacji')
     }
     setObsSaving(false)
   }
 
-  const handleToggleGoal = async (goalId, completed) => {
+  // Observation management
+  const handleDeleteObs = async (obsId) => {
+    if (!confirm('Usunac te obserwacje?')) return
     try {
-      await api.put(`/players/${id}/goals/${goalId}`, {
-        completed: !completed,
-        completedAt: !completed ? new Date().toISOString() : null,
-      })
-      const { data } = await api.get(`/players/${id}`)
-      setPlayer(data.player || data)
+      await api.delete(`/observations/${obsId}`)
+      setObservations((prev) => prev.filter((o) => o._id !== obsId))
+      toast.success('Obserwacja usunieta')
+    } catch {
+      toast.error('Nie udalo sie usunac obserwacji')
+    }
+  }
+
+  const handleUpdateObs = async (obsId) => {
+    if (!editObsText.trim()) return
+    try {
+      const { data } = await api.put(`/observations/${obsId}`, { text: editObsText.trim(), type: editObsType })
+      setObservations((prev) => prev.map((o) => o._id === obsId ? data.observation : o))
+      setEditingObs(null)
+      toast.success('Obserwacja zaktualizowana')
+    } catch {
+      toast.error('Nie udalo sie zapisac zmian')
+    }
+  }
+
+  const handleTogglePin = async (obs) => {
+    try {
+      const { data } = await api.put(`/observations/${obs._id}`, { pinned: !obs.pinned })
+      setObservations((prev) => prev.map((o) => o._id === obs._id ? data.observation : o))
     } catch { /* silent */ }
+  }
+
+  // Focus areas management
+  const handleAddFocus = async () => {
+    const tag = focusInput.trim()
+    if (!tag || focusTags.length >= 5 || focusTags.includes(tag)) return
+    const updated = [...focusTags, tag]
+    setFocusTags(updated)
+    setFocusInput('')
+    setFocusSaving(true)
+    try {
+      await api.put(`/players/${id}/training-plan`, { focus: updated })
+      toast.success('Obszar fokusu dodany')
+    } catch {
+      toast.error('Nie udalo sie zapisac')
+      setFocusTags(focusTags)
+    }
+    setFocusSaving(false)
+  }
+
+  const handleRemoveFocus = async (tag) => {
+    const updated = focusTags.filter((t) => t !== tag)
+    setFocusTags(updated)
+    setFocusSaving(true)
+    try {
+      await api.put(`/players/${id}/training-plan`, { focus: updated })
+    } catch {
+      toast.error('Nie udalo sie zapisac')
+      setFocusTags(focusTags)
+    }
+    setFocusSaving(false)
   }
 
   if (loading) {
@@ -337,7 +494,8 @@ export default function CoachPlayerProfile() {
 
   const age = player.dateOfBirth ? new Date().getFullYear() - new Date(player.dateOfBirth).getFullYear() : null
   const skills = player.skills || {}
-  const goals = player.goals || []
+  const activeGoals = devGoals.filter((g) => g.status === 'active')
+  const filteredGoals = goalFilter === 'all' ? devGoals : devGoals.filter((g) => goalFilter === 'active' ? g.status === 'active' : g.status === 'completed')
 
   return (
     <div className="coach-page">
@@ -467,6 +625,57 @@ export default function CoachPlayerProfile() {
         </div>
       </div>
 
+      {/* Focus Areas */}
+      <div style={{
+        background: 'var(--color-surface)', borderRadius: 12, padding: '16px 20px',
+        marginBottom: 16, border: '1px solid var(--color-border)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <Tag size={16} style={{ color: 'var(--color-primary)' }} />
+          <span style={{ fontWeight: 600, fontSize: 15 }}>Obszary fokusu</span>
+          <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>({focusTags.length}/5)</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          {focusTags.map((tag) => (
+            <span key={tag} style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              background: 'var(--color-primary-light, rgba(59,130,246,0.1))',
+              color: 'var(--color-primary)', padding: '4px 12px', borderRadius: 20,
+              fontSize: 13, fontWeight: 600,
+            }}>
+              {tag}
+              <X size={12} style={{ cursor: 'pointer', opacity: 0.7 }} onClick={() => handleRemoveFocus(tag)} />
+            </span>
+          ))}
+          {focusTags.length < 5 && (
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <input
+                value={focusInput}
+                onChange={(e) => setFocusInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddFocus()}
+                placeholder="Nowy obszar..."
+                style={{
+                  padding: '4px 10px', borderRadius: 8, border: '1px solid var(--color-border)',
+                  background: 'var(--color-background)', color: 'var(--color-text)',
+                  fontSize: 13, width: 140,
+                }}
+              />
+              <button
+                onClick={handleAddFocus}
+                disabled={focusSaving || !focusInput.trim()}
+                style={{
+                  padding: '4px 10px', borderRadius: 8, border: 'none',
+                  background: 'var(--color-primary)', color: '#fff',
+                  fontSize: 13, cursor: 'pointer', opacity: focusInput.trim() ? 1 : 0.5,
+                }}
+              >
+                <Plus size={12} />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Quick Observation */}
       <div style={{
         background: 'var(--color-surface)', borderRadius: 12, padding: '16px 20px',
@@ -533,6 +742,44 @@ export default function CoachPlayerProfile() {
           ))}
         </div>
 
+        {/* Goal & Activity refs */}
+        <div style={{ display: 'flex', gap: 12, marginTop: 12, flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 180px' }}>
+            <label style={{ fontSize: 12, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 4 }}>Powiaz z celem</label>
+            <select
+              value={obsGoalRef}
+              onChange={(e) => setObsGoalRef(e.target.value)}
+              style={{
+                width: '100%', padding: '6px 10px', borderRadius: 8,
+                border: '1px solid var(--color-border)', background: 'var(--color-background)',
+                color: 'var(--color-text)', fontSize: 13,
+              }}
+            >
+              <option value="">— Brak —</option>
+              {activeGoals.map((g) => (
+                <option key={g._id} value={g._id}>{g.title}</option>
+              ))}
+            </select>
+          </div>
+          <div style={{ flex: '1 1 180px' }}>
+            <label style={{ fontSize: 12, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 4 }}>Powiaz z aktywnoscia</label>
+            <select
+              value={obsActivityRef}
+              onChange={(e) => setObsActivityRef(e.target.value)}
+              style={{
+                width: '100%', padding: '6px 10px', borderRadius: 8,
+                border: '1px solid var(--color-border)', background: 'var(--color-background)',
+                color: 'var(--color-text)', fontSize: 13,
+              }}
+            >
+              <option value="">— Brak —</option>
+              {recentActivities.map((a) => (
+                <option key={a._id} value={a._id}>{a.title || a.type} ({new Date(a.date).toLocaleDateString('pl-PL')})</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         {/* Visibility toggle + submit */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, flexWrap: 'wrap', gap: 10 }}>
           <button
@@ -589,7 +836,10 @@ export default function CoachPlayerProfile() {
           <Calendar size={14} /> Sesje ({sessions.length})
         </button>
         <button className={`coach-tab ${tab === 'goals' ? 'active' : ''}`} onClick={() => setTab('goals')}>
-          <Star size={14} /> Cele ({goals.length})
+          <Star size={14} /> Cele ({activeGoals.length})
+        </button>
+        <button className={`coach-tab ${tab === 'observations' ? 'active' : ''}`} onClick={() => setTab('observations')}>
+          <MessageSquare size={14} /> Obserwacje ({observations.length})
         </button>
         <button className={`coach-tab ${tab === 'plan' ? 'active' : ''}`} onClick={() => setTab('plan')}>
           <ClipboardList size={14} /> Plan
@@ -656,23 +906,440 @@ export default function CoachPlayerProfile() {
       {/* Goals tab */}
       {tab === 'goals' && (
         <div className="coach-goals-section">
-          <Button variant="ghost" size="sm" onClick={handleAddGoal} style={{ marginBottom: 12 }}>
-            <Plus size={14} /> Dodaj cel
-          </Button>
-          {goals.length === 0 ? (
-            <div className="coach-empty">Brak celow</div>
-          ) : (
-            goals.map((g) => (
-              <div key={g._id} className={`coach-goal ${g.completed ? 'completed' : ''}`} onClick={() => handleToggleGoal(g._id, g.completed)} style={{ cursor: 'pointer' }}>
-                <span className="coach-goal-text">{g.text}</span>
-                {g.dueDate && (
-                  <span className="coach-goal-date">
-                    do {new Date(g.dueDate).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })}
-                  </span>
-                )}
-                {g.completed && <span className="coach-goal-done">Ukonczony</span>}
+          {/* Top bar: add + filters */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+            <Button variant="primary" size="sm" onClick={() => setShowGoalForm(!showGoalForm)}>
+              <Plus size={14} /> Nowy cel
+            </Button>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {[
+                { key: 'active', label: 'Aktywne' },
+                { key: 'completed', label: 'Osiagniete' },
+                { key: 'all', label: 'Wszystkie' },
+              ].map((f) => (
+                <button
+                  key={f.key}
+                  onClick={() => setGoalFilter(f.key)}
+                  style={{
+                    padding: '4px 12px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                    border: goalFilter === f.key ? '2px solid var(--color-primary)' : '2px solid transparent',
+                    background: goalFilter === f.key ? 'var(--color-primary-light, rgba(59,130,246,0.1))' : 'var(--color-background)',
+                    color: goalFilter === f.key ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                  }}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* New goal form */}
+          {showGoalForm && (
+            <div style={{
+              background: 'var(--color-background)', borderRadius: 12, padding: 16,
+              marginBottom: 16, border: '1px solid var(--color-border)',
+            }}>
+              <input
+                value={goalForm.title}
+                onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
+                placeholder="Tytul celu *"
+                style={{
+                  width: '100%', padding: '8px 12px', borderRadius: 8, marginBottom: 10,
+                  border: '1px solid var(--color-border)', background: 'var(--color-surface)',
+                  color: 'var(--color-text)', fontSize: 14, boxSizing: 'border-box',
+                }}
+              />
+              <textarea
+                value={goalForm.description}
+                onChange={(e) => setGoalForm({ ...goalForm, description: e.target.value })}
+                placeholder="Opis (opcjonalny)"
+                rows={2}
+                style={{
+                  width: '100%', padding: '8px 12px', borderRadius: 8, marginBottom: 10,
+                  border: '1px solid var(--color-border)', background: 'var(--color-surface)',
+                  color: 'var(--color-text)', fontSize: 14, resize: 'vertical',
+                  fontFamily: 'inherit', boxSizing: 'border-box',
+                }}
+              />
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+                <div style={{ flex: '1 1 160px' }}>
+                  <label style={{ fontSize: 12, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 4 }}>Kategoria</label>
+                  <select
+                    value={goalForm.category}
+                    onChange={(e) => setGoalForm({ ...goalForm, category: e.target.value })}
+                    style={{
+                      width: '100%', padding: '6px 10px', borderRadius: 8,
+                      border: '1px solid var(--color-border)', background: 'var(--color-surface)',
+                      color: 'var(--color-text)', fontSize: 13,
+                    }}
+                  >
+                    {GOAL_CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                  </select>
+                </div>
+                <div style={{ flex: '1 1 140px' }}>
+                  <label style={{ fontSize: 12, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 4 }}>Horyzont</label>
+                  <select
+                    value={goalForm.timeframe}
+                    onChange={(e) => setGoalForm({ ...goalForm, timeframe: e.target.value })}
+                    style={{
+                      width: '100%', padding: '6px 10px', borderRadius: 8,
+                      border: '1px solid var(--color-border)', background: 'var(--color-surface)',
+                      color: 'var(--color-text)', fontSize: 13,
+                    }}
+                  >
+                    {TIMEFRAME_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
+                <div style={{ flex: '1 1 140px' }}>
+                  <label style={{ fontSize: 12, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 4 }}>Data docelowa</label>
+                  <input
+                    type="date"
+                    value={goalForm.targetDate}
+                    onChange={(e) => setGoalForm({ ...goalForm, targetDate: e.target.value })}
+                    style={{
+                      width: '100%', padding: '6px 10px', borderRadius: 8,
+                      border: '1px solid var(--color-border)', background: 'var(--color-surface)',
+                      color: 'var(--color-text)', fontSize: 13, boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
               </div>
-            ))
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                <button
+                  onClick={() => setGoalForm({ ...goalForm, visibleToParent: !goalForm.visibleToParent })}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '6px 12px', borderRadius: 8, fontSize: 13, fontWeight: 500,
+                    border: '1px solid var(--color-border)', background: 'var(--color-background)',
+                    color: goalForm.visibleToParent ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {goalForm.visibleToParent ? <Eye size={14} /> : <EyeOff size={14} />}
+                  Widoczny dla rodzica
+                </button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <Button variant="ghost" size="sm" onClick={() => setShowGoalForm(false)}>Anuluj</Button>
+                  <Button variant="primary" size="sm" onClick={handleCreateGoal} loading={goalSaving} disabled={!goalForm.title.trim()}>
+                    <Plus size={14} /> Utworz
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Goals list */}
+          {filteredGoals.length === 0 ? (
+            <div className="coach-empty">Brak celow w tej kategorii</div>
+          ) : (
+            filteredGoals.map((g) => {
+              const cat = GOAL_CATEGORY_MAP[g.category] || GOAL_CATEGORY_MAP.other
+              const tf = TIMEFRAME_OPTIONS.find((t) => t.value === g.timeframe)
+              const isExpanded = expandedGoal === g._id
+              return (
+                <div key={g._id} style={{
+                  background: 'var(--color-surface)', borderRadius: 12, padding: '14px 18px',
+                  marginBottom: 10, border: '1px solid var(--color-border)',
+                  opacity: g.status === 'dropped' ? 0.5 : g.status === 'paused' ? 0.7 : 1,
+                }}>
+                  {/* Goal header */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => setExpandedGoal(isExpanded ? null : g._id)}>
+                    <span style={{
+                      background: `${cat.color}18`, color: cat.color,
+                      padding: '2px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {cat.label}
+                    </span>
+                    <span style={{ fontWeight: 600, fontSize: 14, flex: 1, color: 'var(--color-text)' }}>
+                      {g.title}
+                    </span>
+                    {g.status !== 'active' && (
+                      <span style={{
+                        fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 12,
+                        background: g.status === 'completed' ? '#22c55e18' : g.status === 'paused' ? '#eab30818' : '#ef444418',
+                        color: g.status === 'completed' ? '#22c55e' : g.status === 'paused' ? '#eab308' : '#ef4444',
+                      }}>
+                        {g.status === 'completed' ? 'Osiagniety' : g.status === 'paused' ? 'Wstrzymany' : 'Porzucony'}
+                      </span>
+                    )}
+                    {tf && <span style={{ fontSize: 11, color: 'var(--color-text-secondary)', padding: '2px 8px', background: 'var(--color-background)', borderRadius: 12 }}>{tf.label}</span>}
+                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </div>
+
+                  {/* Progress slider */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
+                    <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--color-border)', overflow: 'hidden' }}>
+                      <div style={{ width: `${g.progress || 0}%`, height: '100%', borderRadius: 3, background: cat.color, transition: 'width 0.3s' }} />
+                    </div>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: cat.color, minWidth: 36, textAlign: 'right' }}>{g.progress || 0}%</span>
+                  </div>
+                  {g.status === 'active' && (
+                    <input
+                      type="range" min={0} max={100} value={g.progress || 0}
+                      onChange={(e) => handleUpdateGoal(g._id, { progress: Number(e.target.value) })}
+                      style={{ width: '100%', marginTop: 4, accentColor: cat.color }}
+                    />
+                  )}
+
+                  {/* Target date */}
+                  {g.targetDate && (
+                    <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Calendar size={12} /> do {new Date(g.targetDate).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </div>
+                  )}
+
+                  {/* Status buttons for active goals */}
+                  {g.status === 'active' && (
+                    <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
+                      <button onClick={(e) => { e.stopPropagation(); handleUpdateGoal(g._id, { status: 'completed', progress: 100 }) }} style={{
+                        display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 8,
+                        border: '1px solid #22c55e', background: '#22c55e10', color: '#22c55e',
+                        fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                      }}>
+                        <Check size={12} /> Osiagniety
+                      </button>
+                      <button onClick={(e) => { e.stopPropagation(); handleUpdateGoal(g._id, { status: 'paused' }) }} style={{
+                        display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 8,
+                        border: '1px solid #eab308', background: '#eab30810', color: '#eab308',
+                        fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                      }}>
+                        <Pause size={12} /> Wstrzymaj
+                      </button>
+                      <button onClick={(e) => { e.stopPropagation(); handleUpdateGoal(g._id, { status: 'dropped' }) }} style={{
+                        display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 8,
+                        border: '1px solid #ef4444', background: '#ef444410', color: '#ef4444',
+                        fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                      }}>
+                        <XCircle size={12} /> Porzuc
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Re-activate for paused/dropped */}
+                  {(g.status === 'paused' || g.status === 'dropped') && (
+                    <div style={{ marginTop: 10 }}>
+                      <button onClick={(e) => { e.stopPropagation(); handleUpdateGoal(g._id, { status: 'active' }) }} style={{
+                        display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 8,
+                        border: '1px solid var(--color-primary)', background: 'var(--color-primary-light, rgba(59,130,246,0.1))', color: 'var(--color-primary)',
+                        fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                      }}>
+                        Aktywuj ponownie
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Expanded: description, edit, delete */}
+                  {isExpanded && (
+                    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--color-border)' }}>
+                      {editingGoal && editingGoal._goalId === g._id ? (
+                        <div>
+                          <input
+                            value={editingGoal.title || ''}
+                            onChange={(e) => setEditingGoal({ ...editingGoal, title: e.target.value })}
+                            placeholder="Tytul"
+                            style={{
+                              width: '100%', padding: '6px 10px', borderRadius: 8, marginBottom: 8,
+                              border: '1px solid var(--color-border)', background: 'var(--color-background)',
+                              color: 'var(--color-text)', fontSize: 13, boxSizing: 'border-box',
+                            }}
+                          />
+                          <textarea
+                            value={editingGoal.description || ''}
+                            onChange={(e) => setEditingGoal({ ...editingGoal, description: e.target.value })}
+                            placeholder="Opis"
+                            rows={2}
+                            style={{
+                              width: '100%', padding: '6px 10px', borderRadius: 8, marginBottom: 8,
+                              border: '1px solid var(--color-border)', background: 'var(--color-background)',
+                              color: 'var(--color-text)', fontSize: 13, resize: 'vertical',
+                              fontFamily: 'inherit', boxSizing: 'border-box',
+                            }}
+                          />
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <Button variant="primary" size="sm" onClick={() => handleSaveEditGoal(g._id)}>
+                              <Save size={12} /> Zapisz
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => setEditingGoal(null)}>Anuluj</Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {g.description && <div style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 10, lineHeight: 1.5 }}>{g.description}</div>}
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <button onClick={(e) => { e.stopPropagation(); setEditingGoal({ _goalId: g._id, title: g.title, description: g.description || '' }) }} style={{
+                              display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 8,
+                              border: '1px solid var(--color-border)', background: 'var(--color-background)',
+                              color: 'var(--color-text-secondary)', fontSize: 12, cursor: 'pointer',
+                            }}>
+                              <Edit3 size={12} /> Edytuj
+                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); handleDeleteGoal(g._id) }} style={{
+                              display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 8,
+                              border: '1px solid #ef4444', background: '#ef444410',
+                              color: '#ef4444', fontSize: 12, cursor: 'pointer',
+                            }}>
+                              <Trash2 size={12} /> Usun
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })
+          )}
+        </div>
+      )}
+
+      {/* Observations tab */}
+      {tab === 'observations' && (
+        <div style={{ marginTop: 4 }}>
+          {observations.length === 0 ? (
+            <div className="coach-empty">Brak obserwacji — dodaj pierwsza za pomoca formularza powyzej</div>
+          ) : (
+            observations.map((obs) => {
+              const obsTypeObj = OBS_TYPES.find((t) => t.value === obs.type) || OBS_TYPES[OBS_TYPES.length - 1]
+              const isEditing = editingObs === obs._id
+              return (
+                <div key={obs._id} style={{
+                  background: 'var(--color-surface)', borderRadius: 12, padding: '14px 18px',
+                  marginBottom: 10, border: '1px solid var(--color-border)',
+                  borderLeft: `3px solid ${obsTypeObj.color}`,
+                }}>
+                  {/* Header row */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                    <span style={{
+                      background: `${obsTypeObj.color}18`, color: obsTypeObj.color,
+                      padding: '2px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+                    }}>
+                      {obsTypeObj.label}
+                    </span>
+                    {obs.pinned && <Pin size={12} style={{ color: 'var(--color-primary)' }} />}
+                    <span style={{ flex: 1 }} />
+                    <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>
+                      {new Date(obs.createdAt).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+
+                  {/* Text or edit form */}
+                  {isEditing ? (
+                    <div style={{ marginBottom: 10 }}>
+                      <textarea
+                        value={editObsText}
+                        onChange={(e) => setEditObsText(e.target.value)}
+                        rows={3}
+                        style={{
+                          width: '100%', padding: '8px 12px', borderRadius: 8,
+                          border: '1px solid var(--color-border)', background: 'var(--color-background)',
+                          color: 'var(--color-text)', fontSize: 14, resize: 'vertical',
+                          fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 8,
+                        }}
+                      />
+                      <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+                        {OBS_TYPES.map((t) => (
+                          <button
+                            key={t.value}
+                            onClick={() => setEditObsType(t.value)}
+                            style={{
+                              padding: '3px 10px', borderRadius: 16, fontSize: 12, fontWeight: 600,
+                              border: editObsType === t.value ? `2px solid ${t.color}` : '2px solid transparent',
+                              background: editObsType === t.value ? `${t.color}18` : 'var(--color-background)',
+                              color: editObsType === t.value ? t.color : 'var(--color-text-secondary)',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {t.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Button variant="primary" size="sm" onClick={() => handleUpdateObs(obs._id)}>
+                          <Save size={12} /> Zapisz
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setEditingObs(null)}>Anuluj</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 14, color: 'var(--color-text)', lineHeight: 1.5, marginBottom: 8 }}>{obs.text}</div>
+                  )}
+
+                  {/* Linked goal/activity chips */}
+                  {(obs.goalRef || obs.activity) && (
+                    <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+                      {obs.goalRef && (
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          background: '#8b5cf618', color: '#8b5cf6',
+                          padding: '2px 10px', borderRadius: 16, fontSize: 11, fontWeight: 600,
+                        }}>
+                          <Star size={10} /> Cel: {obs.goalRef.title || obs.goalRef}
+                        </span>
+                      )}
+                      {obs.activity && (
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          background: '#3b82f618', color: '#3b82f6',
+                          padding: '2px 10px', borderRadius: 16, fontSize: 11, fontWeight: 600,
+                        }}>
+                          <Calendar size={10} /> Aktywnosc: {obs.activity.title || obs.activity.type || obs.activity}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Engagement / Effort / Mood dots */}
+                  {(obs.engagement || obs.effort || obs.mood) && (
+                    <div style={{ display: 'flex', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>
+                      {[
+                        { label: 'Zaangazowanie', value: obs.engagement, color: '#3b82f6' },
+                        { label: 'Wysilek', value: obs.effort, color: '#22c55e' },
+                        { label: 'Nastroj', value: obs.mood, color: '#eab308' },
+                      ].filter((s) => s.value).map((s) => (
+                        <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <span style={{ fontSize: 11, color: 'var(--color-text-secondary)', fontWeight: 500 }}>{s.label}</span>
+                          {[1, 2, 3, 4, 5].map((dot) => (
+                            <span key={dot} style={{
+                              width: 8, height: 8, borderRadius: '50%',
+                              background: dot <= s.value ? s.color : 'var(--color-border)',
+                            }} />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Action buttons */}
+                  {!isEditing && (
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button onClick={() => handleTogglePin(obs)} style={{
+                        display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6,
+                        border: '1px solid var(--color-border)', background: obs.pinned ? 'var(--color-primary-light, rgba(59,130,246,0.1))' : 'var(--color-background)',
+                        color: obs.pinned ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                        fontSize: 11, cursor: 'pointer',
+                      }}>
+                        <Pin size={10} /> {obs.pinned ? 'Odpinaj' : 'Przypnij'}
+                      </button>
+                      <button onClick={() => { setEditingObs(obs._id); setEditObsText(obs.text); setEditObsType(obs.type || 'general') }} style={{
+                        display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6,
+                        border: '1px solid var(--color-border)', background: 'var(--color-background)',
+                        color: 'var(--color-text-secondary)', fontSize: 11, cursor: 'pointer',
+                      }}>
+                        <Edit3 size={10} /> Edytuj
+                      </button>
+                      <button onClick={() => handleDeleteObs(obs._id)} style={{
+                        display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6,
+                        border: '1px solid #ef4444', background: '#ef444410',
+                        color: '#ef4444', fontSize: 11, cursor: 'pointer',
+                      }}>
+                        <Trash2 size={10} /> Usun
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            })
           )}
         </div>
       )}
