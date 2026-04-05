@@ -1,5 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LogOut } from 'lucide-react'
+import {
+  LayoutDashboard, Users, User, CalendarDays, ClipboardList,
+  Mail, MessageCircle, Settings, LogOut, Baby, Link2,
+  Newspaper, Dumbbell,
+} from 'lucide-react'
 import useAuthStore from '../../../store/authStore'
 import useUiStore from '../../../store/uiStore'
 import useAuth from '../../../hooks/useAuth'
@@ -7,35 +11,35 @@ import Avatar from '../../ui/Avatar'
 import './Sidebar.css'
 
 const coachNav = [
-  { to: '/coach/dashboard', label: 'Dashboard', icon: '\u{1F3E0}' },
-  { to: '/groups', label: 'Grupy', icon: '\u{1F465}' },
-  { to: '/players', label: 'Zawodnicy', icon: '\u{1F464}' },
-  { to: '/activities', label: 'Aktywno\u015Bci', icon: '\u{1F4C5}' },
-  { to: '/reviews', label: 'Przegl\u0105dy', icon: '\u{1F4CB}' },
-  { to: '/coach/requests', label: 'Pro\u015Bby', icon: '\u{1F4E9}' },
-  { to: '/messages', label: 'Wiadomo\u015Bci', icon: '\u{1F4AC}' },
-  { to: '/settings', label: 'Ustawienia', icon: '\u2699\uFE0F' },
+  { to: '/coach/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/groups', label: 'Grupy', icon: Users },
+  { to: '/players', label: 'Zawodnicy', icon: User },
+  { to: '/activities', label: 'Aktywnosci', icon: CalendarDays },
+  { to: '/reviews', label: 'Przeglady', icon: ClipboardList },
+  { to: '/coach/requests', label: 'Prosby', icon: Mail },
+  { to: '/messages', label: 'Wiadomosci', icon: MessageCircle },
+  { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]
 
 const parentNav = [
-  { to: '/parent/dashboard', label: 'Panel', icon: '\u{1F3E0}' },
-  { to: '/my-children', label: 'Moje dzieci', icon: '\u{1F476}' },
-  { to: '/parent/add-coach', label: 'Dodaj trenera', icon: '\u{1F517}' },
-  { to: '/calendar', label: 'Kalendarz', icon: '\u{1F4C5}' },
-  { to: '/reviews', label: 'Przegl\u0105dy', icon: '\u{1F4CB}' },
-  { to: '/timeline', label: 'Timeline', icon: '\u{1F4F0}' },
-  { to: '/messages', label: 'Wiadomo\u015Bci', icon: '\u{1F4AC}' },
-  { to: '/settings', label: 'Ustawienia', icon: '\u2699\uFE0F' },
+  { to: '/parent/dashboard', label: 'Panel', icon: LayoutDashboard },
+  { to: '/my-children', label: 'Moje dzieci', icon: Baby },
+  { to: '/parent/add-coach', label: 'Dodaj trenera', icon: Link2 },
+  { to: '/calendar', label: 'Kalendarz', icon: CalendarDays },
+  { to: '/reviews', label: 'Przeglady', icon: ClipboardList },
+  { to: '/timeline', label: 'Timeline', icon: Newspaper },
+  { to: '/messages', label: 'Wiadomosci', icon: MessageCircle },
+  { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]
 
 const clubAdminNav = [
-  { to: '/club/dashboard', label: 'Panel Klubu', icon: '\u{1F3E0}' },
-  { to: '/groups', label: 'Grupy', icon: '\u{1F465}' },
-  { to: '/players', label: 'Zawodnicy', icon: '\u{1F464}' },
-  { to: '/coaches', label: 'Trenerzy', icon: '\u{1F3CB}\uFE0F' },
-  { to: '/activities', label: 'Aktywno\u015Bci', icon: '\u{1F4C5}' },
-  { to: '/reviews', label: 'Przegl\u0105dy', icon: '\u{1F4CB}' },
-  { to: '/settings', label: 'Ustawienia', icon: '\u2699\uFE0F' },
+  { to: '/club/dashboard', label: 'Panel Klubu', icon: LayoutDashboard },
+  { to: '/groups', label: 'Grupy', icon: Users },
+  { to: '/players', label: 'Zawodnicy', icon: User },
+  { to: '/coaches', label: 'Trenerzy', icon: Dumbbell },
+  { to: '/activities', label: 'Aktywnosci', icon: CalendarDays },
+  { to: '/reviews', label: 'Przeglady', icon: ClipboardList },
+  { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]
 
 const roleLabels = {
@@ -96,7 +100,7 @@ export default function Sidebar() {
               }
               onClick={handleNavClick}
             >
-              <span className="sidebar-nav-icon">{item.icon}</span>
+              <item.icon size={18} className="sidebar-nav-icon" />
               {item.label}
             </NavLink>
           ))}
