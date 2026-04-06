@@ -162,6 +162,7 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
               {SURFACES.map((s) => (
                 <button key={s.value}
                   className={`ccal-type-btn ${form.surface === s.value ? 'active' : ''}`}
+                  style={form.surface === s.value ? { background: 'var(--color-accent)', borderColor: 'var(--color-accent)', color: 'var(--color-accent-contrast)' } : {}}
                   onClick={() => handleChange('surface', s.value)}>
                   {s.label}
                 </button>
