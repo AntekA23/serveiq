@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
-import { X, Save, Trash2 } from 'lucide-react'
+import { X, Save, Trash2, Plus } from 'lucide-react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -354,8 +354,28 @@ export default function CoachCalendar() {
     )
   }
 
+  const handleNewSession = () => {
+    const now = new Date()
+    // Round to next full hour
+    now.setMinutes(0, 0, 0)
+    now.setHours(now.getHours() + 1)
+    setModal({
+      mode: 'create',
+      data: {
+        date: toDateStr(now),
+        startTime: toTimeStr(now),
+      },
+    })
+  }
+
   return (
     <div className="coach-calendar-page">
+      <div className="ccal-top-bar">
+        <button className="ccal-add-btn" onClick={handleNewSession}>
+          <Plus size={16} /> Nowa sesja
+        </button>
+        <span className="ccal-hint">Kliknij na slot w kalendarzu aby dodac sesje w konkretnym terminie</span>
+      </div>
       <div className="coach-calendar-wrapper">
         <FullCalendar
           ref={calendarRef}
