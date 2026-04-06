@@ -38,6 +38,7 @@ const clubAdminNav = [
   { to: '/players', label: 'Zawodnicy', icon: User },
   { to: '/coaches', label: 'Trenerzy', icon: Dumbbell },
   { to: '/reviews', label: 'Przeglady', icon: ClipboardList },
+  { to: '/messages', label: 'Wiadomosci', icon: MessageCircle },
   { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]
 
