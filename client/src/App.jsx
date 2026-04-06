@@ -16,7 +16,7 @@ import AcceptInvite from './pages/auth/AcceptInvite'
 
 // Coach pages
 import CoachDashboard from './pages/coach/Dashboard'
-import CoachPlayers from './pages/coach/Players'
+import CoachPlayers from './pages/coach/CoachPlayers'
 import CoachDisabled from './pages/coach/CoachDisabled'
 import CoachRequests from './pages/coach/CoachRequests'
 import CoachPlayerProfile from './pages/coach/CoachPlayerProfile'

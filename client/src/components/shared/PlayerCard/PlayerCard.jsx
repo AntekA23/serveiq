@@ -1,39 +1,20 @@
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import Avatar from '../../ui/Avatar/Avatar'
-import ProgressBar from '../../ui/ProgressBar/ProgressBar'
+import { SKILL_NAMES, getSkillLevel } from '../../../constants/skillLevels'
 import './PlayerCard.css'
-
-const skillLabels = {
-  serve: 'Serwis',
-  forehand: 'Forhend',
-  backhand: 'Bekhend',
-  volley: 'Wolej',
-  tactics: 'Taktyka',
-  fitness: 'Kondycja',
-}
-
-const skillColors = {
-  serve: 'blue',
-  forehand: 'blue',
-  backhand: 'amber',
-  volley: 'green',
-  tactics: 'green',
-  fitness: 'red',
-}
 
 export default function PlayerCard({ player }) {
   const navigate = useNavigate()
   const skills = player.skills || {}
 
-  const topSkills = Object.entries(skillLabels)
-    .map(([key, label]) => ({
-      key,
-      label,
-      value: typeof skills[key] === 'object' ? (skills[key]?.score ?? 0) : (skills[key] ?? 0),
-      color: skillColors[key],
-    }))
-    .slice(0, 3)
+  const topSkills = Object.entries(SKILL_NAMES)
+    .map(([key, label]) => {
+      const raw = typeof skills[key] === 'object' ? (skills[key]?.score ?? 0) : (skills[key] ?? 0)
+      return { key, label, score: raw, level: getSkillLevel(raw) }
+    })
+    .filter((s) => s.score > 0)
+    .slice(0, 4)
 
   const age = player.dateOfBirth
     ? Math.floor((Date.now() - new Date(player.dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
@@ -42,7 +23,7 @@ export default function PlayerCard({ player }) {
   return (
     <div
       className="player-card card"
-      onClick={() => navigate(`/coach/players/${player._id}`)}
+      onClick={() => navigate(`/coach/player/${player._id}`)}
     >
       <div className="player-card-header">
         <Avatar
@@ -64,17 +45,15 @@ export default function PlayerCard({ player }) {
         </div>
         <ChevronRight size={16} className="player-card-arrow" />
       </div>
-      <div className="player-card-skills">
-        {topSkills.map((skill) => (
-          <ProgressBar
-            key={skill.key}
-            label={skill.label}
-            value={skill.value}
-            color={skill.color}
-            showValue
-          />
-        ))}
-      </div>
+      {topSkills.length > 0 && (
+        <div className="player-card-skills">
+          {topSkills.map((s) => (
+            <span key={s.key} className="player-card-skill-chip" style={{ borderColor: s.level.dot, color: s.level.dot }}>
+              {s.label}: {s.level.label}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -42,6 +42,15 @@
 
 .player-card-skills {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.player-card-skill-chip {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-md);
+  background: transparent;
 }
