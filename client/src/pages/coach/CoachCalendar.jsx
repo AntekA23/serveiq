@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { X, Save, Trash2 } from 'lucide-react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -10,24 +10,32 @@ import useToast from '../../hooks/useToast'
 import './CoachCalendar.css'
 
 const TYPE_COLORS = {
-  class: '#22c55e',
-  camp: '#3b82f6',
-  tournament: '#ef4444',
-  training: '#eab308',
-  match: '#8b5cf6',
-  fitness: '#f97316',
-  review: '#06b6d4',
-  other: '#6b7280',
+  class: '#22c55e', camp: '#3b82f6', tournament: '#ef4444',
+  training: '#eab308', match: '#8b5cf6', fitness: '#f97316',
+  review: '#06b6d4', other: '#6b7280',
 }
-
 const SESSION_COLORS = {
-  kort: '#22c55e',
-  sparing: '#8b5cf6',
-  kondycja: '#f97316',
-  rozciaganie: '#06b6d4',
-  mecz: '#ef4444',
-  inne: '#6b7280',
+  kort: '#22c55e', sparing: '#8b5cf6', kondycja: '#f97316',
+  rozciaganie: '#06b6d4', mecz: '#ef4444', inne: '#6b7280',
 }
+const SESSION_TYPES = [
+  { value: 'kort', label: 'Kort' },
+  { value: 'sparing', label: 'Sparing' },
+  { value: 'kondycja', label: 'Kondycja' },
+  { value: 'rozciaganie', label: 'Rozciaganie' },
+  { value: 'mecz', label: 'Mecz' },
+  { value: 'inne', label: 'Inne' },
+]
+const SURFACES = [
+  { value: 'clay', label: 'Maczka' },
+  { value: 'hard', label: 'Twarda' },
+  { value: 'indoor-hard', label: 'Hala' },
+  { value: 'grass', label: 'Trawa' },
+]
+
+function pad2(n) { return String(n).padStart(2, '0') }
+function toTimeStr(date) { return `${pad2(date.getHours())}:${pad2(date.getMinutes())}` }
+function toDateStr(date) { return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}` }
 
 function parseTimeToDate(dateStr, timeStr) {
   if (!timeStr) return null
@@ -36,16 +44,178 @@ function parseTimeToDate(dateStr, timeStr) {
   d.setHours(h, m, 0, 0)
   return d
 }
+function addMinutes(date, mins) { return new Date(date.getTime() + mins * 60000) }
 
-function addMinutes(date, mins) {
-  return new Date(date.getTime() + mins * 60000)
+// ─── Modal for creating / viewing sessions ───
+
+function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast }) {
+  const isEdit = mode === 'edit'
+  const [form, setForm] = useState({
+    player: data.player || '',
+    date: data.date || '',
+    startTime: data.startTime || '15:00',
+    sessionType: data.sessionType || 'kort',
+    surface: data.surface || 'clay',
+    durationMinutes: data.durationMinutes || 60,
+    title: data.title || '',
+    notes: data.notes || '',
+    visibleToParent: data.visibleToParent !== false,
+  })
+  const [saving, setSaving] = useState(false)
+
+  const handleChange = (field, value) => setForm((p) => ({ ...p, [field]: value }))
+
+  const handleSave = async () => {
+    if (!form.player) { toast.error('Wybierz zawodnika'); return }
+    if (!form.title.trim()) {
+      // Auto-generate title
+      const type = SESSION_TYPES.find((t) => t.value === form.sessionType)?.label || form.sessionType
+      const playerObj = players.find((p) => p._id === form.player)
+      const name = playerObj ? `${playerObj.firstName} ${playerObj.lastName?.[0] || ''}.` : ''
+      form.title = `${type} — ${name}`.trim()
+    }
+    setSaving(true)
+    try {
+      if (isEdit) {
+        await api.put(`/sessions/${data._id}`, form)
+        toast.success('Sesja zaktualizowana')
+      } else {
+        await api.post('/sessions', form)
+        toast.success('Sesja dodana')
+      }
+      onSaved()
+    } catch {
+      toast.error('Nie udalo sie zapisac sesji')
+    }
+    setSaving(false)
+  }
+
+  const handleDelete = async () => {
+    if (!window.confirm('Usunac te sesje?')) return
+    try {
+      await api.delete(`/sessions/${data._id}`)
+      toast.success('Sesja usunieta')
+      onDeleted()
+    } catch {
+      toast.error('Nie udalo sie usunac')
+    }
+  }
+
+  return (
+    <div className="ccal-modal-overlay" onClick={onClose}>
+      <div className="ccal-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="ccal-modal-header">
+          <h3>{isEdit ? 'Edytuj sesje' : 'Nowa sesja'}</h3>
+          <button className="ccal-modal-close" onClick={onClose}><X size={18} /></button>
+        </div>
+
+        <div className="ccal-modal-body">
+          {/* Player */}
+          <div className="ccal-field">
+            <label>Zawodnik</label>
+            <select value={form.player} onChange={(e) => handleChange('player', e.target.value)} disabled={isEdit}>
+              <option value="">Wybierz...</option>
+              {players.map((p) => (
+                <option key={p._id} value={p._id}>{p.firstName} {p.lastName}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Date + Time row */}
+          <div className="ccal-field-row">
+            <div className="ccal-field">
+              <label>Data</label>
+              <input type="date" value={form.date} onChange={(e) => handleChange('date', e.target.value)} />
+            </div>
+            <div className="ccal-field">
+              <label>Godzina</label>
+              <input type="time" value={form.startTime} onChange={(e) => handleChange('startTime', e.target.value)} />
+            </div>
+            <div className="ccal-field">
+              <label>Czas (min)</label>
+              <select value={form.durationMinutes} onChange={(e) => handleChange('durationMinutes', Number(e.target.value))}>
+                {[30, 45, 60, 75, 90, 120].map((m) => (
+                  <option key={m} value={m}>{m} min</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Type + Surface */}
+          <div className="ccal-field">
+            <label>Typ</label>
+            <div className="ccal-type-row">
+              {SESSION_TYPES.map((t) => (
+                <button key={t.value}
+                  className={`ccal-type-btn ${form.sessionType === t.value ? 'active' : ''}`}
+                  style={form.sessionType === t.value ? { background: SESSION_COLORS[t.value], borderColor: SESSION_COLORS[t.value], color: '#fff' } : {}}
+                  onClick={() => handleChange('sessionType', t.value)}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="ccal-field">
+            <label>Nawierzchnia</label>
+            <div className="ccal-type-row">
+              {SURFACES.map((s) => (
+                <button key={s.value}
+                  className={`ccal-type-btn ${form.surface === s.value ? 'active' : ''}`}
+                  onClick={() => handleChange('surface', s.value)}>
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Title */}
+          <div className="ccal-field">
+            <label>Tytul (opcjonalnie — auto-generowany)</label>
+            <input type="text" placeholder="np. Trening serwisu" value={form.title}
+              onChange={(e) => handleChange('title', e.target.value)} />
+          </div>
+
+          {/* Notes */}
+          <div className="ccal-field">
+            <label>Notatki</label>
+            <textarea rows={2} placeholder="Plan treningu, fokus..." value={form.notes}
+              onChange={(e) => handleChange('notes', e.target.value)} />
+          </div>
+
+          {/* Visibility */}
+          <label className="ccal-checkbox">
+            <input type="checkbox" checked={form.visibleToParent}
+              onChange={(e) => handleChange('visibleToParent', e.target.checked)} />
+            Widoczne dla rodzica
+          </label>
+        </div>
+
+        <div className="ccal-modal-footer">
+          {isEdit && (
+            <button className="ccal-btn-danger" onClick={handleDelete}><Trash2 size={14} /> Usun</button>
+          )}
+          <div className="ccal-modal-footer-right">
+            <button className="ccal-btn-secondary" onClick={onClose}>Anuluj</button>
+            <button className="ccal-btn-primary" onClick={handleSave} disabled={saving}>
+              <Save size={14} /> {saving ? 'Zapisywanie...' : 'Zapisz'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
+// ─── Main Calendar ───
+
 export default function CoachCalendar() {
-  const navigate = useNavigate()
   const toast = useToast()
   const calendarRef = useRef(null)
   const [events, setEvents] = useState([])
+  const [players, setPlayers] = useState([])
+  const [modal, setModal] = useState(null) // { mode: 'create'|'edit', data: {} }
+  const playersRef = useRef([])
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -55,9 +225,11 @@ export default function CoachCalendar() {
         api.get('/players').catch(() => ({ data: { players: [] } })),
       ])
 
-      const players = plRes.data.players || plRes.data || []
+      const pl = plRes.data.players || plRes.data || []
+      setPlayers(pl)
+      playersRef.current = pl
       const playerMap = {}
-      for (const p of players) {
+      for (const p of pl) {
         playerMap[p._id] = `${p.firstName} ${p.lastName?.[0] || ''}.`
       }
 
@@ -72,18 +244,11 @@ export default function CoachCalendar() {
         return {
           id: `act-${a._id}`,
           title: a.title || 'Aktywnosc',
-          start,
-          end,
+          start, end,
           backgroundColor: TYPE_COLORS[a.type] || '#6b7280',
           borderColor: 'transparent',
           textColor: '#fff',
-          extendedProps: {
-            source: 'activity',
-            activityType: a.type,
-            playerNames,
-            location: a.location,
-            _id: a._id,
-          },
+          extendedProps: { source: 'activity', activityType: a.type, playerNames, location: a.location, _id: a._id },
         }
       })
 
@@ -97,46 +262,62 @@ export default function CoachCalendar() {
         return {
           id: `ses-${s._id}`,
           title: s.title || 'Sesja',
-          start,
-          end,
+          start, end,
           backgroundColor: SESSION_COLORS[s.sessionType] || '#6b7280',
           borderColor: 'transparent',
           textColor: '#fff',
           extendedProps: {
-            source: 'session',
-            sessionType: s.sessionType,
-            playerNames: playerName,
-            _id: s._id,
+            source: 'session', sessionType: s.sessionType, playerNames: playerName, _id: s._id,
+            // keep raw data for edit modal
+            player: playerId, surface: s.surface, notes: s.notes,
+            startTime: s.startTime, durationMinutes: s.durationMinutes,
+            visibleToParent: s.visibleToParent,
           },
         }
       })
 
       setEvents([...activities, ...sessions])
-    } catch {
-      // silent
-    }
+    } catch { /* silent */ }
   }, [])
 
   const handleEventClick = (info) => {
     const props = info.event.extendedProps
     if (props.source === 'session') {
-      navigate(`/coach/sessions/${props._id}/edit`)
+      setModal({
+        mode: 'edit',
+        data: {
+          _id: props._id,
+          player: props.player,
+          date: toDateStr(info.event.start),
+          startTime: props.startTime || toTimeStr(info.event.start),
+          sessionType: props.sessionType,
+          surface: props.surface || '',
+          durationMinutes: props.durationMinutes || 60,
+          title: info.event.title,
+          notes: props.notes || '',
+          visibleToParent: props.visibleToParent,
+        },
+      })
     }
   }
 
   const handleDateClick = (info) => {
-    navigate(`/coach/sessions/new?date=${info.dateStr.slice(0, 10)}`)
+    const clickedDate = info.date
+    setModal({
+      mode: 'create',
+      data: {
+        date: toDateStr(clickedDate),
+        startTime: toTimeStr(clickedDate),
+      },
+    })
   }
 
   const handleEventDrop = async (info) => {
     const props = info.event.extendedProps
-    if (props.source !== 'session') {
-      info.revert()
-      return
-    }
+    if (props.source !== 'session') { info.revert(); return }
     try {
       const newDate = info.event.start.toISOString()
-      const newTime = `${String(info.event.start.getHours()).padStart(2, '0')}:${String(info.event.start.getMinutes()).padStart(2, '0')}`
+      const newTime = toTimeStr(info.event.start)
       await api.put(`/sessions/${props._id}`, { date: newDate, startTime: newTime })
       toast.success('Sesja przeniesiona')
     } catch {
@@ -147,13 +328,9 @@ export default function CoachCalendar() {
 
   const handleEventResize = async (info) => {
     const props = info.event.extendedProps
-    if (props.source !== 'session') {
-      info.revert()
-      return
-    }
+    if (props.source !== 'session') { info.revert(); return }
     try {
-      const durationMs = info.event.end - info.event.start
-      const durationMinutes = Math.round(durationMs / 60000)
+      const durationMinutes = Math.round((info.event.end - info.event.start) / 60000)
       await api.put(`/sessions/${props._id}`, { durationMinutes })
       toast.success('Czas trwania zaktualizowany')
     } catch {
@@ -161,6 +338,10 @@ export default function CoachCalendar() {
       toast.error('Nie udalo sie zmienic czasu trwania')
     }
   }
+
+  const handleModalClose = () => setModal(null)
+  const handleModalSaved = () => { setModal(null); fetchEvents() }
+  const handleModalDeleted = () => { setModal(null); fetchEvents() }
 
   function renderEventContent(eventInfo) {
     const props = eventInfo.event.extendedProps
@@ -185,12 +366,7 @@ export default function CoachCalendar() {
             center: 'title',
             right: 'timeGridWeek,dayGridMonth,listWeek',
           }}
-          buttonText={{
-            today: 'Dzis',
-            week: 'Tydzien',
-            month: 'Miesiac',
-            list: 'Lista',
-          }}
+          buttonText={{ today: 'Dzis', week: 'Tydzien', month: 'Miesiac', list: 'Lista' }}
           locale="pl"
           firstDay={1}
           height="auto"
@@ -199,11 +375,7 @@ export default function CoachCalendar() {
           slotMaxTime="21:00:00"
           slotDuration="00:30:00"
           slotLabelInterval="01:00"
-          slotLabelFormat={{
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-          }}
+          slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
           allDaySlot={false}
           nowIndicator
           events={events}
@@ -221,6 +393,18 @@ export default function CoachCalendar() {
           eventDisplay="block"
         />
       </div>
+
+      {modal && (
+        <SessionModal
+          mode={modal.mode}
+          data={modal.data}
+          players={players}
+          onClose={handleModalClose}
+          onSaved={handleModalSaved}
+          onDeleted={handleModalDeleted}
+          toast={toast}
+        />
+      )}
     </div>
   )
 }
