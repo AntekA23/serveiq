@@ -241,6 +241,66 @@
   line-height: 1.4;
 }
 
+/* ─── Requests (in invite tab) ─── */
+.settings-requests-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-size: 11px;
+  font-weight: 700;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.settings-requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-request-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.settings-request-info { flex: 1; min-width: 0; }
+.settings-request-name { font-size: 14px; font-weight: 700; color: var(--color-text); }
+.settings-request-email { font-size: 12px; color: var(--color-text-tertiary); }
+.settings-request-players { font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; }
+.settings-request-message { font-size: 12px; color: var(--color-text-secondary); font-style: italic; margin-top: 4px; padding: 4px 8px; background: var(--color-bg-secondary); border-radius: var(--radius-sm); }
+
+.settings-request-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.settings-request-accept,
+.settings-request-reject {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  transition: all 0.15s;
+}
+
+.settings-request-accept { color: var(--color-green); }
+.settings-request-accept:hover { background: var(--color-green-bg); }
+.settings-request-reject { color: var(--color-red); }
+.settings-request-reject:hover { background: var(--color-red-bg); }
+
 /* ─── Quiet Hours ─── */
 .settings-quiet-hours {
   padding: 4px 0;

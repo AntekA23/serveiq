@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, User, CalendarDays, CalendarClock, ClipboardList,
-  Mail, MessageCircle, Settings, LogOut, Baby, Link2,
+  MessageCircle, Settings, LogOut, Baby, Link2,
   Newspaper, Dumbbell,
 } from 'lucide-react'
 import useAuthStore from '../../../store/authStore'
@@ -16,7 +16,6 @@ const coachNav = [
   { to: '/players', label: 'Zawodnicy', icon: User },
   { to: '/groups', label: 'Grupy', icon: Users },
   { to: '/reviews', label: 'Przeglady', icon: ClipboardList },
-  { to: '/coach/requests', label: 'Prosby', icon: Mail },
   { to: '/messages', label: 'Wiadomosci', icon: MessageCircle },
   { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]

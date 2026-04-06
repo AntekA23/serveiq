@@ -5,6 +5,7 @@ import { z } from 'zod'
 import {
   User, Lock, Bell, Save, Trash2, Phone, Mail,
   AlertTriangle, X, Link2, Copy, RefreshCw, ToggleLeft, ToggleRight,
+  CheckCircle, XCircle,
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -161,7 +162,16 @@ function TabInviteCode() {
   const [loaded, setLoaded] = useState(false)
   const [copied, setCopied] = useState(false)
   const [resetting, setResetting] = useState(false)
+  const [requests, setRequests] = useState([])
+  const [responding, setResponding] = useState(null)
   const toast = useToast()
+
+  const fetchRequests = async () => {
+    try {
+      const res = await api.get('/coach-links/requests?status=pending')
+      setRequests(res.data.requests || [])
+    } catch { /* silent */ }
+  }
 
   useEffect(() => {
     api.get('/coach-links/my-code')
@@ -171,7 +181,21 @@ function TabInviteCode() {
       })
       .catch(() => toast.error('Nie udało się pobrać kodu'))
       .finally(() => setLoaded(true))
+    fetchRequests()
   }, [toast])
+
+  const handleRespond = async (id, status) => {
+    setResponding(id)
+    try {
+      await api.put(`/coach-links/requests/${id}`, { status })
+      setRequests((prev) => prev.filter((r) => r._id !== id))
+      toast.success(status === 'accepted' ? 'Zaakceptowano' : 'Odrzucono')
+    } catch {
+      toast.error('Nie udalo sie odpowiedziec')
+    } finally {
+      setResponding(null)
+    }
+  }
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code)
@@ -245,6 +269,53 @@ function TabInviteCode() {
       <div className="settings-invite-hint">
         Po wygenerowaniu nowego kodu stary przestaje działać. Istniejące połączenia zostają.
       </div>
+
+      {/* Pending requests */}
+      <div className="settings-divider" />
+      <div className="settings-section-title">
+        Oczekujace prosby {requests.length > 0 && <span className="settings-requests-badge">{requests.length}</span>}
+      </div>
+
+      {requests.length === 0 ? (
+        <p style={{ fontSize: 13, color: 'var(--color-text-tertiary)' }}>Brak oczekujacych prosb.</p>
+      ) : (
+        <div className="settings-requests-list">
+          {requests.map((req) => (
+            <div key={req._id} className="settings-request-card">
+              <div className="settings-request-info">
+                <div className="settings-request-name">{req.parent?.firstName} {req.parent?.lastName}</div>
+                <div className="settings-request-email">{req.parent?.email}</div>
+                {req.players?.length > 0 && (
+                  <div className="settings-request-players">
+                    Dzieci: {req.players.map((p) => `${p.firstName} ${p.lastName}`).join(', ')}
+                  </div>
+                )}
+                {req.message && (
+                  <div className="settings-request-message">&ldquo;{req.message}&rdquo;</div>
+                )}
+              </div>
+              <div className="settings-request-actions">
+                <button
+                  className="settings-request-accept"
+                  onClick={() => handleRespond(req._id, 'accepted')}
+                  disabled={responding === req._id}
+                  title="Akceptuj"
+                >
+                  <CheckCircle size={18} />
+                </button>
+                <button
+                  className="settings-request-reject"
+                  onClick={() => handleRespond(req._id, 'rejected')}
+                  disabled={responding === req._id}
+                  title="Odrzuc"
+                >
+                  <XCircle size={18} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
