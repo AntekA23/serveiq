@@ -301,15 +301,18 @@ export default function CoachCalendar() {
     }
   }
 
-  const handleDateClick = (info) => {
-    const clickedDate = info.date
+  const handleSelect = (info) => {
+    const durationMinutes = Math.round((info.end - info.start) / 60000)
     setModal({
       mode: 'create',
       data: {
-        date: toDateStr(clickedDate),
-        startTime: toTimeStr(clickedDate),
+        date: toDateStr(info.start),
+        startTime: toTimeStr(info.start),
+        durationMinutes: durationMinutes || 60,
       },
     })
+    // Unselect the range after opening modal
+    calendarRef.current?.getApi().unselect()
   }
 
   const handleEventDrop = async (info) => {
@@ -398,10 +401,12 @@ export default function CoachCalendar() {
           slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
           allDaySlot={false}
           nowIndicator
+          selectable
+          selectMirror
           events={events}
           datesSet={fetchEvents}
           eventClick={handleEventClick}
-          dateClick={handleDateClick}
+          select={handleSelect}
           eventDrop={handleEventDrop}
           eventResize={handleEventResize}
           eventContent={renderEventContent}
