@@ -179,10 +179,10 @@ function TabInviteCode() {
         setCode(res.data.inviteCode || '')
         setActive(res.data.inviteActive)
       })
-      .catch(() => toast.error('Nie udało się pobrać kodu'))
+      .catch(() => {})
       .finally(() => setLoaded(true))
     fetchRequests()
-  }, [toast])
+  }, [])
 
   const handleRespond = async (id, status) => {
     setResponding(id)
