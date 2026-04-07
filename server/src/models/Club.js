@@ -50,6 +50,39 @@ const clubSchema = new mongoose.Schema(
     courtsCount: {
       type: Number,
     },
+    courts: [
+      {
+        number: { type: Number, required: true },
+        name: { type: String, trim: true },
+        surface: {
+          type: String,
+          enum: ['clay', 'hard', 'grass', 'carpet', 'indoor-hard'],
+          required: true,
+        },
+        indoor: { type: Boolean, default: false },
+        lighting: { type: Boolean, default: false },
+        heated: { type: Boolean, default: false },
+        active: { type: Boolean, default: true },
+      },
+    ],
+    facilities: {
+      gym: { available: { type: Boolean, default: false }, description: String },
+      squash: { available: { type: Boolean, default: false }, courtsCount: Number, description: String },
+      tableTennis: { available: { type: Boolean, default: false }, tablesCount: Number, description: String },
+      swimmingPool: { available: { type: Boolean, default: false }, description: String },
+      sauna: { available: { type: Boolean, default: false }, description: String },
+      changingRooms: { available: { type: Boolean, default: false }, description: String },
+      parking: { available: { type: Boolean, default: false }, spacesCount: Number, description: String },
+      shop: { available: { type: Boolean, default: false }, description: String },
+      cafe: { available: { type: Boolean, default: false }, description: String },
+      physio: { available: { type: Boolean, default: false }, description: String },
+      other: [
+        {
+          name: { type: String, required: true },
+          description: String,
+        },
+      ],
+    },
     pathwayStages: [
       {
         name: { type: String, required: true },
@@ -75,6 +108,11 @@ const clubSchema = new mongoose.Schema(
         ref: 'User',
       },
     ],
+    inviteCode: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     settings: {
       defaultCurrency: { type: String, default: 'PLN' },
       timezone: { type: String, default: 'Europe/Warsaw' },
@@ -89,6 +127,28 @@ const clubSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+function generateClubCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'KLUB-';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+clubSchema.pre('save', async function (next) {
+  if (!this.inviteCode) {
+    let code;
+    let exists = true;
+    while (exists) {
+      code = generateClubCode();
+      exists = await mongoose.model('Club').findOne({ inviteCode: code });
+    }
+    this.inviteCode = code;
+  }
+  next();
+});
 
 clubSchema.index({ name: 1 });
 clubSchema.index({ city: 1 });

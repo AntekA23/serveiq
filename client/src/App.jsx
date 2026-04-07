@@ -46,6 +46,7 @@ import AddCoach from './pages/parent/AddCoach'
 
 // Club pages
 import ClubDashboard from './pages/club/ClubDashboard'
+import ClubFacility from './pages/club/ClubFacility'
 import CoachesList from './pages/club/CoachesList'
 
 // Shared pages (placeholders)
@@ -348,6 +349,14 @@ export default function App() {
           element={
             <ProtectedRoute role="clubAdmin">
               <AppShell><ClubDashboard /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/club/facility"
+          element={
+            <ProtectedRoute role="clubAdmin">
+              <AppShell><ClubFacility /></AppShell>
             </ProtectedRoute>
           }
         />

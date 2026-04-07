@@ -22,6 +22,41 @@ const DEFAULT_PATHWAY_STAGES = [
 
 // ====== Zod Schemas ======
 
+const courtSchema = z.object({
+  number: z.number().min(1, 'Numer kortu musi być >= 1'),
+  name: z.string().optional(),
+  surface: z.enum(['clay', 'hard', 'grass', 'carpet', 'indoor-hard']),
+  indoor: z.boolean().optional(),
+  lighting: z.boolean().optional(),
+  heated: z.boolean().optional(),
+  active: z.boolean().optional(),
+});
+
+const facilityItemSchema = z.object({
+  available: z.boolean().optional(),
+  description: z.string().optional().nullable(),
+  courtsCount: z.number().optional().nullable(),
+  tablesCount: z.number().optional().nullable(),
+  spacesCount: z.number().optional().nullable(),
+});
+
+const facilitiesSchema = z.object({
+  gym: facilityItemSchema.optional(),
+  squash: facilityItemSchema.optional(),
+  tableTennis: facilityItemSchema.optional(),
+  swimmingPool: facilityItemSchema.optional(),
+  sauna: facilityItemSchema.optional(),
+  changingRooms: facilityItemSchema.optional(),
+  parking: facilityItemSchema.optional(),
+  shop: facilityItemSchema.optional(),
+  cafe: facilityItemSchema.optional(),
+  physio: facilityItemSchema.optional(),
+  other: z.array(z.object({
+    name: z.string().min(1),
+    description: z.string().optional(),
+  })).optional(),
+});
+
 const createClubSchema = z.object({
   name: z.string().min(1, 'Nazwa klubu jest wymagana'),
   shortName: z.string().optional(),
@@ -34,6 +69,8 @@ const createClubSchema = z.object({
   pztCertified: z.boolean().optional(),
   surfaces: z.array(z.enum(['clay', 'hard', 'grass', 'carpet', 'indoor-hard'])).optional(),
   courtsCount: z.number().positive('Liczba kortów musi być dodatnia').optional(),
+  courts: z.array(courtSchema).optional(),
+  facilities: facilitiesSchema.optional(),
 });
 
 const updateClubSchema = z.object({
@@ -49,6 +86,8 @@ const updateClubSchema = z.object({
   pztCertified: z.boolean().optional(),
   surfaces: z.array(z.enum(['clay', 'hard', 'grass', 'carpet', 'indoor-hard'])).optional(),
   courtsCount: z.number().positive('Liczba kortów musi być dodatnia').optional().nullable(),
+  courts: z.array(courtSchema).optional(),
+  facilities: facilitiesSchema.optional(),
   pathwayStages: z.array(z.object({
     name: z.string().min(1),
     order: z.number(),
@@ -159,7 +198,7 @@ export const updateClub = async (req, res, next) => {
     const fields = [
       'name', 'shortName', 'city', 'address', 'phone', 'email',
       'website', 'logoUrl', 'pztLicense', 'pztCertified', 'surfaces',
-      'courtsCount', 'pathwayStages', 'settings',
+      'courtsCount', 'courts', 'facilities', 'pathwayStages', 'settings',
     ];
 
     for (const field of fields) {
@@ -348,6 +387,222 @@ export const getPlayersNeedingAttention = async (req, res, next) => {
     }
 
     res.json({ players: results });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/clubs/:id/facility
+ * Dane infrastruktury ośrodka — korty + udogodnienia
+ */
+export const getFacility = async (req, res, next) => {
+  try {
+    const club = await Club.findById(req.params.id)
+      .select('name courts facilities courtsCount surfaces');
+
+    if (!club) {
+      return res.status(404).json({ message: 'Klub nie znaleziony' });
+    }
+
+    res.json({
+      facility: {
+        name: club.name,
+        courts: club.courts || [],
+        facilities: club.facilities || {},
+        courtsCount: club.courtsCount,
+        surfaces: club.surfaces || [],
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/clubs/:id/facility
+ * Aktualizuj infrastrukturę — korty + udogodnienia
+ */
+const updateFacilitySchema = z.object({
+  courts: z.array(courtSchema).optional(),
+  facilities: facilitiesSchema.optional(),
+});
+
+export const updateFacility = async (req, res, next) => {
+  try {
+    const data = updateFacilitySchema.parse(req.body);
+
+    const club = await Club.findById(req.params.id);
+    if (!club) {
+      return res.status(404).json({ message: 'Klub nie znaleziony' });
+    }
+
+    const userId = req.user._id.toString();
+    const isOwner = club.owner?.toString() === userId;
+    const isAdmin = club.admins.some((a) => a.toString() === userId);
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: 'Brak uprawnień do edycji infrastruktury' });
+    }
+
+    if (data.courts !== undefined) {
+      club.courts = data.courts;
+      // Sync legacy fields
+      club.courtsCount = data.courts.filter(c => c.active !== false).length;
+      club.surfaces = [...new Set(data.courts.map(c => c.surface))];
+    }
+
+    if (data.facilities !== undefined) {
+      club.facilities = data.facilities;
+    }
+
+    await club.save();
+
+    res.json({
+      message: 'Infrastruktura została zaktualizowana',
+      facility: {
+        courts: club.courts,
+        facilities: club.facilities,
+        courtsCount: club.courtsCount,
+        surfaces: club.surfaces,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/clubs/:id/invite-code
+ * Pobierz kod zaproszenia klubu — tylko owner/admin
+ */
+export const getInviteCode = async (req, res, next) => {
+  try {
+    const club = await Club.findById(req.params.id);
+    if (!club) {
+      return res.status(404).json({ message: 'Klub nie znaleziony' });
+    }
+
+    const userId = req.user._id.toString();
+    const isOwner = club.owner?.toString() === userId;
+    const isAdmin = club.admins.some((a) => a.toString() === userId);
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: 'Brak uprawnień' });
+    }
+
+    res.json({ inviteCode: club.inviteCode });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/clubs/join
+ * Trener dołącza do klubu za pomocą kodu zaproszenia
+ */
+export const joinClub = async (req, res, next) => {
+  try {
+    const { code } = req.body;
+
+    if (!code) {
+      return res.status(400).json({ message: 'Kod zaproszenia jest wymagany' });
+    }
+
+    if (req.user.role !== 'coach') {
+      return res.status(403).json({ message: 'Tylko trenerzy mogą dołączać do klubów' });
+    }
+
+    if (req.user.club) {
+      return res.status(400).json({ message: 'Już należysz do klubu. Najpierw opuść obecny klub.' });
+    }
+
+    const club = await Club.findOne({ inviteCode: code.toUpperCase().trim(), isActive: true });
+    if (!club) {
+      return res.status(404).json({ message: 'Nieprawidłowy kod zaproszenia' });
+    }
+
+    // Add coach to club
+    if (!club.coaches.some((c) => c.toString() === req.user._id.toString())) {
+      club.coaches.push(req.user._id);
+      await club.save();
+    }
+
+    // Set club on user
+    await User.findByIdAndUpdate(req.user._id, { club: club._id });
+
+    // Assign club to all coach's players
+    await Player.updateMany(
+      { coaches: req.user._id, club: { $exists: false } },
+      { $set: { club: club._id } }
+    );
+    await Player.updateMany(
+      { coaches: req.user._id, club: null },
+      { $set: { club: club._id } }
+    );
+
+    const populatedClub = await Club.findById(club._id)
+      .populate('owner', 'firstName lastName email')
+      .select('name shortName city');
+
+    res.json({
+      message: `Dołączyłeś do klubu ${club.name}`,
+      club: populatedClub,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/clubs/leave
+ * Trener opuszcza klub
+ */
+export const leaveClub = async (req, res, next) => {
+  try {
+    if (req.user.role !== 'coach') {
+      return res.status(403).json({ message: 'Tylko trenerzy mogą opuszczać kluby' });
+    }
+
+    if (!req.user.club) {
+      return res.status(400).json({ message: 'Nie należysz do żadnego klubu' });
+    }
+
+    const clubId = req.user.club;
+    const club = await Club.findById(clubId);
+
+    if (club) {
+      club.coaches = club.coaches.filter((c) => c.toString() !== req.user._id.toString());
+      await club.save();
+    }
+
+    await User.findByIdAndUpdate(req.user._id, { $unset: { club: 1 } });
+
+    res.json({ message: 'Opuściłeś klub' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/clubs/validate-code
+ * Sprawdź kod zaproszenia — publiczny dla zalogowanych
+ */
+export const validateClubCode = async (req, res, next) => {
+  try {
+    const { code } = req.query;
+    if (!code) {
+      return res.status(400).json({ message: 'Kod jest wymagany' });
+    }
+
+    const club = await Club.findOne({ inviteCode: code.toUpperCase().trim(), isActive: true })
+      .select('name shortName city address courtsCount surfaces');
+
+    if (!club) {
+      return res.status(404).json({ message: 'Nieprawidłowy kod' });
+    }
+
+    res.json({ club });
   } catch (error) {
     next(error);
   }

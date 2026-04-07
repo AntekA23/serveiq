@@ -5,7 +5,7 @@ import { z } from 'zod'
 import {
   User, Lock, Bell, Save, Trash2, Phone, Mail,
   AlertTriangle, X, Link2, Copy, RefreshCw, ToggleLeft, ToggleRight,
-  CheckCircle, XCircle,
+  CheckCircle, XCircle, Building2, LogOut as LogOutIcon,
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -550,15 +550,212 @@ function TabNotifications() {
 }
 
 // ────────────────────────────────────────────
+// Club Tab (coach join/leave + clubAdmin invite code)
+// ────────────────────────────────────────────
+function TabClub() {
+  const user = useAuthStore((s) => s.user)
+  const toast = useToast()
+  const isCoach = user?.role === 'coach'
+  const isClubAdmin = user?.role === 'clubAdmin'
+  const clubId = user?.club && typeof user.club === 'object' ? user.club._id : user?.club
+  const clubName = user?.club && typeof user.club === 'object' ? user.club.name : null
+
+  const [code, setCode] = useState('')
+  const [preview, setPreview] = useState(null)
+  const [validating, setValidating] = useState(false)
+  const [joining, setJoining] = useState(false)
+  const [leaving, setLeaving] = useState(false)
+  const [clubInviteCode, setClubInviteCode] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  // Load club invite code for clubAdmin
+  useEffect(() => {
+    if (isClubAdmin && clubId) {
+      api.get(`/clubs/${clubId}/invite-code`)
+        .then((res) => setClubInviteCode(res.data.inviteCode || ''))
+        .catch(() => {})
+    }
+  }, [isClubAdmin, clubId])
+
+  const handleValidate = async () => {
+    if (!code.trim()) return
+    setValidating(true)
+    setPreview(null)
+    try {
+      const { data } = await api.get(`/clubs/validate-code?code=${code.trim()}`)
+      setPreview(data.club)
+    } catch {
+      toast.error('Nieprawidlowy kod zaproszenia')
+    } finally {
+      setValidating(false)
+    }
+  }
+
+  const handleJoin = async () => {
+    setJoining(true)
+    try {
+      const { data } = await api.post('/clubs/join', { code: code.trim() })
+      toast.success(data.message)
+      // Refresh user data
+      const meRes = await api.get('/auth/me')
+      useAuthStore.getState().setUser(meRes.data.user)
+      setPreview(null)
+      setCode('')
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Nie udalo sie dolaczyc')
+    } finally {
+      setJoining(false)
+    }
+  }
+
+  const handleLeave = async () => {
+    setLeaving(true)
+    try {
+      await api.post('/clubs/leave')
+      toast.success('Opusciles klub')
+      const meRes = await api.get('/auth/me')
+      useAuthStore.getState().setUser(meRes.data.user)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Nie udalo sie opuscic klubu')
+    } finally {
+      setLeaving(false)
+    }
+  }
+
+  const handleCopyClubCode = () => {
+    navigator.clipboard.writeText(clubInviteCode)
+    setCopied(true)
+    toast.success('Kod skopiowany')
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  // ClubAdmin view — show invite code
+  if (isClubAdmin) {
+    return (
+      <div className="settings-section">
+        <div className="settings-section-title">Kod zaproszenia klubu</div>
+        <p className="settings-invite-desc">
+          Podaj ten kod trenerom — wpiszą go w swoich ustawieniach aby dołączyć do klubu.
+        </p>
+
+        <div className="settings-invite-code-box">
+          <span className="settings-invite-code">{clubInviteCode || '---'}</span>
+        </div>
+
+        <div className="settings-invite-actions">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleCopyClubCode}
+            disabled={!clubInviteCode}
+          >
+            <Copy size={14} />
+            {copied ? 'Skopiowano!' : 'Kopiuj kod'}
+          </Button>
+        </div>
+
+        <div className="settings-invite-hint">
+          Trenerzy mogą używać tego kodu żeby dołączyć do klubu. Po dołączeniu ich zawodnicy będą widoczni w panelu klubu.
+        </div>
+      </div>
+    )
+  }
+
+  // Coach view — join/leave club
+  if (isCoach && clubId) {
+    return (
+      <div className="settings-section">
+        <div className="settings-section-title">Twój klub</div>
+        <div style={{
+          padding: '1rem', borderRadius: 10,
+          background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)',
+          display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12,
+        }}>
+          <Building2 size={24} style={{ color: 'var(--color-accent)' }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 600, color: 'var(--color-text)' }}>
+              {clubName || 'Klub'}
+            </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+              Jestes przypisany do tego klubu
+            </div>
+          </div>
+        </div>
+        <Button variant="danger" size="sm" onClick={handleLeave} loading={leaving}>
+          <LogOutIcon size={14} />
+          Opusc klub
+        </Button>
+      </div>
+    )
+  }
+
+  // Coach view — join club
+  return (
+    <div className="settings-section">
+      <div className="settings-section-title">Dolacz do klubu</div>
+      <p className="settings-invite-desc">
+        Wpisz kod zaproszenia klubu, aby się do niego przypisać. To jest opcjonalne — mozesz pracowac niezaleznie.
+      </p>
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        <input
+          value={code}
+          onChange={(e) => { setCode(e.target.value.toUpperCase()); setPreview(null) }}
+          placeholder="np. KLUB-XXXXXX"
+          maxLength={12}
+          style={{
+            flex: 1, padding: '0.6rem 0.8rem', borderRadius: 8,
+            border: '1px solid var(--color-border)', background: 'var(--color-bg-secondary)',
+            color: 'var(--color-text)', fontSize: '0.95rem', fontFamily: 'monospace',
+            letterSpacing: 2,
+          }}
+        />
+        <Button size="sm" onClick={handleValidate} loading={validating}>
+          Sprawdz
+        </Button>
+      </div>
+
+      {preview && (
+        <div style={{
+          padding: '1rem', borderRadius: 10,
+          background: 'var(--color-bg-secondary)', border: '1px solid var(--color-accent)',
+          marginBottom: 12,
+        }}>
+          <div style={{ fontWeight: 600, color: 'var(--color-text)', fontSize: '1rem' }}>
+            {preview.name}
+          </div>
+          {preview.city && (
+            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: 4 }}>
+              {preview.city}{preview.address ? ` — ${preview.address}` : ''}
+            </div>
+          )}
+          {preview.courtsCount > 0 && (
+            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: 4 }}>
+              Korty: {preview.courtsCount} | Nawierzchnie: {(preview.surfaces || []).join(', ')}
+            </div>
+          )}
+          <Button variant="primary" size="sm" onClick={handleJoin} loading={joining} style={{ marginTop: 12 }}>
+            <Building2 size={14} />
+            Dolacz do tego klubu
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ────────────────────────────────────────────
 // Main Settings
 // ────────────────────────────────────────────
 export default function Settings() {
   const user = useAuthStore((s) => s.user)
   const isCoach = user?.role === 'coach'
+  const isClubAdmin = user?.role === 'clubAdmin'
 
   const TABS = [
     { key: 'profile', label: 'Profil', icon: User },
     ...(isCoach ? [{ key: 'invite', label: 'Kod zaproszenia', icon: Link2 }] : []),
+    ...(isCoach || isClubAdmin ? [{ key: 'club', label: 'Klub', icon: Building2 }] : []),
     { key: 'security', label: 'Bezpieczeństwo', icon: Lock },
     { key: 'notifications', label: 'Powiadomienia', icon: Bell },
   ]
@@ -585,6 +782,7 @@ export default function Settings() {
       <div className="settings-content">
         {activeTab === 'profile' && <TabProfile />}
         {activeTab === 'invite' && isCoach && <TabInviteCode />}
+        {activeTab === 'club' && (isCoach || isClubAdmin) && <TabClub />}
         {activeTab === 'security' && <TabSecurity />}
         {activeTab === 'notifications' && <TabNotifications />}
       </div>

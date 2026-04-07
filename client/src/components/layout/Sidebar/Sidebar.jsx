@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, User, CalendarDays, CalendarClock, ClipboardList,
   MessageCircle, Settings, LogOut, Baby, Link2,
-  Newspaper, Dumbbell,
+  Newspaper, Dumbbell, Building2,
 } from 'lucide-react'
 import useAuthStore from '../../../store/authStore'
 import useUiStore from '../../../store/uiStore'
@@ -33,6 +33,7 @@ const parentNav = [
 
 const clubAdminNav = [
   { to: '/club/dashboard', label: 'Panel Klubu', icon: LayoutDashboard },
+  { to: '/club/facility', label: 'Infrastruktura', icon: Building2 },
   { to: '/calendar', label: 'Kalendarz', icon: CalendarClock },
   { to: '/groups', label: 'Grupy', icon: Users },
   { to: '/players', label: 'Zawodnicy', icon: User },
