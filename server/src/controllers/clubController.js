@@ -607,3 +607,162 @@ export const validateClubCode = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * GET /api/clubs/:id/coaches
+ * Lista trenerów przypisanych do klubu
+ */
+export const getClubCoaches = async (req, res, next) => {
+  try {
+    const club = await Club.findById(req.params.id)
+      .populate('coaches', 'firstName lastName email phone coachProfile avatarUrl createdAt');
+
+    if (!club) {
+      return res.status(404).json({ message: 'Klub nie znaleziony' });
+    }
+
+    const coachesWithStats = await Promise.all(
+      (club.coaches || []).map(async (coach) => {
+        const playerCount = await Player.countDocuments({
+          coaches: coach._id,
+          active: true,
+        });
+        return { ...coach.toObject(), playerCount };
+      })
+    );
+
+    res.json({ coaches: coachesWithStats });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/clubs/:id/search-coaches?q=
+ * Wyszukaj trenerów w systemie do zapraszania
+ */
+export const searchCoaches = async (req, res, next) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.trim().length < 2) {
+      return res.json({ coaches: [] });
+    }
+
+    const club = await Club.findById(req.params.id);
+    if (!club) {
+      return res.status(404).json({ message: 'Klub nie znaleziony' });
+    }
+
+    const existingCoachIds = (club.coaches || []).map((c) => c.toString());
+    const searchRegex = new RegExp(q.trim(), 'i');
+
+    const coaches = await User.find({
+      role: 'coach',
+      isActive: true,
+      _id: { $nin: existingCoachIds },
+      $or: [
+        { email: searchRegex },
+        { firstName: searchRegex },
+        { lastName: searchRegex },
+      ],
+    })
+      .select('firstName lastName email coachProfile.specialization coachProfile.itfLevel avatarUrl')
+      .limit(10)
+      .lean();
+
+    res.json({ coaches });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/clubs/:id/coaches
+ * Admin dodaje trenera do klubu
+ */
+export const addCoachToClub = async (req, res, next) => {
+  try {
+    const { coachId } = req.body;
+    if (!coachId) {
+      return res.status(400).json({ message: 'ID trenera jest wymagane' });
+    }
+
+    const club = await Club.findById(req.params.id);
+    if (!club) {
+      return res.status(404).json({ message: 'Klub nie znaleziony' });
+    }
+
+    const userId = req.user._id.toString();
+    const isOwner = club.owner?.toString() === userId;
+    const isAdmin = club.admins.some((a) => a.toString() === userId);
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: 'Brak uprawnień' });
+    }
+
+    const coach = await User.findById(coachId);
+    if (!coach || coach.role !== 'coach') {
+      return res.status(404).json({ message: 'Trener nie znaleziony' });
+    }
+
+    if (coach.club && coach.club.toString() !== club._id.toString()) {
+      return res.status(400).json({ message: 'Ten trener już należy do innego klubu' });
+    }
+
+    if (!club.coaches.some((c) => c.toString() === coachId)) {
+      club.coaches.push(coachId);
+      await club.save();
+    }
+
+    await User.findByIdAndUpdate(coachId, { club: club._id });
+
+    await Player.updateMany(
+      { coaches: coachId, $or: [{ club: { $exists: false } }, { club: null }] },
+      { $set: { club: club._id } }
+    );
+
+    res.json({
+      message: `Trener ${coach.firstName} ${coach.lastName} dodany do klubu`,
+      coach: {
+        _id: coach._id,
+        firstName: coach.firstName,
+        lastName: coach.lastName,
+        email: coach.email,
+        coachProfile: coach.coachProfile,
+        avatarUrl: coach.avatarUrl,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * DELETE /api/clubs/:id/coaches/:coachId
+ * Admin usuwa trenera z klubu
+ */
+export const removeCoachFromClub = async (req, res, next) => {
+  try {
+    const { id, coachId } = req.params;
+
+    const club = await Club.findById(id);
+    if (!club) {
+      return res.status(404).json({ message: 'Klub nie znaleziony' });
+    }
+
+    const userId = req.user._id.toString();
+    const isOwner = club.owner?.toString() === userId;
+    const isAdmin = club.admins.some((a) => a.toString() === userId);
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: 'Brak uprawnień' });
+    }
+
+    club.coaches = club.coaches.filter((c) => c.toString() !== coachId);
+    await club.save();
+
+    await User.findByIdAndUpdate(coachId, { $unset: { club: 1 } });
+
+    res.json({ message: 'Trener usunięty z klubu' });
+  } catch (error) {
+    next(error);
+  }
+};

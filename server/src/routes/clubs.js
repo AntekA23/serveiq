@@ -11,6 +11,10 @@ import {
   joinClub,
   leaveClub,
   validateClubCode,
+  getClubCoaches,
+  searchCoaches,
+  addCoachToClub,
+  removeCoachFromClub,
 } from '../controllers/clubController.js';
 import { verifyToken, requireRole } from '../middleware/auth.js';
 
@@ -45,5 +49,11 @@ router.put('/:id/facility', requireRole('clubAdmin'), updateFacility);
 
 // GET - invite code (clubAdmin)
 router.get('/:id/invite-code', requireRole('clubAdmin'), getInviteCode);
+
+// Coaches management (clubAdmin)
+router.get('/:id/coaches', requireRole('clubAdmin'), getClubCoaches);
+router.get('/:id/search-coaches', requireRole('clubAdmin'), searchCoaches);
+router.post('/:id/coaches', requireRole('clubAdmin'), addCoachToClub);
+router.delete('/:id/coaches/:coachId', requireRole('clubAdmin'), removeCoachFromClub);
 
 export default router;
