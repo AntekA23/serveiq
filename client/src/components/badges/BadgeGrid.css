@@ -1,0 +1,125 @@
+.badge-grid-section {
+  background: var(--color-surface, #fff);
+  border-radius: 12px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.badge-grid-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.badge-grid-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.badge-grid-title svg {
+  color: var(--color-accent);
+}
+
+.badge-grid-count {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  margin-left: auto;
+}
+
+.badge-grid-category { margin-bottom: 1rem; }
+.badge-grid-category:last-child { margin-bottom: 0; }
+
+.badge-grid-category-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-tertiary);
+  margin-bottom: 0.5rem;
+}
+
+.badge-grid-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.badge-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 80px;
+  cursor: default;
+  position: relative;
+}
+
+.badge-grid-item-name {
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--color-text-secondary);
+  line-height: 1.2;
+}
+
+.badge-grid-item.locked .badge-grid-item-name {
+  color: var(--color-text-tertiary);
+}
+
+.badge-grid-progress {
+  width: 48px;
+  height: 3px;
+  background: var(--color-bg-tertiary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.badge-grid-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--color-accent);
+  transition: width 0.3s ease;
+}
+
+.badge-grid-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-width: 140px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.badge-grid-item:hover .badge-grid-tooltip { display: block; }
+
+.badge-grid-tooltip-name { font-size: 12px; font-weight: 700; color: var(--color-text); margin-bottom: 2px; }
+.badge-grid-tooltip-desc { font-size: 11px; color: var(--color-text-secondary); }
+.badge-grid-tooltip-date { font-size: 10px; color: var(--color-accent); margin-top: 4px; }
+
+@keyframes badgeEarned {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.badge-grid-item.earned .badge-grid-item-icon {
+  animation: badgeEarned 0.5s ease;
+}
+
+@media (max-width: 480px) {
+  .badge-grid-items { gap: 8px; }
+  .badge-grid-item { width: 68px; }
+}

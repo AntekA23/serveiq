@@ -15,6 +15,7 @@ import PlayerJourney from '../../components/player/PlayerJourney'
 import PlayerTimeline from '../../components/player/PlayerTimeline'
 import { SKILL_NAMES, getSkillLevel } from '../../constants/skillLevels'
 import './ChildProfile.css'
+import BadgeGrid from '../../components/badges/BadgeGrid'
 
 const ACTIVITY_TYPE_COLORS = {
   class: '#22c55e',
@@ -291,6 +292,9 @@ export default function ChildProfile() {
         currentStage={child.pathwayStage}
         pathwayHistory={child.pathwayHistory}
       />
+
+      {/* Badges */}
+      <BadgeGrid playerId={child._id} />
 
       {/* Player Journey */}
       <PlayerJourney player={child} />
