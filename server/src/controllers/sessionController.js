@@ -2,6 +2,7 @@ import { z } from 'zod';
 import Session from '../models/Session.js';
 import Player from '../models/Player.js';
 import Notification from '../models/Notification.js';
+import { evaluateBadges } from '../services/badgeEngine.js';
 
 // ====== Zod Schemas ======
 
@@ -166,6 +167,9 @@ export const createSession = async (req, res, next) => {
       }
     }
 
+    const parentIds = (player.parents || []).map(String);
+    evaluateBadges(player._id, parentIds).catch(() => {});
+
     const populatedSession = await Session.findById(session._id)
       .populate('player', 'firstName lastName')
       .populate('coach', 'firstName lastName');
@@ -253,6 +257,12 @@ export const updateSession = async (req, res, next) => {
     }
 
     await session.save();
+
+    const playerForBadges = await Player.findById(session.player).select('parents').lean();
+    if (playerForBadges) {
+      const parentIds = (playerForBadges.parents || []).map(String);
+      evaluateBadges(session.player, parentIds).catch(() => {});
+    }
 
     const updatedSession = await Session.findById(session._id)
       .populate('player', 'firstName lastName')

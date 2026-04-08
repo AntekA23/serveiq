@@ -33,6 +33,7 @@ import reviewRoutes from './routes/reviews.js';
 import recommendationRoutes from './routes/recommendations.js';
 import timelineRoutes from './routes/timeline.js';
 import coachLinkRoutes from './routes/coachLinks.js';
+import badgeRoutes from './routes/badges.js';
 
 // ====== Konfiguracja ======
 
@@ -113,6 +114,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/timeline', timelineRoutes);
 app.use('/api/coach-links', coachLinkRoutes);
+app.use('/api/badges', badgeRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

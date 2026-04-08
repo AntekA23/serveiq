@@ -15,6 +15,7 @@ import Observation from '../models/Observation.js';
 import DevelopmentGoal from '../models/DevelopmentGoal.js';
 import Recommendation from '../models/Recommendation.js';
 import ReviewSummary from '../models/ReviewSummary.js';
+import PlayerBadge from '../models/PlayerBadge.js';
 
 /**
  * Seed script — wypelnia baze danych pelnym zestawem demo danych
@@ -56,6 +57,7 @@ const seed = async () => {
       DevelopmentGoal.deleteMany({}),
       Recommendation.deleteMany({}),
       ReviewSummary.deleteMany({}),
+      PlayerBadge.deleteMany({}),
     ]);
     console.log('Kolekcje wyczyszczone.\n');
 
@@ -1167,6 +1169,46 @@ const seed = async () => {
     console.log(`  ${messagesData.length} wiadomosci\n`);
 
     // ============================================================
+    // ODZNAKI (GAMIFIKACJA)
+    // ============================================================
+    console.log('\n--- Odznaki ---');
+
+    // Kacper — aktywny gracz, kilka odznak
+    await PlayerBadge.insertMany([
+      { player: kacper._id, badgeSlug: 'first-session', earnedAt: new Date('2026-02-15') },
+      { player: kacper._id, badgeSlug: 'regular-player', earnedAt: new Date('2026-03-10') },
+      { player: kacper._id, badgeSlug: 'weekly-streak', earnedAt: new Date('2026-03-20') },
+      { player: kacper._id, badgeSlug: 'first-step', earnedAt: new Date('2026-02-28') },
+      { player: kacper._id, badgeSlug: 'practitioner', earnedAt: new Date('2026-03-25') },
+      { player: kacper._id, badgeSlug: 'tournament-debut', earnedAt: new Date('2026-04-01') },
+    ]);
+    console.log('  Kacper: 6 odznak');
+
+    // Julia — zaawansowana, więcej odznak
+    await PlayerBadge.insertMany([
+      { player: julia._id, badgeSlug: 'first-session', earnedAt: new Date('2025-09-01') },
+      { player: julia._id, badgeSlug: 'regular-player', earnedAt: new Date('2025-10-15') },
+      { player: julia._id, badgeSlug: 'training-machine', earnedAt: new Date('2026-01-20') },
+      { player: julia._id, badgeSlug: 'weekly-streak', earnedAt: new Date('2025-10-01') },
+      { player: julia._id, badgeSlug: 'streak-master', earnedAt: new Date('2025-11-15') },
+      { player: julia._id, badgeSlug: 'first-step', earnedAt: new Date('2025-09-10') },
+      { player: julia._id, badgeSlug: 'practitioner', earnedAt: new Date('2025-10-20') },
+      { player: julia._id, badgeSlug: 'stable-player', earnedAt: new Date('2026-01-10') },
+      { player: julia._id, badgeSlug: 'all-rounder', earnedAt: new Date('2026-02-01') },
+      { player: julia._id, badgeSlug: 'tournament-debut', earnedAt: new Date('2025-11-01') },
+      { player: julia._id, badgeSlug: 'winner', earnedAt: new Date('2026-01-15') },
+      { player: julia._id, badgeSlug: 'court-traveler', earnedAt: new Date('2026-02-20') },
+      { player: julia._id, badgeSlug: 'goal-achieved', earnedAt: new Date('2026-01-05') },
+    ]);
+    console.log('  Julia: 13 odznak');
+
+    // Antoni — nowy, tylko pierwsza sesja
+    await PlayerBadge.insertMany([
+      { player: antoni._id, badgeSlug: 'first-session', earnedAt: new Date('2026-04-02') },
+    ]);
+    console.log('  Antoni: 1 odznaka');
+
+    // ============================================================
     // PODSUMOWANIE
     // ============================================================
     const counts = await Promise.all([
@@ -1183,6 +1225,7 @@ const seed = async () => {
       Tournament.countDocuments(),
       Payment.countDocuments(),
       Message.countDocuments(),
+      PlayerBadge.countDocuments(),
     ]);
 
     console.log('==========================================');
@@ -1200,6 +1243,7 @@ const seed = async () => {
     console.log(`  Turnieje:         ${counts[10]}`);
     console.log(`  Platnosci:        ${counts[11]}`);
     console.log(`  Wiadomosci:       ${counts[12]}`);
+    console.log(`  Odznaki:          ${counts[13]}`);
     console.log('==========================================\n');
 
     console.log('Konta demo:');
