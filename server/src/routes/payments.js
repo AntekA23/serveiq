@@ -21,9 +21,9 @@ router.post('/webhook', express.raw({ type: 'application/json' }), webhook);
 router.use(verifyToken);
 
 router.get('/', getPayments);
-router.post('/', requireRole('coach'), createPayment);
-router.get('/stats', requireRole('coach'), getStats);
-router.put('/:id/mark-paid', requireRole('coach'), markAsPaid);
+router.post('/', requireRole('coach', 'clubAdmin'), createPayment);
+router.get('/stats', requireRole('coach', 'clubAdmin'), getStats);
+router.put('/:id/mark-paid', requireRole('coach', 'clubAdmin'), markAsPaid);
 router.post('/:id/checkout', requireRole('parent'), createCheckout);
 
 export default router;

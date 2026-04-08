@@ -1,4 +1,8 @@
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { z } from 'zod';
+import multer from 'multer';
 import Club from '../models/Club.js';
 import User from '../models/User.js';
 import Player from '../models/Player.js';
@@ -7,6 +11,38 @@ import Observation from '../models/Observation.js';
 import ReviewSummary from '../models/ReviewSummary.js';
 import Recommendation from '../models/Recommendation.js';
 import DevelopmentGoal from '../models/DevelopmentGoal.js';
+import Payment from '../models/Payment.js';
+import Session from '../models/Session.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ====== Multer config for club logo uploads ======
+const logoUploadDir = path.resolve(__dirname, '../../uploads/logos');
+if (!fs.existsSync(logoUploadDir)) {
+  fs.mkdirSync(logoUploadDir, { recursive: true });
+}
+
+const logoStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, logoUploadDir),
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `logo-${uniqueSuffix}${path.extname(file.originalname)}`);
+  },
+});
+
+const logoUpload = multer({
+  storage: logoStorage,
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowed = /jpeg|jpg|png|webp|svg/;
+    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
+    const mime = allowed.test(file.mimetype);
+    cb(ext && mime ? null : new Error('Dozwolone formaty: jpg, png, webp, svg'), ext && mime);
+  },
+});
+
+export const logoUploadMiddleware = logoUpload.single('logo');
 
 // ====== Domyślne etapy ścieżki ======
 
@@ -762,6 +798,486 @@ export const removeCoachFromClub = async (req, res, next) => {
     await User.findByIdAndUpdate(coachId, { $unset: { club: 1 } });
 
     res.json({ message: 'Trener usunięty z klubu' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ====== CLUB SETTINGS ======
+
+/**
+ * GET /api/clubs/:id/settings
+ * Pobierz ustawienia klubu
+ */
+export const getClubSettings = async (req, res, next) => {
+  try {
+    const club = await Club.findById(req.params.id)
+      .select('name shortName city address phone email website logoUrl pztLicense pztCertified pathwayStages settings inviteCode');
+
+    if (!club) {
+      return res.status(404).json({ message: 'Klub nie znaleziony' });
+    }
+
+    res.json({ settings: club });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/clubs/:id/logo
+ * Upload logo klubu
+ */
+export const uploadClubLogo = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Plik logo jest wymagany' });
+    }
+
+    const club = await Club.findById(req.params.id);
+    if (!club) {
+      return res.status(404).json({ message: 'Klub nie znaleziony' });
+    }
+
+    // Usuń stare logo jeśli istnieje
+    if (club.logoUrl) {
+      const oldPath = path.resolve(__dirname, '../..', club.logoUrl.replace(/^\//, ''));
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
+    }
+
+    club.logoUrl = `/uploads/logos/${req.file.filename}`;
+    await club.save();
+
+    res.json({ logoUrl: club.logoUrl });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/clubs/:id/regenerate-invite-code
+ * Regeneruj kod zaproszenia
+ */
+export const regenerateInviteCode = async (req, res, next) => {
+  try {
+    const club = await Club.findById(req.params.id);
+    if (!club) {
+      return res.status(404).json({ message: 'Klub nie znaleziony' });
+    }
+
+    // Force regenerate by clearing and saving
+    club.inviteCode = undefined;
+    await club.save();
+
+    res.json({ inviteCode: club.inviteCode });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ====== CLUB PLAYERS ======
+
+/**
+ * GET /api/clubs/:id/players
+ * Lista wszystkich graczy klubu z filtrami
+ */
+export const getClubPlayers = async (req, res, next) => {
+  try {
+    const clubId = req.params.id;
+    const { coach, pathwayStage, status, search, sort } = req.query;
+
+    const filter = { club: clubId };
+
+    if (status === 'active') filter.active = true;
+    else if (status === 'inactive') filter.active = false;
+    else filter.active = true; // domyslnie aktywni
+
+    if (coach) filter.coaches = coach;
+    if (pathwayStage) filter.pathwayStage = pathwayStage;
+
+    if (search) {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      filter.$or = [
+        { firstName: searchRegex },
+        { lastName: searchRegex },
+      ];
+    }
+
+    let sortObj = { lastName: 1, firstName: 1 };
+    if (sort === 'recent') sortObj = { updatedAt: -1 };
+    if (sort === 'stage') sortObj = { pathwayStage: 1, lastName: 1 };
+
+    const players = await Player.find(filter)
+      .populate('coaches', 'firstName lastName')
+      .populate('parents', 'firstName lastName email')
+      .select('firstName lastName dateOfBirth pathwayStage coaches parents active skills avatarUrl updatedAt createdAt')
+      .sort(sortObj)
+      .lean();
+
+    // Dodaj datę ostatniej aktywności
+    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    const enriched = await Promise.all(
+      players.map(async (p) => {
+        const lastActivity = await Activity.findOne({ players: p._id })
+          .sort({ date: -1 })
+          .select('date')
+          .lean();
+
+        let playerStatus = 'active';
+        if (lastActivity) {
+          if (lastActivity.date < fourteenDaysAgo) playerStatus = 'inactive';
+        } else {
+          // Nowy gracz? Sprawdź createdAt
+          if (p.createdAt > thirtyDaysAgo) playerStatus = 'new';
+          else playerStatus = 'inactive';
+        }
+
+        return {
+          ...p,
+          lastActivityDate: lastActivity?.date || null,
+          playerStatus,
+        };
+      })
+    );
+
+    res.json({ players: enriched });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/clubs/:id/players/:playerId/assign-coach
+ * Przypisz trenera do gracza
+ */
+export const assignCoachToPlayer = async (req, res, next) => {
+  try {
+    const { playerId } = req.params;
+    const { coachId } = req.body;
+
+    const player = await Player.findById(playerId);
+    if (!player) {
+      return res.status(404).json({ message: 'Gracz nie znaleziony' });
+    }
+
+    if (coachId) {
+      const coach = await User.findById(coachId);
+      if (!coach || coach.role !== 'coach') {
+        return res.status(404).json({ message: 'Trener nie znaleziony' });
+      }
+
+      // Ustaw jako główny trener i dodaj do tablicy coaches
+      player.coach = coachId;
+      if (!player.coaches.some((c) => c.toString() === coachId)) {
+        player.coaches.push(coachId);
+      }
+    } else {
+      player.coach = undefined;
+    }
+
+    await player.save();
+
+    const updated = await Player.findById(playerId)
+      .populate('coaches', 'firstName lastName');
+
+    res.json({ message: 'Trener przypisany', player: updated });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/clubs/:id/players/:playerId/pathway-stage
+ * Zmień etap ścieżki gracza
+ */
+export const updatePlayerPathwayStage = async (req, res, next) => {
+  try {
+    const { playerId } = req.params;
+    const { stage } = req.body;
+
+    const player = await Player.findById(playerId);
+    if (!player) {
+      return res.status(404).json({ message: 'Gracz nie znaleziony' });
+    }
+
+    // Dodaj wpis do historii
+    if (player.pathwayStage && player.pathwayStage !== stage) {
+      player.pathwayHistory.push({
+        stage: player.pathwayStage,
+        startDate: player.updatedAt,
+        endDate: new Date(),
+        notes: `Zmieniono przez admina klubu`,
+      });
+    }
+
+    player.pathwayStage = stage;
+    await player.save();
+
+    res.json({ message: 'Etap zaktualizowany', player });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/clubs/:id/players/:playerId/deactivate
+ * Dezaktywuj gracza (soft delete)
+ */
+export const deactivatePlayer = async (req, res, next) => {
+  try {
+    const { playerId } = req.params;
+
+    const player = await Player.findByIdAndUpdate(
+      playerId,
+      { active: false },
+      { new: true }
+    );
+
+    if (!player) {
+      return res.status(404).json({ message: 'Gracz nie znaleziony' });
+    }
+
+    res.json({ message: 'Gracz dezaktywowany', player });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/clubs/:id/players/:playerId/activate
+ * Aktywuj gracza
+ */
+export const activatePlayer = async (req, res, next) => {
+  try {
+    const { playerId } = req.params;
+
+    const player = await Player.findByIdAndUpdate(
+      playerId,
+      { active: true },
+      { new: true }
+    );
+
+    if (!player) {
+      return res.status(404).json({ message: 'Gracz nie znaleziony' });
+    }
+
+    res.json({ message: 'Gracz aktywowany', player });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ====== CLUB PAYMENTS ======
+
+/**
+ * GET /api/clubs/:id/payments
+ * Wszystkie płatności klubu z filtrami
+ */
+export const getClubPayments = async (req, res, next) => {
+  try {
+    const clubId = req.params.id;
+    const { coach, status, period } = req.query;
+
+    // Znajdź graczy klubu
+    const clubPlayers = await Player.find({ club: clubId }).select('_id').lean();
+    const playerIds = clubPlayers.map((p) => p._id);
+
+    const filter = { player: { $in: playerIds } };
+
+    if (status) filter.status = status;
+    if (coach) filter.coach = coach;
+
+    if (period) {
+      const now = new Date();
+      if (period === 'month') {
+        filter.createdAt = { $gte: new Date(now.getFullYear(), now.getMonth(), 1) };
+      } else if (period === 'quarter') {
+        const qStart = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
+        filter.createdAt = { $gte: qStart };
+      } else if (period === 'year') {
+        filter.createdAt = { $gte: new Date(now.getFullYear(), 0, 1) };
+      }
+    }
+
+    const payments = await Payment.find(filter)
+      .populate('player', 'firstName lastName')
+      .populate('coach', 'firstName lastName')
+      .populate('parent', 'firstName lastName email')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Statystyki
+    const allPayments = await Payment.find({ player: { $in: playerIds } }).lean();
+
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const stats = {
+      totalRevenue: allPayments.filter((p) => p.status === 'paid').reduce((s, p) => s + p.amount, 0),
+      monthlyRevenue: allPayments
+        .filter((p) => p.status === 'paid' && p.paidAt >= monthStart)
+        .reduce((s, p) => s + p.amount, 0),
+      pending: allPayments.filter((p) => p.status === 'pending').reduce((s, p) => s + p.amount, 0),
+      overdue: allPayments.filter((p) => p.status === 'overdue').reduce((s, p) => s + p.amount, 0),
+      overdueCount: allPayments.filter((p) => p.status === 'overdue').length,
+    };
+
+    res.json({ payments, stats });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ====== CLUB REPORTS ======
+
+/**
+ * GET /api/clubs/:id/reports
+ * Raporty klubu — frekwencja, postępy, aktywność trenerów
+ */
+export const getClubReports = async (req, res, next) => {
+  try {
+    const clubId = req.params.id;
+    const club = await Club.findById(clubId);
+    if (!club) {
+      return res.status(404).json({ message: 'Klub nie znaleziony' });
+    }
+
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+    // === FREKWENCJA (ostatnie 6 miesięcy) ===
+    const attendanceByMonth = await Activity.aggregate([
+      {
+        $match: {
+          club: club._id,
+          date: { $gte: sixMonthsAgo },
+          status: { $in: ['completed', 'in-progress'] },
+        },
+      },
+      { $unwind: { path: '$attendance', preserveNullAndEmptyArrays: false } },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$date' },
+            month: { $month: '$date' },
+          },
+          total: { $sum: 1 },
+          present: {
+            $sum: { $cond: [{ $eq: ['$attendance.status', 'present'] }, 1, 0] },
+          },
+        },
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
+    ]);
+
+    // === FREKWENCJA PER TRENER ===
+    const attendanceByCoach = await Activity.aggregate([
+      {
+        $match: {
+          club: club._id,
+          date: { $gte: sixMonthsAgo },
+          status: { $in: ['completed', 'in-progress'] },
+        },
+      },
+      { $unwind: { path: '$attendance', preserveNullAndEmptyArrays: false } },
+      {
+        $group: {
+          _id: '$coach',
+          total: { $sum: 1 },
+          present: {
+            $sum: { $cond: [{ $eq: ['$attendance.status', 'present'] }, 1, 0] },
+          },
+        },
+      },
+    ]);
+
+    // Populate coach names
+    const coachIds = attendanceByCoach.map((a) => a._id).filter(Boolean);
+    const coaches = await User.find({ _id: { $in: coachIds } })
+      .select('firstName lastName')
+      .lean();
+    const coachMap = Object.fromEntries(coaches.map((c) => [c._id.toString(), c]));
+
+    const attendanceByCoachEnriched = attendanceByCoach
+      .filter((a) => a._id)
+      .map((a) => ({
+        coach: coachMap[a._id.toString()] || { firstName: '?', lastName: '?' },
+        total: a.total,
+        present: a.present,
+        rate: a.total > 0 ? Math.round((a.present / a.total) * 100) : 0,
+      }));
+
+    // === AKTYWNOŚĆ TRENERÓW ===
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const coachActivity = await Promise.all(
+      (club.coaches || []).map(async (coachId) => {
+        const [activities, reviews, sessions] = await Promise.all([
+          Activity.countDocuments({ coach: coachId, club: club._id, date: { $gte: monthStart } }),
+          ReviewSummary.countDocuments({ coach: coachId, club: club._id, createdAt: { $gte: monthStart } }),
+          Session.countDocuments({ coach: coachId, date: { $gte: monthStart } }),
+        ]);
+
+        const coach = coachMap[coachId.toString()];
+        return {
+          coach: coach || { firstName: '?', lastName: '?' },
+          activities,
+          reviews,
+          sessions,
+        };
+      })
+    );
+
+    // === PATHWAY ROZKŁAD ===
+    const pathwayDistribution = await Player.aggregate([
+      { $match: { club: club._id, active: true } },
+      {
+        $group: {
+          _id: '$pathwayStage',
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // === RETENCJA (aktywni vs nieaktywni) ===
+    const totalPlayers = await Player.countDocuments({ club: club._id });
+    const activePlayers = await Player.countDocuments({ club: club._id, active: true });
+    const inactivePlayers = totalPlayers - activePlayers;
+
+    // Nowi gracze (ostatnie 30 dni)
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const newPlayers = await Player.countDocuments({
+      club: club._id,
+      createdAt: { $gte: thirtyDaysAgo },
+    });
+
+    res.json({
+      reports: {
+        attendance: {
+          byMonth: attendanceByMonth.map((a) => ({
+            year: a._id.year,
+            month: a._id.month,
+            total: a.total,
+            present: a.present,
+            rate: a.total > 0 ? Math.round((a.present / a.total) * 100) : 0,
+          })),
+          byCoach: attendanceByCoachEnriched,
+        },
+        coachActivity,
+        pathwayDistribution,
+        retention: {
+          total: totalPlayers,
+          active: activePlayers,
+          inactive: inactivePlayers,
+          new: newPlayers,
+        },
+      },
+    });
   } catch (error) {
     next(error);
   }

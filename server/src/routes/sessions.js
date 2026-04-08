@@ -17,11 +17,11 @@ router.use(verifyToken);
 router.get('/', getSessions);
 router.get('/:id', getSession);
 
-// POST - coach i parent mogą tworzyć sesje
-router.post('/', requireRole('coach', 'parent'), createSession);
-// PUT - tylko coach
-router.put('/:id', requireRole('coach'), updateSession);
-// DELETE - coach i parent (parent moze usuwac swoje)
-router.delete('/:id', requireRole('coach', 'parent'), deleteSession);
+// POST - coach, clubAdmin i parent mogą tworzyć sesje
+router.post('/', requireRole('coach', 'clubAdmin', 'parent'), createSession);
+// PUT - coach i clubAdmin
+router.put('/:id', requireRole('coach', 'clubAdmin'), updateSession);
+// DELETE - coach, clubAdmin i parent (parent moze usuwac swoje)
+router.delete('/:id', requireRole('coach', 'clubAdmin', 'parent'), deleteSession);
 
 export default router;

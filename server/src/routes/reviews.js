@@ -22,8 +22,8 @@ router.get('/:id/prefill', requireRole('coach', 'clubAdmin'), prefillReview);
 // GET - szczegóły przeglądu
 router.get('/:id', getReview);
 
-// POST - utwórz przegląd (coach)
-router.post('/', requireRole('coach'), createReview);
+// POST - utwórz przegląd (coach, clubAdmin)
+router.post('/', requireRole('coach', 'clubAdmin'), createReview);
 
 // PUT - aktualizuj/opublikuj przegląd (coach, clubAdmin)
 router.put('/:id', requireRole('coach', 'clubAdmin'), updateReview);

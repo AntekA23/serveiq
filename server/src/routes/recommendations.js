@@ -14,8 +14,8 @@ router.use(verifyToken);
 // GET - lista rekomendacji (filtrowana wg roli)
 router.get('/', getRecommendations);
 
-// POST - utwórz rekomendację (coach)
-router.post('/', requireRole('coach'), createRecommendation);
+// POST - utwórz rekomendację (coach, clubAdmin)
+router.post('/', requireRole('coach', 'clubAdmin'), createRecommendation);
 
 // PUT - aktualizuj status (coach, clubAdmin)
 router.put('/:id', requireRole('coach', 'clubAdmin'), updateRecommendation);

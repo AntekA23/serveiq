@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, User, CalendarDays, CalendarClock, ClipboardList,
   MessageCircle, Settings, LogOut, Baby, Link2,
-  Newspaper, Dumbbell, Building2,
+  Newspaper, Dumbbell, Building2, BarChart3, CreditCard, Cog,
 } from 'lucide-react'
 import useAuthStore from '../../../store/authStore'
 import useUiStore from '../../../store/uiStore'
@@ -32,15 +32,23 @@ const parentNav = [
 ]
 
 const clubAdminNav = [
+  { section: 'Klub' },
   { to: '/club/dashboard', label: 'Panel Klubu', icon: LayoutDashboard },
+  { to: '/club/settings', label: 'Ustawienia Klubu', icon: Cog },
   { to: '/club/facility', label: 'Infrastruktura', icon: Building2 },
-  { to: '/calendar', label: 'Kalendarz', icon: CalendarClock },
-  { to: '/groups', label: 'Grupy', icon: Users },
-  { to: '/players', label: 'Zawodnicy', icon: User },
+  { section: 'Ludzie' },
+  { to: '/club/players', label: 'Zawodnicy', icon: User },
   { to: '/coaches', label: 'Trenerzy', icon: Dumbbell },
+  { to: '/groups', label: 'Grupy', icon: Users },
+  { section: 'Trening' },
+  { to: '/calendar', label: 'Kalendarz', icon: CalendarClock },
   { to: '/reviews', label: 'Przeglady', icon: ClipboardList },
+  { section: 'Finanse' },
+  { to: '/club/payments', label: 'Platnosci', icon: CreditCard },
+  { section: 'Raporty' },
+  { to: '/club/reports', label: 'Statystyki', icon: BarChart3 },
+  { section: 'Komunikacja' },
   { to: '/messages', label: 'Wiadomosci', icon: MessageCircle },
-  { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]
 
 const roleLabels = {
@@ -92,19 +100,25 @@ export default function Sidebar() {
         )}
 
         <nav className="sidebar-nav">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `sidebar-nav-item${isActive ? ' active' : ''}`
-              }
-              onClick={handleNavClick}
-            >
-              <item.icon size={18} className="sidebar-nav-icon" />
-              {item.label}
-            </NavLink>
-          ))}
+          {navItems.map((item, idx) =>
+            item.section ? (
+              <div key={item.section} className="sidebar-section-label">
+                {item.section}
+              </div>
+            ) : (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  `sidebar-nav-item${isActive ? ' active' : ''}`
+                }
+                onClick={handleNavClick}
+              >
+                <item.icon size={18} className="sidebar-nav-icon" />
+                {item.label}
+              </NavLink>
+            )
+          )}
         </nav>
 
         <div className="sidebar-user">

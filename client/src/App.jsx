@@ -47,6 +47,10 @@ import AddCoach from './pages/parent/AddCoach'
 // Club pages
 import ClubDashboard from './pages/club/ClubDashboard'
 import ClubFacility from './pages/club/ClubFacility'
+import ClubSettings from './pages/club/ClubSettings'
+import ClubPlayers from './pages/club/ClubPlayers'
+import ClubPayments from './pages/club/ClubPayments'
+import ClubReports from './pages/club/ClubReports'
 import CoachesList from './pages/club/CoachesList'
 
 // Shared pages (placeholders)
@@ -76,7 +80,9 @@ function ProtectedRoute({ children, role }) {
     return <Navigate to="/login" replace />
   }
 
-  if (role && user?.role !== role) {
+  // role can be a string or array of strings
+  const roles = role ? (Array.isArray(role) ? role : [role]) : null
+  if (roles && !roles.includes(user?.role)) {
     // Redirect to the appropriate dashboard for this role
     if (user?.role === 'coach') return <Navigate to="/coach/dashboard" replace />
     if (user?.role === 'clubAdmin') return <Navigate to="/club/dashboard" replace />
@@ -171,7 +177,7 @@ export default function App() {
         <Route
           path="/coach/requests"
           element={
-            <ProtectedRoute role="coach">
+            <ProtectedRoute role={['coach', 'clubAdmin']}>
               <AppShell><CoachRequests /></AppShell>
             </ProtectedRoute>
           }
@@ -179,7 +185,7 @@ export default function App() {
         <Route
           path="/coach/player/:id"
           element={
-            <ProtectedRoute role="coach">
+            <ProtectedRoute role={['coach', 'clubAdmin']}>
               <AppShell><CoachPlayerProfile /></AppShell>
             </ProtectedRoute>
           }
@@ -187,7 +193,7 @@ export default function App() {
         <Route
           path="/coach/players/new"
           element={
-            <ProtectedRoute role="coach">
+            <ProtectedRoute role={['coach', 'clubAdmin']}>
               <AppShell><CoachNewPlayer /></AppShell>
             </ProtectedRoute>
           }
@@ -195,7 +201,7 @@ export default function App() {
         <Route
           path="/coach/sessions"
           element={
-            <ProtectedRoute role="coach">
+            <ProtectedRoute role={['coach', 'clubAdmin']}>
               <AppShell><CoachSessions /></AppShell>
             </ProtectedRoute>
           }
@@ -203,7 +209,7 @@ export default function App() {
         <Route
           path="/coach/sessions/new"
           element={
-            <ProtectedRoute role="coach">
+            <ProtectedRoute role={['coach', 'clubAdmin']}>
               <AppShell><CoachNewSession /></AppShell>
             </ProtectedRoute>
           }
@@ -211,7 +217,7 @@ export default function App() {
         <Route
           path="/coach/sessions/:id/edit"
           element={
-            <ProtectedRoute role="coach">
+            <ProtectedRoute role={['coach', 'clubAdmin']}>
               <AppShell><CoachEditSession /></AppShell>
             </ProtectedRoute>
           }
@@ -219,7 +225,7 @@ export default function App() {
         <Route
           path="/coach/reviews"
           element={
-            <ProtectedRoute role="coach">
+            <ProtectedRoute role={['coach', 'clubAdmin']}>
               <AppShell><CoachReviews /></AppShell>
             </ProtectedRoute>
           }
@@ -227,7 +233,7 @@ export default function App() {
         <Route
           path="/coach/reviews/new"
           element={
-            <ProtectedRoute role="coach">
+            <ProtectedRoute role={['coach', 'clubAdmin']}>
               <AppShell><CoachNewReview /></AppShell>
             </ProtectedRoute>
           }
@@ -235,7 +241,7 @@ export default function App() {
         <Route
           path="/coach/reviews/:id/edit"
           element={
-            <ProtectedRoute role="coach">
+            <ProtectedRoute role={['coach', 'clubAdmin']}>
               <AppShell><CoachNewReview /></AppShell>
             </ProtectedRoute>
           }
@@ -243,7 +249,7 @@ export default function App() {
         <Route
           path="/coach/payments"
           element={
-            <ProtectedRoute role="coach">
+            <ProtectedRoute role={['coach', 'clubAdmin']}>
               <AppShell><CoachPayments /></AppShell>
             </ProtectedRoute>
           }
@@ -251,7 +257,7 @@ export default function App() {
         <Route
           path="/coach/calendar"
           element={
-            <ProtectedRoute role="coach">
+            <ProtectedRoute role={['coach', 'clubAdmin']}>
               <AppShell><CoachCalendar /></AppShell>
             </ProtectedRoute>
           }
@@ -259,7 +265,7 @@ export default function App() {
         <Route
           path="/coach/tournaments"
           element={
-            <ProtectedRoute role="coach">
+            <ProtectedRoute role={['coach', 'clubAdmin']}>
               <AppShell><CoachTournaments /></AppShell>
             </ProtectedRoute>
           }
@@ -357,6 +363,38 @@ export default function App() {
           element={
             <ProtectedRoute role="clubAdmin">
               <AppShell><ClubFacility /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/club/settings"
+          element={
+            <ProtectedRoute role="clubAdmin">
+              <AppShell><ClubSettings /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/club/players"
+          element={
+            <ProtectedRoute role="clubAdmin">
+              <AppShell><ClubPlayers /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/club/payments"
+          element={
+            <ProtectedRoute role="clubAdmin">
+              <AppShell><ClubPayments /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/club/reports"
+          element={
+            <ProtectedRoute role="clubAdmin">
+              <AppShell><ClubReports /></AppShell>
             </ProtectedRoute>
           }
         />
