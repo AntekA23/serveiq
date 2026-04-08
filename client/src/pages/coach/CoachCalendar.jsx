@@ -139,180 +139,12 @@ function ActivityModal({ data, onClose, onChanged, toast }) {
   )
 }
 
-// ─── Constants for activity creation ───
-
-const ACTIVITY_TYPES = [
-  { value: 'class', label: 'Zajecia' },
-  { value: 'training', label: 'Trening' },
-  { value: 'camp', label: 'Oboz' },
-  { value: 'match', label: 'Mecz' },
-  { value: 'fitness', label: 'Fitness' },
-  { value: 'other', label: 'Inne' },
-]
-
 const RECURRENCE_OPTIONS = [
   { value: 'none', label: 'Jednorazowo' },
   { value: 'weekly', label: 'Co tydzien' },
   { value: 'biweekly', label: 'Co 2 tygodnie' },
   { value: 'monthly', label: 'Co miesiac' },
 ]
-
-// ─── Modal for creating activities with recurrence ───
-
-function ActivityCreateModal({ data, players, onClose, onSaved, toast }) {
-  const [form, setForm] = useState({
-    type: 'class',
-    title: '',
-    date: data.date || '',
-    startTime: data.startTime || '16:00',
-    durationMinutes: 60,
-    players: [],
-    location: '',
-    recurrence: 'none',
-  })
-  const [saving, setSaving] = useState(false)
-
-  const handleChange = (field, value) => setForm((p) => ({ ...p, [field]: value }))
-
-  const togglePlayer = (playerId) => {
-    setForm((p) => ({
-      ...p,
-      players: p.players.includes(playerId)
-        ? p.players.filter((id) => id !== playerId)
-        : [...p.players, playerId],
-    }))
-  }
-
-  const handleSave = async () => {
-    const submitForm = { ...form }
-    if (!submitForm.title.trim()) {
-      const type = ACTIVITY_TYPES.find((t) => t.value === submitForm.type)?.label || submitForm.type
-      submitForm.title = type
-    }
-    setSaving(true)
-    try {
-      await api.post('/activities', {
-        ...submitForm,
-        durationMinutes: submitForm.durationMinutes,
-        recurrence: { type: submitForm.recurrence },
-      })
-      toast.success(submitForm.recurrence !== 'none'
-        ? 'Aktywnosc dodana z powtarzaniem'
-        : 'Aktywnosc dodana')
-      onSaved()
-    } catch {
-      toast.error('Nie udalo sie dodac aktywnosci')
-    }
-    setSaving(false)
-  }
-
-  return (
-    <div className="ccal-modal-overlay" onClick={onClose}>
-      <div className="ccal-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="ccal-modal-header">
-          <h3>Nowa aktywnosc</h3>
-          <button className="ccal-modal-close" onClick={onClose}><X size={18} /></button>
-        </div>
-
-        <div className="ccal-modal-body">
-          {/* Type */}
-          <div className="ccal-field">
-            <label>Typ</label>
-            <div className="ccal-type-row">
-              {ACTIVITY_TYPES.map((t) => (
-                <button key={t.value}
-                  className={`ccal-type-btn ${form.type === t.value ? 'active' : ''}`}
-                  style={form.type === t.value ? { background: TYPE_COLORS[t.value] || '#6b7280', borderColor: TYPE_COLORS[t.value] || '#6b7280', color: '#fff' } : {}}
-                  onClick={() => handleChange('type', t.value)}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Title */}
-          <div className="ccal-field">
-            <label>Tytul</label>
-            <input type="text" placeholder="np. Zajecia Tennis 10 Red" value={form.title}
-              onChange={(e) => handleChange('title', e.target.value)} />
-          </div>
-
-          {/* Date + Time + Duration */}
-          <div className="ccal-field-row">
-            <div className="ccal-field">
-              <label>Data</label>
-              <input type="date" value={form.date} onChange={(e) => handleChange('date', e.target.value)} />
-            </div>
-            <div className="ccal-field">
-              <label>Godzina</label>
-              <input type="time" value={form.startTime} onChange={(e) => handleChange('startTime', e.target.value)} />
-            </div>
-            <div className="ccal-field">
-              <label>Czas (min)</label>
-              <select value={form.durationMinutes} onChange={(e) => handleChange('durationMinutes', Number(e.target.value))}>
-                {[30, 45, 60, 75, 90, 120].map((m) => (
-                  <option key={m} value={m}>{m} min</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Recurrence */}
-          <div className="ccal-field">
-            <label>Powtarzanie</label>
-            <div className="ccal-type-row">
-              {RECURRENCE_OPTIONS.map((r) => (
-                <button key={r.value}
-                  className={`ccal-type-btn ${form.recurrence === r.value ? 'active' : ''}`}
-                  style={form.recurrence === r.value ? { background: 'var(--color-accent)', borderColor: 'var(--color-accent)', color: 'var(--color-accent-contrast)' } : {}}
-                  onClick={() => handleChange('recurrence', r.value)}>
-                  {r.label}
-                </button>
-              ))}
-            </div>
-            {form.recurrence !== 'none' && (
-              <div style={{ fontSize: 11, color: 'var(--color-text-tertiary)', marginTop: 4 }}>
-                {form.recurrence === 'weekly' && 'Utworzy 12 powtorzen (co tydzien)'}
-                {form.recurrence === 'biweekly' && 'Utworzy 6 powtorzen (co 2 tygodnie)'}
-                {form.recurrence === 'monthly' && 'Utworzy 6 powtorzen (co miesiac)'}
-              </div>
-            )}
-          </div>
-
-          {/* Location */}
-          <div className="ccal-field">
-            <label>Lokalizacja (opcjonalnie)</label>
-            <input type="text" placeholder="np. Kort 1" value={form.location}
-              onChange={(e) => handleChange('location', e.target.value)} />
-          </div>
-
-          {/* Players */}
-          <div className="ccal-field">
-            <label>Zawodnicy</label>
-            <div className="ccal-player-chips">
-              {players.map((p) => (
-                <button key={p._id}
-                  className={`ccal-player-chip ${form.players.includes(p._id) ? 'selected' : ''}`}
-                  onClick={() => togglePlayer(p._id)}>
-                  {p.firstName} {p.lastName?.[0]}.
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="ccal-modal-footer">
-          <div className="ccal-modal-footer-right">
-            <button className="ccal-btn-secondary" onClick={onClose}>Anuluj</button>
-            <button className="ccal-btn-primary" onClick={handleSave} disabled={saving}>
-              <Save size={14} /> {saving ? 'Zapisywanie...' : 'Zapisz'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // ─── Modal for creating / viewing sessions ───
 
@@ -328,6 +160,7 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
     title: data.title || '',
     notes: data.notes || '',
     visibleToParent: data.visibleToParent !== false,
+    recurrence: 'none',
   })
   const [saving, setSaving] = useState(false)
 
@@ -347,6 +180,22 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
       if (isEdit) {
         await api.put(`/sessions/${data._id}`, form)
         toast.success('Sesja zaktualizowana')
+      } else if (form.recurrence !== 'none') {
+        // Create as activity with recurrence
+        const playerObj = players.find((p) => p._id === form.player)
+        await api.post('/activities', {
+          type: 'training',
+          title: form.title,
+          date: form.date,
+          startTime: form.startTime,
+          durationMinutes: form.durationMinutes,
+          players: form.player ? [form.player] : [],
+          surface: form.surface,
+          notes: form.notes,
+          visibleToParent: form.visibleToParent,
+          recurrence: { type: form.recurrence },
+        })
+        toast.success('Sesja dodana z powtarzaniem')
       } else {
         await api.post('/sessions', form)
         toast.success('Sesja dodana')
@@ -458,6 +307,30 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
               onChange={(e) => handleChange('visibleToParent', e.target.checked)} />
             Widoczne dla rodzica
           </label>
+
+          {/* Recurrence — only for new sessions */}
+          {!isEdit && (
+            <div className="ccal-field">
+              <label>Powtarzanie</label>
+              <div className="ccal-type-row">
+                {RECURRENCE_OPTIONS.map((r) => (
+                  <button key={r.value}
+                    className={`ccal-type-btn ${form.recurrence === r.value ? 'active' : ''}`}
+                    style={form.recurrence === r.value ? { background: 'var(--color-accent)', borderColor: 'var(--color-accent)', color: 'var(--color-accent-contrast)' } : {}}
+                    onClick={() => handleChange('recurrence', r.value)}>
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+              {form.recurrence !== 'none' && (
+                <div style={{ fontSize: 11, color: 'var(--color-text-tertiary)', marginTop: 4 }}>
+                  {form.recurrence === 'weekly' && 'Utworzy 12 powtorzen (co tydzien)'}
+                  {form.recurrence === 'biweekly' && 'Utworzy 6 powtorzen (co 2 tygodnie)'}
+                  {form.recurrence === 'monthly' && 'Utworzy 6 powtorzen (co miesiac)'}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="ccal-modal-footer">
@@ -662,27 +535,11 @@ export default function CoachCalendar() {
     })
   }
 
-  const handleNewActivity = () => {
-    const now = new Date()
-    now.setMinutes(0, 0, 0)
-    now.setHours(now.getHours() + 1)
-    setModal({
-      mode: 'create-activity',
-      data: {
-        date: toDateStr(now),
-        startTime: toTimeStr(now),
-      },
-    })
-  }
-
   return (
     <div className="coach-calendar-page">
       <div className="ccal-top-bar">
         <button className="ccal-add-btn" onClick={handleNewSession}>
           <Plus size={16} /> Nowa sesja
-        </button>
-        <button className="ccal-add-btn ccal-add-btn-alt" onClick={handleNewActivity}>
-          <Plus size={16} /> Nowa aktywnosc
         </button>
         <span className="ccal-hint">Kliknij na slot w kalendarzu aby dodac sesje w konkretnym terminie</span>
       </div>
@@ -731,16 +588,6 @@ export default function CoachCalendar() {
           data={modal.data}
           onClose={handleModalClose}
           onChanged={handleModalSaved}
-          toast={toast}
-        />
-      )}
-
-      {modal && modal.mode === 'create-activity' && (
-        <ActivityCreateModal
-          data={modal.data}
-          players={players}
-          onClose={handleModalClose}
-          onSaved={handleModalSaved}
           toast={toast}
         />
       )}
