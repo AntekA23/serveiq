@@ -530,3 +530,86 @@
     font-size: 1.2rem;
   }
 }
+
+/* ─── Cancelled Events ─── */
+.ccal-event-cancelled {
+  opacity: 0.45 !important;
+  text-decoration: line-through;
+}
+
+.ccal-event-cancelled .ccal-event-title {
+  text-decoration: line-through;
+}
+
+/* ─── Cancelled banner in modal ─── */
+.ccal-cancelled-banner {
+  padding: 10px 14px;
+  background: var(--color-red-bg, rgba(239, 68, 68, 0.1));
+  border: 1px solid var(--color-red, #ef4444);
+  border-radius: var(--radius-sm);
+  color: var(--color-red, #ef4444);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ─── Cancel button ─── */
+.ccal-btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: var(--color-red, #ef4444);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ccal-btn-cancel:hover { opacity: 0.9; }
+.ccal-btn-cancel:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ─── Alt add button ─── */
+.ccal-add-btn-alt {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-md);
+}
+
+.ccal-add-btn-alt:hover {
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* ─── Player chips ─── */
+.ccal-player-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ccal-player-chip {
+  padding: 4px 10px;
+  border: 1px solid var(--color-border-md);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ccal-player-chip:hover {
+  border-color: var(--color-accent);
+}
+
+.ccal-player-chip.selected {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
