@@ -105,6 +105,28 @@ const activitySchema = new mongoose.Schema(
       default: true,
     },
     tags: [String],
+    // Recurrence
+    recurrence: {
+      type: {
+        type: String,
+        enum: ['none', 'weekly', 'biweekly', 'monthly'],
+        default: 'none',
+      },
+      seriesId: {
+        type: String,
+      },
+      parentActivityId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Activity',
+      },
+    },
+    cancelledAt: {
+      type: Date,
+    },
+    cancelReason: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,
@@ -117,6 +139,7 @@ activitySchema.index({ coach: 1, date: -1 });
 activitySchema.index({ group: 1, date: -1 });
 activitySchema.index({ type: 1, date: -1 });
 activitySchema.index({ club: 1, type: 1, status: 1 });
+activitySchema.index({ 'recurrence.seriesId': 1 });
 
 const Activity = mongoose.model('Activity', activitySchema);
 

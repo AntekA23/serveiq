@@ -34,6 +34,9 @@ const createActivitySchema = z.object({
   }).optional(),
   visibleToParent: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
+  recurrence: z.object({
+    type: z.enum(['none', 'weekly', 'biweekly', 'monthly']).optional(),
+  }).optional(),
 });
 
 const updateActivitySchema = z.object({
@@ -182,6 +185,51 @@ export const createActivity = async (req, res, next) => {
     }
 
     const activity = await Activity.create(activityData);
+
+    // Generate recurring instances if requested
+    const recurrenceType = data.recurrence?.type || 'none';
+
+    if (recurrenceType !== 'none') {
+      const seriesId = activity._id.toString();
+
+      // Mark the original as the parent
+      activity.recurrence = {
+        type: recurrenceType,
+        seriesId,
+        parentActivityId: activity._id,
+      };
+      await activity.save();
+
+      // Generate future occurrences (12 weeks for weekly/biweekly, 6 months for monthly)
+      const baseDate = new Date(data.date);
+      const count = recurrenceType === 'monthly' ? 5 : (recurrenceType === 'biweekly' ? 5 : 11);
+
+      const recurring = [];
+      for (let i = 1; i <= count; i++) {
+        const newDate = new Date(baseDate);
+        if (recurrenceType === 'weekly') {
+          newDate.setDate(newDate.getDate() + (i * 7));
+        } else if (recurrenceType === 'biweekly') {
+          newDate.setDate(newDate.getDate() + (i * 14));
+        } else if (recurrenceType === 'monthly') {
+          newDate.setMonth(newDate.getMonth() + i);
+        }
+
+        recurring.push({
+          ...activityData,
+          date: newDate,
+          recurrence: {
+            type: recurrenceType,
+            seriesId,
+            parentActivityId: activity._id,
+          },
+        });
+      }
+
+      if (recurring.length > 0) {
+        await Activity.insertMany(recurring);
+      }
+    }
 
     const populatedActivity = await Activity.findById(activity._id)
       .populate('players', 'firstName lastName')
@@ -424,6 +472,97 @@ export const getUpcoming = async (req, res, next) => {
       .limit(limit);
 
     res.json({ activities });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/activities/:id/cancel
+ * Odwołaj aktywność (nie usuwaj — oznacz jako cancelled)
+ */
+export const cancelActivity = async (req, res, next) => {
+  try {
+    const activity = await Activity.findById(req.params.id);
+
+    if (!activity) {
+      return res.status(404).json({ message: 'Aktywność nie znaleziona' });
+    }
+
+    const reason = req.body.reason || '';
+
+    activity.status = 'cancelled';
+    activity.cancelledAt = new Date();
+    activity.cancelReason = reason;
+    await activity.save();
+
+    const updated = await Activity.findById(activity._id)
+      .populate('players', 'firstName lastName')
+      .populate('coach', 'firstName lastName')
+      .populate('group', 'name');
+
+    res.json({
+      message: 'Aktywność została odwołana',
+      activity: updated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/activities/:id/restore
+ * Przywróć odwołaną aktywność
+ */
+export const restoreActivity = async (req, res, next) => {
+  try {
+    const activity = await Activity.findById(req.params.id);
+
+    if (!activity) {
+      return res.status(404).json({ message: 'Aktywność nie znaleziona' });
+    }
+
+    activity.status = 'planned';
+    activity.cancelledAt = undefined;
+    activity.cancelReason = undefined;
+    await activity.save();
+
+    const updated = await Activity.findById(activity._id)
+      .populate('players', 'firstName lastName')
+      .populate('coach', 'firstName lastName')
+      .populate('group', 'name');
+
+    res.json({
+      message: 'Aktywność została przywrócona',
+      activity: updated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * DELETE /api/activities/series/:seriesId
+ * Usuń wszystkie aktywności z serii (recurrence)
+ */
+export const deleteActivitySeries = async (req, res, next) => {
+  try {
+    const { seriesId } = req.params;
+
+    const query = { 'recurrence.seriesId': seriesId };
+
+    if (req.user.role === 'coach') {
+      query.coach = req.user._id;
+    } else if (req.user.role === 'clubAdmin' && req.user.club) {
+      query.club = req.user.club;
+    }
+
+    const result = await Activity.deleteMany(query);
+
+    res.json({
+      message: `Usunięto ${result.deletedCount} aktywności z serii`,
+      deletedCount: result.deletedCount,
+    });
   } catch (error) {
     next(error);
   }
