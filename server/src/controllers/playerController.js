@@ -261,7 +261,8 @@ export const getPlayer = async (req, res, next) => {
     }
 
     const player = await Player.findOne(query)
-      .populate('parents', 'firstName lastName email phone');
+      .populate('parents', 'firstName lastName email phone')
+      .populate('federationProgram.program', 'federationCode federationName countryFlag');
 
     if (!player) {
       return res.status(404).json({ message: 'Zawodnik nie znaleziony' });

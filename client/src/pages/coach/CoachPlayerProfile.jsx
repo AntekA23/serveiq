@@ -832,6 +832,52 @@ export default function CoachPlayerProfile() {
         </div>
       )}
 
+      {/* Federation program banner */}
+      {player && !player.federationProgram?.program && (
+        <div
+          onClick={() => setTab('program')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)',
+            border: '1px solid #bfdbfe',
+            borderRadius: 10, padding: '12px 16px', marginBottom: 12,
+            cursor: 'pointer', transition: 'all 0.15s',
+          }}
+          onMouseOver={e => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(59,130,246,0.1)' }}
+          onMouseOut={e => { e.currentTarget.style.borderColor = '#bfdbfe'; e.currentTarget.style.boxShadow = 'none' }}
+        >
+          <span style={{ fontSize: 24 }}>🌍</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 600, fontSize: 13, color: '#1e40af' }}>Brak programu rozwoju</div>
+            <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
+              Wybierz program federacji (ITF, USTA, Tennis Canada...) aby otrzymac rekomendacje treningowe dopasowane do wieku i plci zawodnika
+            </div>
+          </div>
+          <span style={{ fontSize: 13, color: '#3b82f6', fontWeight: 600, whiteSpace: 'nowrap' }}>Ustaw program →</span>
+        </div>
+      )}
+      {player?.federationProgram?.program && (
+        <div
+          onClick={() => setTab('program')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: '#f0fdf4', border: '1px solid #bbf7d0',
+            borderRadius: 8, padding: '8px 14px', marginBottom: 12,
+            cursor: 'pointer', fontSize: 13,
+          }}
+        >
+          <span style={{ fontSize: 16 }}>{player.federationProgram.program.countryFlag || '🌍'}</span>
+          <span style={{ color: '#15803d', fontWeight: 600 }}>
+            {player.federationProgram.program.federationName || 'Program'}
+          </span>
+          <span style={{ color: '#6b7280' }}>·</span>
+          <span style={{ color: '#374151' }}>
+            {player.federationProgram.currentStageCode?.replace(/_/g, ' ') || '—'}
+          </span>
+          <span style={{ color: '#9ca3af', marginLeft: 'auto', fontSize: 12 }}>Szczegoly →</span>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="coach-tabs">
         <button className={`coach-tab ${tab === 'skills' ? 'active' : ''}`} onClick={() => setTab('skills')}>
