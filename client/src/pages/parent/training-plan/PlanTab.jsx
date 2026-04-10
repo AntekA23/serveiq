@@ -3,6 +3,7 @@ import { CalendarDays, Target, Plus, Trash2, Save, GripVertical, Clock } from 'l
 import api from '../../../api/axios'
 import { SESSION_TYPES, SURFACES, SURFACE_TYPES, DAY_NAMES_FULL, DAY_NUMBERS } from './constants'
 import MilestoneTimeline from './MilestoneTimeline'
+import PlanRecommendationBar from '../../../components/player/PlanRecommendationBar'
 
 const DURATION_OPTIONS = [30, 45, 60, 75, 90, 120]
 
@@ -216,6 +217,7 @@ export default function PlanTab({ child, plan, onRefresh }) {
 
   return (
     <div className="tp-plan">
+      <PlanRecommendationBar playerId={childId} />
       {/* Weekly overview banner */}
       <div className="tp-plan-overview">
         <div className="tp-plan-stat">

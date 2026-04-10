@@ -20,6 +20,7 @@ const notificationSchema = new mongoose.Schema(
           'coach_request_new',
           'coach_request_response',
           'system',
+          'stage_transition',
         ],
         message: 'Nieprawidłowy typ powiadomienia',
       },

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare, FileText, Sparkles, Loader, ClipboardList, Trash2, Clock, Heart, Eye, EyeOff, Pin, X, Edit3, Check, Pause, XCircle, Tag
+  ArrowLeft, Target, Plus, Save, ChevronDown, ChevronUp, Calendar, Star, MessageSquare, FileText, Sparkles, Loader, ClipboardList, Trash2, Clock, Heart, Eye, EyeOff, Pin, X, Edit3, Check, Pause, XCircle, Tag, Globe
 } from 'lucide-react'
 import api from '../../api/axios'
+import DevelopmentProgramTab from './DevelopmentProgramTab'
+import PlanRecommendationBar from '../../components/player/PlanRecommendationBar'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import Button from '../../components/ui/Button/Button'
 import useToast from '../../hooks/useToast'
@@ -56,6 +58,7 @@ function CoachPlanTab({ playerId, player, toast }) {
 
   return (
     <div className="coach-plan-tab">
+      <PlanRecommendationBar playerId={playerId} />
       {/* Summary */}
       <div className="coach-plan-summary">
         <div className="coach-plan-stat"><span className="coach-plan-stat-val">{totalSessions}</span> sesji/tyg</div>
@@ -250,8 +253,7 @@ export default function CoachPlayerProfile() {
   const [focusInput, setFocusInput] = useState('')
   const [focusSaving, setFocusSaving] = useState(false)
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = async () => {
       try {
         const [playerRes, sessionsRes, reviewsRes, healthRes, historyRes, goalsRes, obsRes, activitiesRes] = await Promise.all([
           api.get(`/players/${id}`),
@@ -286,6 +288,7 @@ export default function CoachPlayerProfile() {
       } catch { /* silent */ }
       setLoading(false)
     }
+  useEffect(() => {
     fetchData()
   }, [id])
 
@@ -846,6 +849,9 @@ export default function CoachPlayerProfile() {
         <button className={`coach-tab ${tab === 'plan' ? 'active' : ''}`} onClick={() => setTab('plan')}>
           <ClipboardList size={14} /> Plan
         </button>
+        <button className={`coach-tab ${tab === 'program' ? 'active' : ''}`} onClick={() => setTab('program')}>
+          <Globe size={14} /> Program
+        </button>
         <button className={`coach-tab ${tab === 'health' ? 'active' : ''}`} onClick={() => setTab('health')}>
           <Heart size={14} /> Zdrowie
         </button>
@@ -1398,6 +1404,17 @@ export default function CoachPlayerProfile() {
 
       {/* Plan tab */}
       {tab === 'plan' && <CoachPlanTab playerId={id} player={player} toast={toast} />}
+
+      {/* Program tab */}
+      {tab === 'program' && (
+        <DevelopmentProgramTab
+          playerId={id}
+          player={player}
+          toast={toast}
+          isCoach={true}
+          onRefresh={fetchData}
+        />
+      )}
 
       {/* Reviews tab */}
       {tab === 'reviews' && (

@@ -16,6 +16,7 @@ import PlayerTimeline from '../../components/player/PlayerTimeline'
 import { SKILL_NAMES, getSkillLevel } from '../../constants/skillLevels'
 import './ChildProfile.css'
 import BadgeGrid from '../../components/badges/BadgeGrid'
+import DevelopmentProgramTab from '../coach/DevelopmentProgramTab'
 
 const ACTIVITY_TYPE_COLORS = {
   class: '#22c55e',
@@ -292,6 +293,31 @@ export default function ChildProfile() {
         currentStage={child.pathwayStage}
         pathwayHistory={child.pathwayHistory}
       />
+
+      {/* Program Rozwoju */}
+      {child?.federationProgram?.program && (
+        <div style={{
+          background: 'var(--color-surface, #fff)',
+          borderRadius: 12,
+          border: '1px solid var(--color-border, #e5e7eb)',
+          marginTop: '1.25rem',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            padding: '1rem 1.25rem 0',
+            fontWeight: 600,
+            fontSize: 15,
+            color: '#111827',
+          }}>Program Rozwoju</div>
+          <DevelopmentProgramTab
+            playerId={child._id}
+            player={child}
+            toast={{ success: () => {}, error: () => {}, info: () => {} }}
+            isCoach={false}
+            onRefresh={() => window.location.reload()}
+          />
+        </div>
+      )}
 
       {/* Badges */}
       <BadgeGrid playerId={child._id} />

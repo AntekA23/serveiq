@@ -16,6 +16,8 @@ import DevelopmentGoal from '../models/DevelopmentGoal.js';
 import Recommendation from '../models/Recommendation.js';
 import ReviewSummary from '../models/ReviewSummary.js';
 import PlayerBadge from '../models/PlayerBadge.js';
+import DevelopmentProgram from '../models/DevelopmentProgram.js';
+import { seedDevelopmentPrograms } from './seedDevelopmentPrograms.js';
 
 /**
  * Seed script — wypelnia baze danych pelnym zestawem demo danych
@@ -58,6 +60,7 @@ const seed = async () => {
       Recommendation.deleteMany({}),
       ReviewSummary.deleteMany({}),
       PlayerBadge.deleteMany({}),
+      DevelopmentProgram.deleteMany({}),
     ]);
     console.log('Kolekcje wyczyszczone.\n');
 
@@ -1169,6 +1172,50 @@ const seed = async () => {
     console.log(`  ${messagesData.length} wiadomosci\n`);
 
     // ============================================================
+    // PROGRAMY ROZWOJU FEDERACJI
+    // ============================================================
+    console.log('\n--- Programy rozwoju federacji ---');
+    const allPrograms = await seedDevelopmentPrograms();
+    const itfProgram = allPrograms.find(p => p.federationCode === 'itf');
+
+    if (itfProgram) {
+      const kacperStage = 'mini_tennis';
+      kacper.federationProgram = {
+        program: itfProgram._id,
+        currentStageCode: kacperStage,
+        stageConfirmedAt: new Date(),
+        stageConfirmedBy: coach._id,
+        autoSuggestedStage: kacperStage,
+      };
+      kacper.markModified('federationProgram');
+      await kacper.save();
+
+      const juliaStage = 'train_to_train';
+      julia.federationProgram = {
+        program: itfProgram._id,
+        currentStageCode: juliaStage,
+        stageConfirmedAt: new Date(),
+        stageConfirmedBy: coach._id,
+        autoSuggestedStage: juliaStage,
+      };
+      julia.markModified('federationProgram');
+      await julia.save();
+
+      const antoniStage = 'mini_tennis';
+      antoni.federationProgram = {
+        program: itfProgram._id,
+        currentStageCode: antoniStage,
+        stageConfirmedAt: new Date(),
+        stageConfirmedBy: coach._id,
+        autoSuggestedStage: antoniStage,
+      };
+      antoni.markModified('federationProgram');
+      await antoni.save();
+
+      console.log('  Przypisano program ITF do 3 graczy');
+    }
+
+    // ============================================================
     // ODZNAKI (GAMIFIKACJA)
     // ============================================================
     console.log('\n--- Odznaki ---');
@@ -1226,6 +1273,7 @@ const seed = async () => {
       Payment.countDocuments(),
       Message.countDocuments(),
       PlayerBadge.countDocuments(),
+      DevelopmentProgram.countDocuments(),
     ]);
 
     console.log('==========================================');
@@ -1244,6 +1292,7 @@ const seed = async () => {
     console.log(`  Platnosci:        ${counts[11]}`);
     console.log(`  Wiadomosci:       ${counts[12]}`);
     console.log(`  Odznaki:          ${counts[13]}`);
+    console.log(`  Programy rozwoju: ${counts[14]}`);
     console.log('==========================================\n');
 
     console.log('Konta demo:');

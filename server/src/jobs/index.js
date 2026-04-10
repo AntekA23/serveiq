@@ -1,5 +1,6 @@
 import { runWeeklySummary } from './weeklyRunner.js';
 import { checkTrialExpiry } from './trialChecker.js';
+import { checkStageTransitions } from './stageChecker.js';
 
 /**
  * Uruchamia wszystkie zadania cykliczne (background jobs).
@@ -12,7 +13,11 @@ export function startJobs() {
   // Tygodniowe podsumowanie — sprawdza co godzine, wysyla w poniedzialek o 7:00
   setInterval(runWeeklySummary, 60 * 60 * 1000);
 
+  // Sprawdzanie sugestii zmian etapu — co godzine (sprawdza pon. 8:00)
+  setInterval(checkStageTransitions, 60 * 60 * 1000);
+
   console.log('[ServeIQ] Background jobs started');
   console.log('[ServeIQ]   - Trial expiry check: co 24h');
   console.log('[ServeIQ]   - Weekly summary: co 1h (wysyla pon. 7:00)');
+  console.log('[ServeIQ]   - Stage transition check: co 1h (sprawdza pon. 8:00)');
 }

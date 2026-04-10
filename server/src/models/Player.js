@@ -124,6 +124,14 @@ const playerSchema = new mongoose.Schema(
       focus: [String],
       notes: String,
     },
+    federationProgram: {
+      program: { type: mongoose.Schema.Types.ObjectId, ref: 'DevelopmentProgram' },
+      currentStageCode: String,
+      stageConfirmedAt: Date,
+      stageConfirmedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      autoSuggestedStage: String,
+      notes: String,
+    },
     nextStep: {
       text: String,
       updatedAt: Date,
