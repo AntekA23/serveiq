@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, ChevronRight, TrendingUp, Target, Star, Calendar, Clock, Award,
+  ArrowLeft, ChevronRight, TrendingUp, Target, Star, Calendar, Clock, Award, Dumbbell,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -81,6 +81,34 @@ export default function ChildProfile() {
 
   const latestReview = reviews[0] || null
 
+  // Training plan
+  const plan = child.trainingPlan || {}
+  const schedule = plan.weeklySchedule || []
+  const weekGoal = plan.weeklyGoal || {}
+  const focusAreas = plan.focus || []
+  const planNotes = plan.notes || ''
+
+  const DAY_NAMES = ['', 'Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd']
+  const DAY_FULL = ['', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela']
+  const SESSION_LABELS = {
+    kort: 'Kort', sparing: 'Sparing', kondycja: 'Kondycja',
+    rozciaganie: 'Rozciąganie', mecz: 'Mecz', inne: 'Inne',
+  }
+  const SESSION_COLORS = {
+    kort: '#22c55e', sparing: '#eab308', kondycja: '#4da6ff',
+    rozciaganie: '#8b5cf6', mecz: '#ef4444', inne: '#6b7280',
+  }
+
+  // Group schedule by day
+  const byDay = {}
+  schedule.forEach((s) => {
+    if (!byDay[s.day]) byDay[s.day] = []
+    byDay[s.day].push(s)
+  })
+  const totalSessions = schedule.length
+  const totalHours = Math.round(schedule.reduce((sum, s) => sum + (s.durationMinutes || 0), 0) / 60 * 10) / 10
+  const activeDays = Object.keys(byDay).length
+
   return (
     <div className="cp-page">
       {/* Back */}
@@ -109,7 +137,86 @@ export default function ChildProfile() {
         </div>
       </div>
 
-      {/* ─── 2. Progress ─── */}
+      {/* ─── 2. Training Plan ─── */}
+      {schedule.length > 0 && (
+        <section className="cp-section">
+          <div className="cp-section-head">
+            <h2 className="cp-section-title"><Dumbbell size={14} /> Plan treningowy</h2>
+            <button className="cp-section-link" onClick={() => navigate('/parent/training-plan')}>
+              Pełny plan <ChevronRight size={14} />
+            </button>
+          </div>
+
+          {/* Stats ribbon */}
+          <div className="cp-plan-stats">
+            <div className="cp-plan-stat">
+              <span className="cp-plan-stat-val">{totalSessions}</span>
+              <span className="cp-plan-stat-label">sesji/tyg</span>
+            </div>
+            <div className="cp-plan-stat-sep" />
+            <div className="cp-plan-stat">
+              <span className="cp-plan-stat-val">{totalHours}</span>
+              <span className="cp-plan-stat-label">h/tyg</span>
+            </div>
+            <div className="cp-plan-stat-sep" />
+            <div className="cp-plan-stat">
+              <span className="cp-plan-stat-val">{activeDays}</span>
+              <span className="cp-plan-stat-label">dni</span>
+            </div>
+          </div>
+
+          {/* Week strip */}
+          <div className="cp-plan-week">
+            {[1, 2, 3, 4, 5, 6, 7].map((day) => {
+              const items = byDay[day] || []
+              const isActive = items.length > 0
+              return (
+                <div key={day} className={`cp-plan-day ${isActive ? 'active' : ''}`}>
+                  <span className="cp-plan-day-name">{DAY_NAMES[day]}</span>
+                  {isActive ? (
+                    <div className="cp-plan-day-sessions">
+                      {items.map((s, i) => (
+                        <div
+                          key={i}
+                          className="cp-plan-session"
+                          style={{ '--s-color': SESSION_COLORS[s.sessionType] || SESSION_COLORS.inne }}
+                        >
+                          <span className="cp-plan-session-type">{SESSION_LABELS[s.sessionType] || s.sessionType}</span>
+                          <span className="cp-plan-session-time">
+                            {s.startTime ? s.startTime.slice(0, 5) : '—'}
+                          </span>
+                          <span className="cp-plan-session-dur">{s.durationMinutes}′</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="cp-plan-day-off">—</div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Focus areas */}
+          {focusAreas.length > 0 && (
+            <div className="cp-plan-focus">
+              <span className="cp-plan-focus-label">Fokus:</span>
+              {focusAreas.map((f, i) => (
+                <span key={i} className="cp-plan-focus-tag">{f}</span>
+              ))}
+            </div>
+          )}
+
+          {/* Coach notes */}
+          {planNotes && (
+            <div className="cp-plan-notes">
+              <span className="cp-plan-notes-text">{planNotes}</span>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ─── 3. Progress ─── */}
       {skillEntries.length > 0 && (
         <section className="cp-section">
           <div className="cp-section-head">

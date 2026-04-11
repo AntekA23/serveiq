@@ -143,6 +143,187 @@
 }
 .cp-section-link:hover { color: var(--color-accent); }
 
+/* ─── Training Plan ─── */
+
+.cp-plan-stats {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+}
+
+.cp-plan-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.cp-plan-stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--color-text);
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.cp-plan-stat-label {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+.cp-plan-stat-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--color-border-md);
+  flex-shrink: 0;
+}
+
+/* Week strip — the star of the show */
+.cp-plan-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+.cp-plan-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px 10px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  min-height: 72px;
+  transition: all 0.2s ease;
+}
+
+.cp-plan-day.active {
+  border-color: var(--color-border-md);
+  background: var(--color-bg-tertiary);
+}
+
+.cp-plan-day-name {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-tertiary);
+}
+
+.cp-plan-day.active .cp-plan-day-name {
+  color: var(--color-text-secondary);
+}
+
+.cp-plan-day-sessions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.cp-plan-session {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 4px 3px;
+  border-radius: 4px;
+  border-left: 3px solid var(--s-color, var(--color-accent));
+  background: color-mix(in srgb, var(--s-color, var(--color-accent)) 8%, transparent);
+  animation: cp-plan-pop 0.3s ease both;
+}
+
+@keyframes cp-plan-pop {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.cp-plan-session-type {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--s-color, var(--color-accent));
+  text-align: center;
+  line-height: 1.2;
+}
+
+.cp-plan-session-time {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  color: var(--color-text);
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.cp-plan-session-dur {
+  font-size: 9px;
+  color: var(--color-text-tertiary);
+}
+
+.cp-plan-day-off {
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+  opacity: 0.3;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+/* Focus tags */
+.cp-plan-focus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.cp-plan-focus-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cp-plan-focus-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+/* Coach notes */
+.cp-plan-notes {
+  padding: 10px 14px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-text-tertiary);
+  border-radius: var(--radius-sm);
+  font-style: italic;
+}
+
+.cp-plan-notes-text {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* Responsive plan */
+@media (max-width: 480px) {
+  .cp-plan-week {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .cp-plan-session-type { font-size: 9px; }
+  .cp-plan-session-time { font-size: 12px; }
+}
+
 /* ─── Progress ─── */
 .cp-progress-avg {
   display: flex;
