@@ -21,6 +21,7 @@ const coachNav = [
 const parentNav = [
   { to: '/parent/dashboard', label: 'Panel', icon: LayoutDashboard },
   { to: '/my-children', label: 'Moje dzieci', icon: Baby },
+  { to: '/parent/add-coach', label: 'Dodaj trenera', icon: Link2 },
   { to: '/messages', label: 'Wiadomości', icon: MessageCircle },
   { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]
