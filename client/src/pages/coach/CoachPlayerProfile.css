@@ -63,6 +63,48 @@
 .cpp-tag-rank { background: var(--color-blue-bg); color: var(--color-blue); }
 .cpp-header-actions { display: flex; gap: 6px; flex-shrink: 0; }
 
+/* Pathway selector */
+.cpp-pathway { margin-top: 6px; }
+.cpp-pathway-select {
+  padding: 4px 8px; font-size: 12px; font-weight: 600;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-accent);
+  cursor: pointer; outline: none;
+}
+.cpp-pathway-select:focus { border-color: var(--color-accent); }
+
+/* AI Results */
+.cpp-ai-result {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-accent-dim);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.cpp-ai-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px; font-weight: 600;
+  color: var(--color-accent);
+  border-bottom: 1px solid var(--color-border);
+}
+.cpp-ai-header span { flex: 1; }
+.cpp-ai-close {
+  background: none; border: none;
+  color: var(--color-text-tertiary); cursor: pointer;
+  font-size: 18px; line-height: 1; padding: 0;
+}
+.cpp-ai-close:hover { color: var(--color-text); }
+.cpp-ai-body {
+  padding: 12px 14px;
+  font-size: 13px; color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+.cpp-ai-body p { margin: 0 0 6px; }
+
 /* ─── Collapsible sections ─── */
 .cpp-section {
   margin-bottom: 8px;

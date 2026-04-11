@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, ChevronDown, ChevronUp, Plus, Save, Trash2, Target,
-  Calendar, FileText, Eye, EyeOff, Clock, Star, MessageSquare,
+  Calendar, FileText, Eye, EyeOff, Clock, Star, MessageSquare, Sparkles, Loader,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -91,6 +91,14 @@ export default function CoachPlayerProfile() {
   const [goalCat, setGoalCat] = useState('fundamentals')
   const [goalSaving, setGoalSaving] = useState(false)
 
+  // Pathway stage
+  const [pathwayStage, setPathwayStage] = useState('')
+  const [pathwaySaving, setPathwaySaving] = useState(false)
+
+  // AI Recommendations
+  const [aiRecs, setAiRecs] = useState(null)
+  const [aiLoading, setAiLoading] = useState(false)
+
   // Plan editing
   const [schedule, setSchedule] = useState([])
   const [planDirty, setPlanDirty] = useState(false)
@@ -107,6 +115,7 @@ export default function CoachPlayerProfile() {
       ])
       const p = playerRes.data.player || playerRes.data
       setPlayer(p)
+      setPathwayStage(p.pathwayStage || '')
       setSchedule(p.trainingPlan?.weeklySchedule || [])
       setSessions((sessionsRes.data.sessions || sessionsRes.data || []).sort((a, b) => new Date(b.date) - new Date(a.date)))
       setReviews((reviewsRes.data.reviews || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)))
@@ -129,6 +138,31 @@ export default function CoachPlayerProfile() {
       setEditSkill(null)
       toast.success('Umiejętność zapisana')
     } catch { toast.error('Nie udało się zapisać') }
+  }
+
+  const handlePathwayChange = async (newStage) => {
+    setPathwayStage(newStage)
+    setPathwaySaving(true)
+    try {
+      const { data } = await api.put(`/players/${id}`, { pathwayStage: newStage })
+      setPlayer(data.player || data)
+      toast.success('Etap ścieżki zapisany')
+    } catch {
+      toast.error('Nie udało się zapisać etapu')
+      setPathwayStage(player?.pathwayStage || '')
+    }
+    setPathwaySaving(false)
+  }
+
+  const handleAiRecommendations = async () => {
+    setAiLoading(true)
+    try {
+      const { data } = await api.post(`/ai/recommendations/${id}`)
+      setAiRecs(data.result)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Nie udało się wygenerować rekomendacji')
+    }
+    setAiLoading(false)
   }
 
   const handleObsSubmit = async () => {
@@ -254,19 +288,55 @@ export default function CoachPlayerProfile() {
           <h1 className="cpp-name">{player.firstName} {player.lastName}</h1>
           <div className="cpp-tags">
             {age && <span className="cpp-tag">{age} lat</span>}
-            {player.pathwayStage && <span className="cpp-tag cpp-tag-accent">{PATHWAY_MAP[player.pathwayStage] || player.pathwayStage}</span>}
             {player.ranking?.pzt && <span className="cpp-tag cpp-tag-rank">PZT #{player.ranking.pzt}</span>}
+          </div>
+          {/* Pathway stage selector */}
+          <div className="cpp-pathway">
+            <select
+              className="cpp-pathway-select"
+              value={pathwayStage}
+              onChange={(e) => handlePathwayChange(e.target.value)}
+              disabled={pathwaySaving}
+            >
+              <option value="">Etap ścieżki...</option>
+              {PATHWAY_STAGES.map((s) => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
           </div>
         </div>
         <div className="cpp-header-actions">
+          <Button size="sm" onClick={handleAiRecommendations} loading={aiLoading}>
+            <Sparkles size={13} /> AI
+          </Button>
           <Button size="sm" onClick={() => navigate('/coach/reviews/new')}>
             <FileText size={13} /> Ocena
           </Button>
-          <Button size="sm" onClick={() => navigate(`/messages`)}>
-            <MessageSquare size={13} />
-          </Button>
         </div>
       </div>
+
+      {/* AI Recommendations (if generated) */}
+      {aiRecs && (
+        <div className="cpp-ai-result">
+          <div className="cpp-ai-header">
+            <Sparkles size={14} /> <span>Rekomendacje AI</span>
+            <button className="cpp-ai-close" onClick={() => setAiRecs(null)}>&times;</button>
+          </div>
+          <div className="cpp-ai-body">
+            {typeof aiRecs === 'string' ? (
+              <p>{aiRecs}</p>
+            ) : (
+              <>
+                {aiRecs.summary && <p>{aiRecs.summary}</p>}
+                {aiRecs.recommendations?.map((r, i) => <p key={i}>• {r}</p>)}
+                {aiRecs.focusAreas?.length > 0 && (
+                  <p><strong>Fokus:</strong> {aiRecs.focusAreas.join(', ')}</p>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ─── Summary (default open) ─── */}
       <Section title="Umiejętności" icon={Star} defaultOpen badge={avgSkill > 0 ? `Śr. ${avgSkill}` : null}>

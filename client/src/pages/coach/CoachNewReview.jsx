@@ -271,11 +271,15 @@ export default function CoachNewReview() {
           </div>
         </div>
 
-        {/* AI Toolbar — simplified */}
+        {/* AI Toolbar */}
         <div className="coach-ai-generate">
-          <Button size="sm" onClick={handleAiGenerate} loading={aiGenerating || prefilling}
+          <Button size="sm" variant="secondary" onClick={handlePrefill} loading={prefilling}
             disabled={!form.player || !form.periodStart || !form.periodEnd}>
-            <Sparkles size={14} /> {aiGenerating ? 'Generowanie...' : 'Przygotuj draft AI'}
+            <Database size={14} /> Wypełnij danymi
+          </Button>
+          <Button size="sm" onClick={handleAiGenerate} loading={aiGenerating}
+            disabled={!form.player || !form.periodStart || !form.periodEnd}>
+            <Sparkles size={14} /> {aiGenerating ? 'Generowanie...' : 'Wygeneruj draft AI'}
           </Button>
         </div>
 
