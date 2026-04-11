@@ -19,7 +19,6 @@ const MONTH_NAMES = [
 export default function CoachPayments() {
   const toast = useToast()
   const [payments, setPayments] = useState([])
-  const [stats, setStats] = useState(null)
   const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -37,13 +36,11 @@ export default function CoachPayments() {
 
   const fetchData = async () => {
     try {
-      const [payRes, statsRes, plRes] = await Promise.all([
+      const [payRes, plRes] = await Promise.all([
         api.get('/payments'),
-        api.get('/payments/stats'),
         api.get('/players'),
       ])
       setPayments(payRes.data.payments || [])
-      setStats(statsRes.data.stats || null)
       setPlayers(plRes.data.players || plRes.data || [])
     } catch { /* silent */ }
     setLoading(false)
@@ -126,32 +123,6 @@ export default function CoachPayments() {
           <Plus size={14} /> Nowa platnosc
         </Button>
       </div>
-
-      {/* Stats */}
-      {stats && (
-        <div className="coach-stats">
-          <div className="coach-stat" style={{ '--stat-color': 'var(--color-green)' }}>
-            <div className="coach-stat-icon"><CheckCircle size={18} /></div>
-            <div className="coach-stat-value">{stats.totalPaid?.toLocaleString('pl-PL') || 0}</div>
-            <div className="coach-stat-label">Oplacone (PLN)</div>
-          </div>
-          <div className="coach-stat" style={{ '--stat-color': 'var(--color-amber)' }}>
-            <div className="coach-stat-icon"><Clock size={18} /></div>
-            <div className="coach-stat-value">{stats.pending?.total?.toLocaleString('pl-PL') || 0}</div>
-            <div className="coach-stat-label">Oczekujace ({stats.pending?.count || 0})</div>
-          </div>
-          <div className="coach-stat" style={{ '--stat-color': 'var(--color-heart)' }}>
-            <div className="coach-stat-icon"><AlertCircle size={18} /></div>
-            <div className="coach-stat-value">{stats.overdue?.total?.toLocaleString('pl-PL') || 0}</div>
-            <div className="coach-stat-label">Przeterminowane ({stats.overdue?.count || 0})</div>
-          </div>
-          <div className="coach-stat" style={{ '--stat-color': 'var(--color-accent)' }}>
-            <div className="coach-stat-icon"><DollarSign size={18} /></div>
-            <div className="coach-stat-value">{payments.length}</div>
-            <div className="coach-stat-label">Wszystkie platnosci</div>
-          </div>
-        </div>
-      )}
 
       {/* New payment form */}
       {showForm && (

@@ -1,0 +1,307 @@
+/* ═══════════════════════════════════════════
+   Club Dashboard — Focused, utilitarian
+   "What needs my attention right now?"
+   ═══════════════════════════════════════════ */
+
+.cld-page {
+  max-width: 720px;
+}
+
+/* Loading */
+.cld-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  color: var(--color-accent);
+}
+.cld-spin { animation: cld-rotate 0.8s linear infinite; }
+@keyframes cld-rotate { to { transform: rotate(360deg); } }
+
+.cld-no-club {
+  padding: 40px;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+
+/* ─── Header ─── */
+.cld-header {
+  margin-bottom: 20px;
+}
+
+.cld-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 1.5px;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1;
+}
+
+/* ─── Metrics inline ─── */
+.cld-metrics {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.cld-metric {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-text-secondary);
+}
+
+.cld-metric svg { flex-shrink: 0; opacity: 0.6; }
+
+.cld-metric-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--color-text);
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.cld-metric-label {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+.cld-metric-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--color-border-md);
+  flex-shrink: 0;
+}
+
+/* ─── Sections ─── */
+.cld-section {
+  margin-bottom: 28px;
+}
+
+.cld-section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cld-section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 15px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin: 0;
+  flex: 1;
+}
+
+.cld-section-link {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+.cld-section-link:hover { color: var(--color-accent); }
+
+.cld-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-amber-bg);
+  color: var(--color-amber);
+}
+
+.cld-attention-icon { color: var(--color-amber); flex-shrink: 0; }
+
+/* ─── Attention list ─── */
+.cld-attention-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cld-attention-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  animation: cld-fadeIn 0.25s ease both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+.cld-attention-info { flex: 1; min-width: 0; }
+
+.cld-attention-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  display: block;
+}
+
+.cld-attention-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.cld-reason-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--r-bg, var(--color-bg-tertiary));
+  color: var(--r-color, var(--color-text-secondary));
+}
+
+.cld-attention-link {
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.cld-attention-link:hover { color: var(--color-accent); }
+
+/* ─── Upcoming ─── */
+.cld-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 36px 20px;
+  background: var(--color-bg-secondary);
+  border: 1px dashed var(--color-border-md);
+  border-radius: var(--radius-md);
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+.cld-empty-state p { margin: 0; }
+
+.cld-upcoming-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cld-upcoming-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  animation: cld-fadeIn 0.25s ease both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+.cld-upcoming-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 36px;
+  flex-shrink: 0;
+}
+
+.cld-upcoming-day {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--color-text);
+  line-height: 1;
+  letter-spacing: 0.5px;
+}
+
+.cld-upcoming-month {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cld-upcoming-body { flex: 1; min-width: 0; }
+
+.cld-upcoming-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  display: block;
+}
+
+.cld-upcoming-meta {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  display: block;
+  margin-top: 2px;
+}
+
+/* ─── Quick nav ─── */
+.cld-quick-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.cld-quick-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1;
+  padding: 12px 14px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  justify-content: center;
+}
+
+.cld-quick-item svg {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.cld-quick-item:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+/* ─── Animations ─── */
+@keyframes cld-fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+  .cld-title { font-size: 26px; }
+  .cld-metrics { gap: 10px; padding: 12px 14px; }
+  .cld-metric-val { font-size: 18px; }
+  .cld-metric-sep { display: none; }
+  .cld-metrics { flex-wrap: wrap; }
+  .cld-quick-nav { flex-direction: column; }
+}

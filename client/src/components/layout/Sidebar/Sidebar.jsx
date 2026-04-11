@@ -11,44 +11,27 @@ import Avatar from '../../ui/Avatar'
 import './Sidebar.css'
 
 const coachNav = [
-  { to: '/coach/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/coach/dashboard', label: 'Panel', icon: LayoutDashboard },
   { to: '/coach/calendar', label: 'Kalendarz', icon: CalendarClock },
   { to: '/players', label: 'Zawodnicy', icon: User },
-  { to: '/groups', label: 'Grupy', icon: Users },
-  { to: '/reviews', label: 'Przeglady', icon: ClipboardList },
-  { to: '/messages', label: 'Wiadomosci', icon: MessageCircle },
+  { to: '/messages', label: 'Wiadomości', icon: MessageCircle },
   { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]
 
 const parentNav = [
   { to: '/parent/dashboard', label: 'Panel', icon: LayoutDashboard },
   { to: '/my-children', label: 'Moje dzieci', icon: Baby },
-  { to: '/parent/add-coach', label: 'Dodaj trenera', icon: Link2 },
-  { to: '/calendar', label: 'Kalendarz', icon: CalendarDays },
-  { to: '/reviews', label: 'Przeglady', icon: ClipboardList },
-  { to: '/timeline', label: 'Timeline', icon: Newspaper },
-  { to: '/messages', label: 'Wiadomosci', icon: MessageCircle },
+  { to: '/messages', label: 'Wiadomości', icon: MessageCircle },
   { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]
 
 const clubAdminNav = [
-  { section: 'Klub' },
-  { to: '/club/dashboard', label: 'Panel Klubu', icon: LayoutDashboard },
-  { to: '/club/settings', label: 'Ustawienia Klubu', icon: Cog },
-  { to: '/club/facility', label: 'Infrastruktura', icon: Building2 },
-  { section: 'Ludzie' },
+  { to: '/club/dashboard', label: 'Panel', icon: LayoutDashboard },
   { to: '/club/players', label: 'Zawodnicy', icon: User },
   { to: '/coaches', label: 'Trenerzy', icon: Dumbbell },
-  { to: '/groups', label: 'Grupy', icon: Users },
-  { section: 'Trening' },
-  { to: '/calendar', label: 'Kalendarz', icon: CalendarClock },
-  { to: '/reviews', label: 'Przeglady', icon: ClipboardList },
-  { section: 'Finanse' },
-  { to: '/club/payments', label: 'Platnosci', icon: CreditCard },
-  { section: 'Raporty' },
-  { to: '/club/reports', label: 'Statystyki', icon: BarChart3 },
-  { section: 'Komunikacja' },
-  { to: '/messages', label: 'Wiadomosci', icon: MessageCircle },
+  { to: '/club/payments', label: 'Płatności', icon: CreditCard },
+  { to: '/messages', label: 'Wiadomości', icon: MessageCircle },
+  { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]
 
 const roleLabels = {

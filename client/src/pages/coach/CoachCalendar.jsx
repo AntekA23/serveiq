@@ -238,7 +238,7 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
             </select>
           </div>
 
-          {/* Date + Time row */}
+          {/* Date + Time + Duration row */}
           <div className="ccal-field-row">
             <div className="ccal-field">
               <label>Data</label>
@@ -258,7 +258,7 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
             </div>
           </div>
 
-          {/* Type + Surface */}
+          {/* Type */}
           <div className="ccal-field">
             <label>Typ</label>
             <div className="ccal-type-row">
@@ -273,63 +273,35 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
             </div>
           </div>
 
-          <div className="ccal-field">
-            <label>Nawierzchnia</label>
-            <div className="ccal-type-row">
-              {SURFACES.map((s) => (
-                <button key={s.value}
-                  className={`ccal-type-btn ${form.surface === s.value ? 'active' : ''}`}
-                  style={form.surface === s.value ? { background: 'var(--color-accent)', borderColor: 'var(--color-accent)', color: 'var(--color-accent-contrast)' } : {}}
-                  onClick={() => handleChange('surface', s.value)}>
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Title */}
-          <div className="ccal-field">
-            <label>Tytul (opcjonalnie — auto-generowany)</label>
-            <input type="text" placeholder="np. Trening serwisu" value={form.title}
-              onChange={(e) => handleChange('title', e.target.value)} />
-          </div>
-
-          {/* Notes */}
-          <div className="ccal-field">
-            <label>Notatki</label>
-            <textarea rows={2} placeholder="Plan treningu, fokus..." value={form.notes}
-              onChange={(e) => handleChange('notes', e.target.value)} />
-          </div>
-
-          {/* Visibility */}
-          <label className="ccal-checkbox">
-            <input type="checkbox" checked={form.visibleToParent}
-              onChange={(e) => handleChange('visibleToParent', e.target.checked)} />
-            Widoczne dla rodzica
-          </label>
-
-          {/* Recurrence — only for new sessions */}
-          {!isEdit && (
-            <div className="ccal-field">
-              <label>Powtarzanie</label>
-              <div className="ccal-type-row">
-                {RECURRENCE_OPTIONS.map((r) => (
-                  <button key={r.value}
-                    className={`ccal-type-btn ${form.recurrence === r.value ? 'active' : ''}`}
-                    style={form.recurrence === r.value ? { background: 'var(--color-accent)', borderColor: 'var(--color-accent)', color: 'var(--color-accent-contrast)' } : {}}
-                    onClick={() => handleChange('recurrence', r.value)}>
-                    {r.label}
-                  </button>
-                ))}
-              </div>
-              {form.recurrence !== 'none' && (
-                <div style={{ fontSize: 11, color: 'var(--color-text-tertiary)', marginTop: 4 }}>
-                  {form.recurrence === 'weekly' && 'Utworzy 12 powtorzen (co tydzien)'}
-                  {form.recurrence === 'biweekly' && 'Utworzy 6 powtorzen (co 2 tygodnie)'}
-                  {form.recurrence === 'monthly' && 'Utworzy 6 powtorzen (co miesiac)'}
+          {/* Detailed fields — only in edit mode */}
+          {isEdit && (
+            <>
+              <div className="ccal-field">
+                <label>Nawierzchnia</label>
+                <div className="ccal-type-row">
+                  {SURFACES.map((s) => (
+                    <button key={s.value}
+                      className={`ccal-type-btn ${form.surface === s.value ? 'active' : ''}`}
+                      style={form.surface === s.value ? { background: 'var(--color-accent)', borderColor: 'var(--color-accent)', color: 'var(--color-accent-contrast)' } : {}}
+                      onClick={() => handleChange('surface', s.value)}>
+                      {s.label}
+                    </button>
+                  ))}
                 </div>
-              )}
-            </div>
+              </div>
+
+              <div className="ccal-field">
+                <label>Notatki</label>
+                <textarea rows={2} placeholder="Plan treningu, fokus..." value={form.notes}
+                  onChange={(e) => handleChange('notes', e.target.value)} />
+              </div>
+
+              <label className="ccal-checkbox">
+                <input type="checkbox" checked={form.visibleToParent}
+                  onChange={(e) => handleChange('visibleToParent', e.target.checked)} />
+                Widoczne dla rodzica
+              </label>
+            </>
           )}
         </div>
 

@@ -271,94 +271,13 @@ export default function CoachNewReview() {
           </div>
         </div>
 
-        {/* AI Toolbar */}
+        {/* AI Toolbar — simplified */}
         <div className="coach-ai-generate">
-          <Button size="sm" variant="secondary" onClick={handlePrefill} loading={prefilling}
+          <Button size="sm" onClick={handleAiGenerate} loading={aiGenerating || prefilling}
             disabled={!form.player || !form.periodStart || !form.periodEnd}>
-            <Database size={14} /> Wypelnij danymi
+            <Sparkles size={14} /> {aiGenerating ? 'Generowanie...' : 'Przygotuj draft AI'}
           </Button>
-          <Button size="sm" onClick={handleAiGenerate} loading={aiGenerating}
-            disabled={!form.player || !form.periodStart || !form.periodEnd}>
-            <Sparkles size={14} /> {aiGenerating ? 'Generowanie draftu AI...' : 'Wygeneruj draft AI'}
-          </Button>
-          <span className="coach-ai-hint">Pobierz dane okresu lub wygeneruj szkic AI</span>
         </div>
-
-        {/* Prefill stats */}
-        {prefillData && (
-          <div className="coach-ai-section" style={{ marginBottom: 16 }}>
-            <div className="coach-ai-header">
-              <Database size={14} />
-              <span>Dane okresu</span>
-              <button className="coach-ai-close" onClick={() => setPrefillData(null)}>&times;</button>
-            </div>
-            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 8 }}>
-              <div style={{
-                padding: '8px 14px', borderRadius: 'var(--radius-sm)',
-                background: 'var(--color-bg-tertiary)', fontSize: 13,
-              }}>
-                <span style={{ fontWeight: 700, color: 'var(--color-accent)' }}>{prefillData.activitiesCount}</span>
-                <span style={{ color: 'var(--color-text-secondary)', marginLeft: 6 }}>aktywnosci</span>
-              </div>
-              <div style={{
-                padding: '8px 14px', borderRadius: 'var(--radius-sm)',
-                background: 'var(--color-bg-tertiary)', fontSize: 13,
-              }}>
-                <span style={{ fontWeight: 700, color: 'var(--color-accent)' }}>{(prefillData.observations || []).length}</span>
-                <span style={{ color: 'var(--color-text-secondary)', marginLeft: 6 }}>obserwacji</span>
-              </div>
-              <div style={{
-                padding: '8px 14px', borderRadius: 'var(--radius-sm)',
-                background: 'var(--color-bg-tertiary)', fontSize: 13,
-              }}>
-                <span style={{ fontWeight: 700, color: 'var(--color-accent)' }}>{(prefillData.activeGoals || []).length}</span>
-                <span style={{ color: 'var(--color-text-secondary)', marginLeft: 6 }}>aktywnych celow</span>
-              </div>
-              {prefillData.attendanceRate !== null && prefillData.attendanceRate !== undefined && (
-                <div style={{
-                  padding: '8px 14px', borderRadius: 'var(--radius-sm)',
-                  background: 'var(--color-bg-tertiary)', fontSize: 13,
-                }}>
-                  <span style={{ fontWeight: 700, color: 'var(--color-accent)' }}>{prefillData.attendanceRate}%</span>
-                  <span style={{ color: 'var(--color-text-secondary)', marginLeft: 6 }}>frekwencja</span>
-                </div>
-              )}
-            </div>
-            {(prefillData.observations || []).length > 0 && (
-              <div style={{ marginTop: 8 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 6 }}>
-                  Ostatnie obserwacje:
-                </div>
-                {prefillData.observations.slice(0, 5).map((obs, i) => (
-                  <div key={obs._id || i} style={{
-                    fontSize: 12, color: 'var(--color-text-secondary)',
-                    padding: '4px 0', borderBottom: '1px solid var(--color-border-light)',
-                    lineHeight: 1.5,
-                  }}>
-                    <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{obs.type || 'general'}</span>
-                    {' — '}{typeof obs.text === 'string' ? obs.text.slice(0, 120) : ''}
-                    {obs.text?.length > 120 ? '...' : ''}
-                  </div>
-                ))}
-              </div>
-            )}
-            {(prefillData.activeGoals || []).length > 0 && (
-              <div style={{ marginTop: 10 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 6 }}>
-                  Aktywne cele:
-                </div>
-                {prefillData.activeGoals.slice(0, 5).map((g, i) => (
-                  <div key={g._id || i} style={{
-                    fontSize: 12, color: 'var(--color-text-secondary)',
-                    padding: '4px 0', lineHeight: 1.5,
-                  }}>
-                    {g.title}{g.progress != null ? ` (${g.progress}%)` : ''}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Title */}
         <div className="coach-form-group">
@@ -367,28 +286,16 @@ export default function CoachNewReview() {
             onChange={(e) => handleChange('title', e.target.value)} />
         </div>
 
-        {/* Structured narrative */}
+        {/* Narrative — simplified to 2 fields */}
         <div className="coach-form-group">
-          <label>Co sie dzialo</label>
-          <textarea rows={3} placeholder="Podsumowanie aktywnosci w okresie..." value={form.whatHappened}
+          <label>Podsumowanie okresu</label>
+          <textarea rows={4} placeholder="Co sie dzialo, co poszlo dobrze, mocne strony..." value={form.whatHappened}
             onChange={(e) => handleChange('whatHappened', e.target.value)} />
         </div>
 
         <div className="coach-form-group">
-          <label>Co poszlo dobrze</label>
-          <textarea rows={3} placeholder="Mocne strony, postepy, sukcesy..." value={form.whatWentWell}
-            onChange={(e) => handleChange('whatWentWell', e.target.value)} />
-        </div>
-
-        <div className="coach-form-group">
-          <label>Na czym skupic</label>
-          <textarea rows={3} placeholder="Obszary do poprawy, priorytety..." value={form.whatNeedsFocus}
-            onChange={(e) => handleChange('whatNeedsFocus', e.target.value)} />
-        </div>
-
-        <div className="coach-form-group">
-          <label>Nastepne kroki</label>
-          <textarea rows={3} placeholder="Rekomendacje na nastepny okres..." value={form.nextSteps}
+          <label>Rekomendacje i kolejne kroki</label>
+          <textarea rows={4} placeholder="Obszary do poprawy, rekomendacje na nastepny okres..." value={form.nextSteps}
             onChange={(e) => handleChange('nextSteps', e.target.value)} />
         </div>
 

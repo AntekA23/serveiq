@@ -1,446 +1,244 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import {
-  TrendingUp,
-  ArrowLeft,
-  Calendar,
-  Clock,
-  FileText,
-  ChevronRight,
+  ArrowLeft, ChevronRight, TrendingUp, Target, Star, Calendar, Clock, Award,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
-import PathwayStepper from '../../components/player/PathwayStepper'
-import PlayerJourney from '../../components/player/PlayerJourney'
-import PlayerTimeline from '../../components/player/PlayerTimeline'
-import { SKILL_NAMES, getSkillLevel } from '../../constants/skillLevels'
+import { SKILL_NAMES } from '../../constants/skillLevels'
 import './ChildProfile.css'
-import BadgeGrid from '../../components/badges/BadgeGrid'
-import DevelopmentProgramTab from '../coach/DevelopmentProgramTab'
 
-const ACTIVITY_TYPE_COLORS = {
-  class: '#22c55e',
-  camp: '#3b82f6',
-  tournament: '#ef4444',
-  training: '#eab308',
-  match: '#8b5cf6',
-  fitness: '#f97316',
-  review: '#06b6d4',
-  other: '#6b7280',
-}
-
-function formatPolishDate(dateStr) {
-  try {
-    return new Date(dateStr).toLocaleDateString('pl-PL', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'long',
-    })
-  } catch {
-    return dateStr
-  }
-}
-
-function UpcomingActivities({ activities }) {
-  const sectionStyle = {
-    background: 'var(--color-surface, #fff)',
-    borderRadius: 12,
-    border: '1px solid var(--color-border, #e5e7eb)',
-    padding: '1.25rem',
-    marginTop: '1.25rem',
-  }
-
-  const titleRowStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '1rem',
-  }
-
-  const titleStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    fontSize: '1rem',
-    fontWeight: 700,
-    color: 'var(--color-text, #111827)',
-    margin: 0,
-  }
-
-  const linkStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.25rem',
-    fontSize: '0.8125rem',
-    fontWeight: 600,
-    color: 'var(--color-primary, #6366f1)',
-    textDecoration: 'none',
-  }
-
-  const itemStyle = {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '0.75rem',
-    padding: '0.625rem 0',
-    borderBottom: '1px solid var(--color-border, #e5e7eb)',
-  }
-
-  const lastItemStyle = {
-    ...itemStyle,
-    borderBottom: 'none',
-  }
-
-  const dotStyle = (type) => ({
-    display: 'inline-block',
-    width: 10,
-    height: 10,
-    borderRadius: '50%',
-    backgroundColor: ACTIVITY_TYPE_COLORS[type] || ACTIVITY_TYPE_COLORS.other,
-    marginTop: 5,
-    flexShrink: 0,
-  })
-
-  const emptyStyle = {
-    fontSize: '0.8125rem',
-    color: 'var(--color-text-tertiary, #9ca3af)',
-    fontStyle: 'italic',
-    padding: '0.5rem 0',
-  }
-
-  return (
-    <div style={sectionStyle}>
-      <div style={titleRowStyle}>
-        <h2 style={titleStyle}>
-          <Calendar size={16} />
-          Nadchodzące aktywności
-        </h2>
-        <Link to="/calendar" style={linkStyle}>
-          Zobacz kalendarz
-          <ChevronRight size={14} />
-        </Link>
-      </div>
-
-      {(!activities || activities.length === 0) ? (
-        <div style={emptyStyle}>Brak nadchodzących aktywności</div>
-      ) : (
-        <div>
-          {activities.map((act, idx) => (
-            <div
-              key={act._id || idx}
-              style={idx === activities.length - 1 ? lastItemStyle : itemStyle}
-            >
-              <span style={dotStyle(act.type)} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  color: 'var(--color-text, #111827)',
-                }}>
-                  {act.title}
-                </div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  fontSize: '0.75rem',
-                  color: 'var(--color-text-secondary, #6b7280)',
-                  marginTop: 2,
-                }}>
-                  <span>{formatPolishDate(act.date)}</span>
-                  {act.startTime && (
-                    <span style={{ display: 'flex', alignItems: 'center' }}>
-                      <Clock size={11} style={{ marginRight: 3 }} />
-                      {act.startTime}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
+function formatRelDate(dateStr) {
+  const d = new Date(dateStr)
+  const now = new Date()
+  const diff = Math.ceil((d - now) / (1000 * 60 * 60 * 24))
+  if (diff === 0) return 'Dzisiaj'
+  if (diff === 1) return 'Jutro'
+  if (diff > 1 && diff <= 6) return d.toLocaleDateString('pl-PL', { weekday: 'long' })
+  return d.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })
 }
 
 export default function ChildProfile() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [child, setChild] = useState(null)
+  const [activities, setActivities] = useState([])
+  const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
-  const [upcomingActivities, setUpcomingActivities] = useState([])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true)
-        const { data: playerData } = await api.get(`/players/${id}`)
-        setChild(playerData.player || playerData)
-      } catch {
-        // silent
-      } finally {
-        setLoading(false)
-      }
+        const [playerRes, actRes, revRes] = await Promise.all([
+          api.get(`/players/${id}`),
+          api.get('/activities?status=planned&limit=3').catch(() => ({ data: { activities: [] } })),
+          api.get(`/reviews?player=${id}&status=published&limit=1`).catch(() => ({ data: { reviews: [] } })),
+        ])
+        setChild(playerRes.data.player || playerRes.data)
+        const now = new Date()
+        setActivities((actRes.data.activities || []).filter((a) => new Date(a.date) >= now).slice(0, 3))
+        setReviews(revRes.data.reviews || [])
+      } catch { /* silent */ }
+      setLoading(false)
     }
-
     fetchData()
   }, [id])
 
-  useEffect(() => {
-    if (!child?._id) return
-    const fetchUpcoming = async () => {
-      try {
-        const { data } = await api.get('/activities/upcoming', {
-          params: { player: child._id, limit: 5 },
-        })
-        setUpcomingActivities(data.activities || [])
-      } catch {
-        setUpcomingActivities([])
-      }
-    }
-    fetchUpcoming()
-  }, [child?._id])
-
   if (loading) {
-    return (
-      <div className="child-profile">
-        <div className="child-profile-loading">Ladowanie...</div>
-      </div>
-    )
+    return <div className="cp-page"><div className="cp-loading"><div className="cp-spinner" /></div></div>
   }
 
   if (!child) {
-    return (
-      <div className="child-profile">
-        <div className="child-profile-error">Nie znaleziono zawodnika</div>
-      </div>
-    )
+    return <div className="cp-page"><div className="cp-error">Nie znaleziono zawodnika</div></div>
   }
 
-  const childAge = child.dateOfBirth
+  const age = child.dateOfBirth
     ? Math.floor((Date.now() - new Date(child.dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
     : null
 
-  const activeGoals = (child.goals || []).filter(g => !g.completed)
-  const completedGoals = (child.goals || []).filter(g => g.completed)
+  // Skills average
+  const skills = child.skills || {}
+  const skillEntries = Object.entries(SKILL_NAMES).map(([key, label]) => {
+    const d = skills[key]
+    const score = typeof d === 'object' ? (d?.score ?? 0) : (d ?? 0)
+    return { key, label, score }
+  }).filter((s) => s.score > 0)
+
+  const avgSkill = skillEntries.length > 0
+    ? Math.round(skillEntries.reduce((sum, s) => sum + s.score, 0) / skillEntries.length)
+    : 0
+
+  // Goals
+  const activeGoals = (child.goals || []).filter((g) => !g.completed).slice(0, 4)
+  const completedCount = (child.goals || []).filter((g) => g.completed).length
+
+  // Rankings — only show those that exist
+  const rankings = []
+  if (child.ranking?.pzt) rankings.push({ label: 'PZT', val: child.ranking.pzt })
+  if (child.ranking?.te) rankings.push({ label: 'TE', val: child.ranking.te })
+  if (child.ranking?.atp) rankings.push({ label: 'ATP', val: child.ranking.atp })
+  if (child.ranking?.wta) rankings.push({ label: 'WTA', val: child.ranking.wta })
+
+  const latestReview = reviews[0] || null
 
   return (
-    <div className="child-profile">
-      <button className="child-profile-back" onClick={() => navigate('/parent/dashboard')}>
-        <ArrowLeft size={16} />
-        Powrot do pulpitu
+    <div className="cp-page">
+      {/* Back */}
+      <button className="cp-back" onClick={() => navigate('/parent/dashboard')}>
+        <ArrowLeft size={16} /> Powrót
       </button>
 
-      {/* Hero */}
-      <div className="child-profile-hero">
+      {/* ─── 1. Hero ─── */}
+      <div className="cp-hero">
         <Avatar
           firstName={child.firstName}
           lastName={child.lastName}
-          size={96}
+          size={64}
           role="player"
           src={child.avatarUrl}
         />
-        <div className="child-profile-hero-info">
-          <h1 className="child-profile-name">
-            {child.firstName} {child.lastName}
-          </h1>
-          <div className="child-profile-meta">
-            {childAge && <span>{childAge} lat</span>}
-            {child.gender && <span>{child.gender === 'M' ? 'Chlopiec' : 'Dziewczyna'}</span>}
-          </div>
-          <div className="child-profile-rankings">
-            {child.ranking?.pzt && (
-              <div className="child-profile-rank">
-                <span className="child-profile-rank-label">PZT</span>
-                <span className="child-profile-rank-value">#{child.ranking.pzt}</span>
-              </div>
-            )}
-            {child.ranking?.te && (
-              <div className="child-profile-rank">
-                <span className="child-profile-rank-label">TE</span>
-                <span className="child-profile-rank-value">#{child.ranking.te}</span>
-              </div>
-            )}
-            {child.ranking?.atp && (
-              <div className="child-profile-rank">
-                <span className="child-profile-rank-label">ATP</span>
-                <span className="child-profile-rank-value">#{child.ranking.atp}</span>
-              </div>
-            )}
-            {child.ranking?.wta && (
-              <div className="child-profile-rank">
-                <span className="child-profile-rank-label">WTA</span>
-                <span className="child-profile-rank-value">#{child.ranking.wta}</span>
-              </div>
-            )}
+        <div className="cp-hero-info">
+          <h1 className="cp-hero-name">{child.firstName} {child.lastName}</h1>
+          <div className="cp-hero-tags">
+            {age && <span className="cp-tag">{age} lat</span>}
+            {child.pathwayStage && <span className="cp-tag cp-tag-accent">{child.pathwayStage}</span>}
+            {rankings.map((r) => (
+              <span key={r.label} className="cp-tag cp-tag-rank">{r.label} #{r.val}</span>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Quick navigation links */}
-      <div className="child-profile-nav-links">
-        <button
-          className="child-profile-nav-link"
-          onClick={() => navigate(`/parent/child/${id}/timeline`)}
-        >
-          <Clock size={16} />
-          Historia postepu
+      {/* ─── 2. Progress ─── */}
+      {skillEntries.length > 0 && (
+        <section className="cp-section">
+          <div className="cp-section-head">
+            <h2 className="cp-section-title"><TrendingUp size={14} /> Postępy</h2>
+            <button className="cp-section-link" onClick={() => navigate(`/parent/child/${id}/timeline`)}>
+              Szczegóły <ChevronRight size={14} />
+            </button>
+          </div>
+
+          {/* Average bar */}
+          <div className="cp-progress-avg">
+            <div className="cp-progress-bar-track">
+              <div
+                className="cp-progress-bar-fill"
+                style={{ width: `${avgSkill}%` }}
+              />
+            </div>
+            <span className="cp-progress-val">{avgSkill}<span className="cp-progress-max">/100</span></span>
+          </div>
+
+          {/* Individual skills — compact */}
+          <div className="cp-skills-grid">
+            {skillEntries.map((s, i) => (
+              <div key={s.key} className="cp-skill-item" style={{ '--i': i }}>
+                <span className="cp-skill-name">{s.label}</span>
+                <div className="cp-skill-bar-track">
+                  <div className="cp-skill-bar-fill" style={{ width: `${s.score}%` }} />
+                </div>
+                <span className="cp-skill-score">{s.score}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ─── 3. Upcoming ─── */}
+      {activities.length > 0 && (
+        <section className="cp-section">
+          <div className="cp-section-head">
+            <h2 className="cp-section-title"><Calendar size={14} /> Nadchodzące</h2>
+            <button className="cp-section-link" onClick={() => navigate('/calendar')}>
+              Kalendarz <ChevronRight size={14} />
+            </button>
+          </div>
+          <div className="cp-upcoming">
+            {activities.map((a, i) => (
+              <div key={a._id} className="cp-upcoming-item" style={{ '--i': i }}>
+                <div className="cp-upcoming-when">
+                  <span className="cp-upcoming-day">{formatRelDate(a.date)}</span>
+                  {a.startTime && <span className="cp-upcoming-time">{a.startTime.slice(0, 5)}</span>}
+                </div>
+                <div className="cp-upcoming-what">
+                  <span className="cp-upcoming-title">{a.title || a.type}</span>
+                  {a.location && <span className="cp-upcoming-loc">{a.location}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ─── 4. Latest review ─── */}
+      {latestReview && (
+        <section className="cp-section">
+          <div className="cp-section-head">
+            <h2 className="cp-section-title"><Star size={14} /> Ostatnia ocena</h2>
+            <button className="cp-section-link" onClick={() => navigate('/reviews')}>
+              Wszystkie <ChevronRight size={14} />
+            </button>
+          </div>
+          <div className="cp-review" onClick={() => navigate('/reviews')}>
+            {latestReview.rating && (
+              <div className="cp-review-stars">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star key={s} size={13} fill={s <= latestReview.rating ? 'var(--color-amber)' : 'none'} color={s <= latestReview.rating ? 'var(--color-amber)' : 'var(--color-text-tertiary)'} />
+                ))}
+              </div>
+            )}
+            <p className="cp-review-text">
+              {latestReview.whatHappened || latestReview.title || 'Ocena trenera'}
+            </p>
+            <span className="cp-review-date">
+              {new Date(latestReview.createdAt || latestReview.periodStart).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })}
+            </span>
+          </div>
+        </section>
+      )}
+
+      {/* ─── 5. Goals ─── */}
+      {(activeGoals.length > 0 || completedCount > 0) && (
+        <section className="cp-section">
+          <div className="cp-section-head">
+            <h2 className="cp-section-title"><Target size={14} /> Cele</h2>
+            {completedCount > 0 && (
+              <span className="cp-goals-completed">
+                <Award size={12} /> {completedCount} ukończonych
+              </span>
+            )}
+          </div>
+          <div className="cp-goals">
+            {activeGoals.map((g, i) => (
+              <div key={g._id || i} className="cp-goal" style={{ '--i': i }}>
+                <div className="cp-goal-dot" />
+                <div className="cp-goal-body">
+                  <span className="cp-goal-text">{g.text}</span>
+                  {g.dueDate && (
+                    <span className="cp-goal-date">
+                      do {new Date(g.dueDate).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ─── Quick links ─── */}
+      <div className="cp-quick-links">
+        <button className="cp-quick-link" onClick={() => navigate(`/parent/child/${id}/timeline`)}>
+          <Clock size={14} /> Historia
+        </button>
+        <button className="cp-quick-link" onClick={() => navigate('/reviews')}>
+          <Star size={14} /> Oceny
+        </button>
+        <button className="cp-quick-link" onClick={() => navigate('/parent/training-plan')}>
+          <Calendar size={14} /> Plan
         </button>
       </div>
-
-      {/* Pathway Stepper */}
-      <PathwayStepper
-        currentStage={child.pathwayStage}
-        pathwayHistory={child.pathwayHistory}
-      />
-
-      {/* Program Rozwoju */}
-      {child?.federationProgram?.program && (
-        <div style={{
-          background: 'var(--color-surface, #fff)',
-          borderRadius: 12,
-          border: '1px solid var(--color-border, #e5e7eb)',
-          marginTop: '1.25rem',
-          overflow: 'hidden',
-        }}>
-          <div style={{
-            padding: '1rem 1.25rem 0',
-            fontWeight: 600,
-            fontSize: 15,
-            color: '#111827',
-          }}>Program Rozwoju</div>
-          <DevelopmentProgramTab
-            playerId={child._id}
-            player={child}
-            toast={{ success: () => {}, error: () => {}, info: () => {} }}
-            isCoach={false}
-            onRefresh={() => window.location.reload()}
-          />
-        </div>
-      )}
-
-      {/* Badges */}
-      <BadgeGrid playerId={child._id} />
-
-      {/* Player Journey */}
-      <PlayerJourney player={child} />
-
-      {/* Upcoming Activities */}
-      <UpcomingActivities activities={upcomingActivities} />
-
-      {/* Ostatnie aktualizacje */}
-      <div style={{
-        background: 'var(--color-surface, #fff)',
-        borderRadius: 12,
-        border: '1px solid var(--color-border, #e5e7eb)',
-        padding: '1.25rem',
-        marginTop: '1.25rem',
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '1rem',
-        }}>
-          <h2 style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '1rem',
-            fontWeight: 700,
-            color: 'var(--color-text, #111827)',
-            margin: 0,
-          }}>
-            <Clock size={16} />
-            Ostatnie aktualizacje
-          </h2>
-          <Link
-            to="/timeline"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.25rem',
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: 'var(--color-primary, #6366f1)',
-              textDecoration: 'none',
-            }}
-          >
-            Zobacz pelna historie
-            <ChevronRight size={14} />
-          </Link>
-        </div>
-        <PlayerTimeline playerId={child._id} limit={5} />
-      </div>
-
-      {/* Tennis skills */}
-      {child.skills && (
-        <div className="child-profile-section">
-          <h2 className="child-profile-section-title">
-            <TrendingUp size={16} />
-            Umiejetnosci tenisowe
-          </h2>
-          <div className="child-profile-skills">
-            {Object.entries(SKILL_NAMES).map(([key, label]) => {
-              const skillData = child.skills?.[key]
-              const value = typeof skillData === 'object' ? (skillData?.score ?? 0) : (skillData ?? 0)
-              const notes = typeof skillData === 'object' ? skillData?.notes : null
-              const level = getSkillLevel(value)
-
-              return (
-                <div key={key} className="child-profile-skill">
-                  <div className="child-profile-skill-header">
-                    <span>{label}</span>
-                    <span className="child-profile-skill-level" style={{ color: level.color, background: level.bg, padding: '2px 10px', borderRadius: 'var(--radius-full)', fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: level.dot }} />
-                      {level.label}
-                    </span>
-                  </div>
-                  {notes && <div className="child-profile-skill-notes">{notes}</div>}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Goals */}
-      {(activeGoals.length > 0 || completedGoals.length > 0) && (
-        <div className="child-profile-section">
-          <h2 className="child-profile-section-title">
-            <Calendar size={16} />
-            Cele
-          </h2>
-          <div className="child-profile-goals">
-            {activeGoals.map((goal, idx) => (
-              <div key={goal._id || idx} className="child-profile-goal active">
-                <div className="child-profile-goal-dot active" />
-                <div>
-                  <div className="child-profile-goal-text">{goal.text}</div>
-                  {goal.dueDate && (
-                    <div className="child-profile-goal-date">
-                      Termin: {new Date(goal.dueDate).toLocaleDateString('pl-PL')}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-            {completedGoals.map((goal, idx) => (
-              <div key={goal._id || idx} className="child-profile-goal completed">
-                <div className="child-profile-goal-dot completed" />
-                <div>
-                  <div className="child-profile-goal-text completed">{goal.text}</div>
-                  {goal.completedAt && (
-                    <div className="child-profile-goal-date">
-                      Ukonczone: {new Date(goal.completedAt).toLocaleDateString('pl-PL')}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

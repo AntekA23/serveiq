@@ -5,11 +5,11 @@ import {
   Users,
   Pencil,
   Trash2,
-  Eye,
   X,
   AlertCircle,
   Loader2,
   UserPlus,
+  ChevronRight,
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -593,7 +593,7 @@ function ChildCard({ child, onEdit, onDelete, navigate }) {
     : null
 
   return (
-    <div style={styles.card}>
+    <div style={{ ...styles.card, cursor: 'pointer' }} onClick={() => navigate(`/parent/child/${child._id}`)}>
       <div style={styles.cardTop}>
         <div style={styles.avatar}>{initials(child.firstName, child.lastName)}</div>
         <div style={styles.cardInfo}>
@@ -602,35 +602,13 @@ function ChildCard({ child, onEdit, onDelete, navigate }) {
           </h3>
           <div style={styles.meta}>
             {age !== null && <span style={styles.ageTxt}>{age} lat</span>}
-            {child.gender && (
-              <span style={styles.badgeGender}>
-                {child.gender === 'M' ? 'Chlopiec' : 'Dziewczynka'}
-              </span>
-            )}
             {child.pathwayStage && <span style={styles.badge}>{child.pathwayStage}</span>}
           </div>
           {coachName && (
             <div style={styles.coachTxt}>Trener: {coachName}</div>
           )}
         </div>
-      </div>
-
-      <div style={styles.cardActions}>
-        <button
-          style={styles.btnPrimary}
-          onClick={() => navigate(`/parent/child/${child._id}`)}
-        >
-          <Eye size={14} />
-          Zobacz profil
-        </button>
-        <button style={styles.btnSecondary} onClick={() => onEdit(child)}>
-          <Pencil size={14} />
-          Edytuj
-        </button>
-        <button style={styles.btnDanger} onClick={() => onDelete(child)}>
-          <Trash2 size={14} />
-          Usun
-        </button>
+        <ChevronRight size={16} style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }} />
       </div>
     </div>
   )

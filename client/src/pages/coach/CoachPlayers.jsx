@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, ChevronRight, Users, TrendingUp, Target } from 'lucide-react'
+import { Plus, Search, ChevronRight, Users } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import Button from '../../components/ui/Button/Button'
-import { SKILL_NAMES, getSkillLevel } from '../../constants/skillLevels'
 import './Coach.css'
 
 const PATHWAY_LABELS = {
@@ -53,21 +52,6 @@ export default function CoachPlayers() {
     return 0
   })
 
-  // Group stats
-  const avgSkillAll = players.length > 0 ? Math.round(
-    players.reduce((sum, p) => {
-      const sk = p.skills || {}
-      return sum + Object.values(sk).reduce((s, v) => s + (v?.score || 0), 0) / Math.max(Object.keys(sk).length, 1)
-    }, 0) / players.length
-  ) : 0
-
-  const avgAge = players.length > 0 ? Math.round(
-    players.reduce((sum, p) => {
-      if (!p.dateOfBirth) return sum
-      return sum + (new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear())
-    }, 0) / players.filter((p) => p.dateOfBirth).length
-  ) : 0
-
   if (loading) {
     return <div className="coach-page"><h1 className="page-title">Zawodnicy</h1><div className="coach-loading">Ladowanie...</div></div>
   }
@@ -80,24 +64,6 @@ export default function CoachPlayers() {
           <Plus size={14} /> Dodaj zawodnika
         </Button>
       </div>
-
-      {/* Group stats */}
-      {players.length > 0 && (
-        <div className="cp-group-stats">
-          <div className="cp-group-stat">
-            <Users size={14} />
-            <span><strong>{players.length}</strong> zawodnikow</span>
-          </div>
-          <div className="cp-group-stat">
-            <TrendingUp size={14} />
-            <span>Sredni poziom: <strong>{getSkillLevel(avgSkillAll).label}</strong></span>
-          </div>
-          <div className="cp-group-stat">
-            <Target size={14} />
-            <span>Sredni wiek: <strong>{avgAge}</strong> lat</span>
-          </div>
-        </div>
-      )}
 
       {/* Search + sort */}
       <div className="cp-controls">
@@ -117,49 +83,18 @@ export default function CoachPlayers() {
 
       <div className="coach-players-list">
         {sorted.map((p) => {
-          const skills = p.skills || {}
-          const skillEntries = Object.entries(skills).filter(([, v]) => v?.score > 0)
           const age = p.dateOfBirth ? new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear() : null
-          const avgSkill = skillEntries.length > 0
-            ? Math.round(skillEntries.reduce((s, [, v]) => s + v.score, 0) / skillEntries.length)
-            : 0
 
           return (
             <div key={p._id} className="coach-player-card" onClick={() => navigate(`/coach/player/${p._id}`)}>
-              <Avatar firstName={p.firstName} lastName={p.lastName} size={44} role="player" src={p.avatarUrl} />
+              <Avatar firstName={p.firstName} lastName={p.lastName} size={40} role="player" src={p.avatarUrl} />
               <div className="coach-player-card-body">
-                <div className="coach-player-card-top">
-                  <span className="coach-player-name">{p.firstName} {p.lastName}</span>
-                  {age && <span className="coach-player-age">{age} lat</span>}
-                  {p.pathwayStage && <span className="coach-player-stage">{PATHWAY_LABELS[p.pathwayStage] || p.pathwayStage}</span>}
-                  {p.ranking?.pzt > 0 && <span className="coach-player-ranking">PZT #{p.ranking.pzt}</span>}
-                </div>
-                {skillEntries.length > 0 && (
-                  <div className="coach-player-skills">
-                    {skillEntries.slice(0, 4).map(([name, data]) => {
-                      const lvl = getSkillLevel(data.score)
-                      return (
-                        <span key={name} className="coach-skill-chip" style={{ borderColor: lvl.dot, color: lvl.dot }}>
-                          {SKILL_NAMES[name] || name}: {lvl.label}
-                        </span>
-                      )
-                    })}
-                    {skillEntries.length > 4 && <span className="coach-skill-chip">+{skillEntries.length - 4}</span>}
-                  </div>
-                )}
-                {p.parents?.length > 0 && (
-                  <div className="coach-player-parents">
-                    Rodzic: {p.parents.map((par) => `${par.firstName} ${par.lastName}`).join(', ')}
-                  </div>
-                )}
-              </div>
-              <div className="cp-player-avg">
-                {(() => { const lvl = getSkillLevel(avgSkill); return (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: lvl.color, background: lvl.bg, padding: '4px 10px', borderRadius: 'var(--radius-full)' }}>
-                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: lvl.dot }} />
-                    {lvl.label}
-                  </span>
-                )})()}
+                <span className="coach-player-name">{p.firstName} {p.lastName}</span>
+                <span className="coach-player-meta">
+                  {age && `${age} lat`}
+                  {p.pathwayStage && ` · ${PATHWAY_LABELS[p.pathwayStage] || p.pathwayStage}`}
+                  {p.ranking?.pzt > 0 && ` · PZT #${p.ranking.pzt}`}
+                </span>
               </div>
               <ChevronRight size={16} className="coach-player-arrow" />
             </div>

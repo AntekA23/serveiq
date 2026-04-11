@@ -1,0 +1,468 @@
+/* ═══════════════════════════════════════════
+   Coach Player Profile — Clean collapsible sections
+   From 1500 lines to ~350. 7 tabs → 4 sections.
+   ═══════════════════════════════════════════ */
+
+.cpp-page { max-width: 680px; }
+
+/* Loading / Error */
+.cpp-loading { display: flex; justify-content: center; padding: 80px; }
+.cpp-spinner {
+  width: 24px; height: 24px;
+  border: 2.5px solid var(--color-border-md);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: cpp-spin 0.7s linear infinite;
+}
+@keyframes cpp-spin { to { transform: rotate(360deg); } }
+.cpp-error { text-align: center; padding: 60px; color: var(--color-red); font-size: 14px; }
+
+/* Back */
+.cpp-back {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: none;
+  color: var(--color-text-tertiary); font-size: 13px;
+  cursor: pointer; padding: 0; margin-bottom: 18px;
+  transition: color 0.15s;
+}
+.cpp-back:hover { color: var(--color-accent); }
+
+/* ─── Header ─── */
+.cpp-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.cpp-header::before {
+  content: ''; position: absolute;
+  top: -20px; right: -20px;
+  width: 90px; height: 90px;
+  background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%);
+  opacity: 0.03; pointer-events: none;
+}
+.cpp-header-info { flex: 1; min-width: 0; }
+.cpp-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; letter-spacing: 1px;
+  color: var(--color-text); margin: 0; line-height: 1;
+}
+.cpp-tags { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; }
+.cpp-tag {
+  font-size: 11px; font-weight: 600;
+  padding: 2px 9px; border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary); color: var(--color-text-secondary);
+}
+.cpp-tag-accent { background: var(--color-accent-muted); color: var(--color-accent); }
+.cpp-tag-rank { background: var(--color-blue-bg); color: var(--color-blue); }
+.cpp-header-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* ─── Collapsible sections ─── */
+.cpp-section {
+  margin-bottom: 8px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.cpp-section-toggle {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 14px 16px;
+  background: none; border: none;
+  cursor: pointer; transition: background 0.15s;
+  text-align: left;
+  color: var(--color-text-secondary);
+}
+.cpp-section-toggle:hover { background: var(--color-bg-tertiary); }
+
+.cpp-section-icon { color: var(--color-accent); flex-shrink: 0; }
+
+.cpp-section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px; letter-spacing: 1.2px;
+  text-transform: uppercase; flex: 1;
+  color: var(--color-text-secondary);
+}
+
+.cpp-section-badge {
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary); color: var(--color-text-tertiary);
+}
+
+.cpp-section-body {
+  padding: 0 16px 16px;
+  animation: cpp-fadeIn 0.2s ease;
+}
+
+/* ─── Skills ─── */
+.cpp-skills { display: flex; flex-direction: column; gap: 4px; }
+
+.cpp-skill-row {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.cpp-skill-main {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 8px 10px;
+  background: none; border: none;
+  cursor: pointer; transition: background 0.12s;
+  text-align: left;
+}
+.cpp-skill-main:hover { background: var(--color-bg-tertiary); }
+
+.cpp-skill-label {
+  font-size: 12px; font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 72px; flex-shrink: 0;
+}
+
+.cpp-skill-bar-track {
+  flex: 1; height: 5px;
+  background: var(--color-bg-tertiary);
+  border-radius: 3px; overflow: hidden;
+}
+.cpp-skill-bar-fill {
+  height: 100%; border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.cpp-skill-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: var(--radius-full);
+  flex-shrink: 0; white-space: nowrap;
+}
+
+.cpp-skill-edit {
+  padding: 10px; margin: 0 4px 4px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.cpp-skill-levels {
+  display: flex; flex-wrap: wrap; gap: 4px;
+}
+
+.cpp-level-btn {
+  font-size: 11px; font-weight: 600;
+  padding: 4px 10px; border-radius: var(--radius-full);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  cursor: pointer; transition: all 0.15s;
+}
+.cpp-level-btn:hover { border-color: var(--color-border-md); }
+.cpp-level-btn.active { font-weight: 700; }
+
+.cpp-skill-note {
+  width: 100%; padding: 7px 10px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text); font-size: 12px;
+  outline: none;
+}
+.cpp-skill-note:focus { border-color: var(--color-accent); }
+
+/* ─── Plan ─── */
+.cpp-plan-save { margin-bottom: 10px; }
+
+.cpp-plan-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cpp-plan-day {
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+  padding: 8px 6px;
+  min-height: 60px;
+}
+.cpp-plan-day.active { border-left: 2px solid var(--color-accent); }
+
+.cpp-plan-day-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px;
+}
+.cpp-plan-day-name {
+  font-size: 11px; font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.cpp-plan-add {
+  background: none; border: none;
+  color: var(--color-text-tertiary); cursor: pointer;
+  padding: 2px; display: flex; transition: color 0.15s;
+}
+.cpp-plan-add:hover { color: var(--color-accent); }
+
+.cpp-plan-item {
+  display: flex; gap: 3px; margin-bottom: 3px;
+  flex-wrap: wrap;
+}
+.cpp-plan-select, .cpp-plan-time, .cpp-plan-dur {
+  font-size: 10px; padding: 3px 4px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 4px; color: var(--color-text);
+  outline: none;
+}
+.cpp-plan-select { flex: 1; min-width: 50px; }
+.cpp-plan-time { width: 52px; }
+.cpp-plan-dur { width: 42px; }
+.cpp-plan-remove {
+  background: none; border: none;
+  color: var(--color-text-tertiary); cursor: pointer;
+  padding: 2px; display: flex;
+}
+.cpp-plan-remove:hover { color: var(--color-red); }
+.cpp-plan-empty { font-size: 11px; color: var(--color-text-tertiary); text-align: center; }
+
+/* ─── Sessions ─── */
+.cpp-empty {
+  text-align: center; padding: 20px;
+  color: var(--color-text-tertiary); font-size: 13px;
+}
+
+.cpp-sessions { display: flex; flex-direction: column; }
+
+.cpp-session-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  cursor: pointer; transition: background 0.12s;
+  border-radius: var(--radius-sm);
+}
+.cpp-session-row:hover { background: var(--color-bg-tertiary); }
+
+.cpp-session-date {
+  font-size: 12px; color: var(--color-text-tertiary);
+  min-width: 56px;
+}
+.cpp-session-type {
+  font-size: 13px; font-weight: 600;
+  color: var(--color-text); flex: 1;
+}
+.cpp-session-dur {
+  font-size: 11px; color: var(--color-text-tertiary);
+  padding: 2px 7px; background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+}
+.cpp-session-time {
+  font-size: 11px; color: var(--color-text-tertiary);
+}
+
+.cpp-show-more {
+  text-align: center; padding: 10px;
+  background: none; border: none;
+  color: var(--color-accent); font-size: 12px;
+  font-weight: 600; cursor: pointer;
+}
+.cpp-show-more:hover { text-decoration: underline; }
+
+/* ─── Goals ─── */
+.cpp-add-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: 1px dashed var(--color-border-md);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-tertiary); font-size: 12px;
+  font-weight: 500; cursor: pointer;
+  padding: 8px 12px; width: 100%;
+  transition: all 0.15s; margin-bottom: 10px;
+}
+.cpp-add-btn:hover { border-color: var(--color-accent); color: var(--color-accent); border-style: solid; }
+
+.cpp-goal-form {
+  margin-bottom: 10px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.cpp-goal-input {
+  width: 100%; padding: 8px 12px;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text); font-size: 13px;
+  outline: none;
+}
+.cpp-goal-input:focus { border-color: var(--color-accent); }
+
+.cpp-goal-form-row { display: flex; gap: 6px; align-items: center; }
+.cpp-goal-cat {
+  padding: 6px 8px; font-size: 12px;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text); outline: none;
+}
+.cpp-cancel-btn {
+  background: none; border: none;
+  color: var(--color-text-tertiary); font-size: 12px;
+  cursor: pointer;
+}
+.cpp-cancel-btn:hover { color: var(--color-text); }
+
+.cpp-goals-list { display: flex; flex-direction: column; gap: 4px; }
+
+.cpp-goal-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  transition: background 0.12s;
+}
+.cpp-goal-item:hover { background: var(--color-bg-tertiary); }
+
+.cpp-goal-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.cpp-goal-body { flex: 1; min-width: 0; }
+.cpp-goal-title { font-size: 13px; font-weight: 500; color: var(--color-text); display: block; }
+.cpp-goal-cat { font-size: 10px; display: block; margin-top: 1px; }
+
+.cpp-goal-done {
+  background: none; border: 1px solid var(--color-green);
+  border-radius: var(--radius-sm);
+  color: var(--color-green); cursor: pointer;
+  padding: 2px 6px; font-size: 11px;
+  transition: all 0.15s;
+}
+.cpp-goal-done:hover { background: var(--color-green); color: #fff; }
+
+.cpp-goal-del {
+  background: none; border: none;
+  color: var(--color-text-tertiary); cursor: pointer;
+  padding: 2px; display: flex; opacity: 0;
+  transition: opacity 0.12s;
+}
+.cpp-goal-item:hover .cpp-goal-del { opacity: 1; }
+.cpp-goal-del:hover { color: var(--color-red); }
+
+.cpp-goals-done-count {
+  font-size: 11px; color: var(--color-green);
+  font-weight: 600; margin-top: 8px;
+  padding: 0 10px;
+}
+
+/* ─── Observations ─── */
+.cpp-obs-form { margin-bottom: 12px; }
+
+.cpp-obs-input {
+  width: 100%; padding: 10px 12px;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text); font-size: 13px;
+  outline: none; resize: vertical; min-height: 48px;
+  font-family: inherit;
+}
+.cpp-obs-input:focus { border-color: var(--color-accent); }
+
+.cpp-obs-form-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 8px; flex-wrap: wrap;
+}
+
+.cpp-obs-types { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
+
+.cpp-obs-type-btn {
+  font-size: 11px; font-weight: 600;
+  padding: 4px 10px; border-radius: var(--radius-full);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  cursor: pointer; transition: all 0.15s;
+}
+.cpp-obs-type-btn:hover { border-color: var(--color-border-md); }
+
+.cpp-obs-form-actions { display: flex; gap: 6px; align-items: center; }
+
+.cpp-obs-vis {
+  background: none; border: none;
+  color: var(--color-text-tertiary); cursor: pointer;
+  padding: 4px; display: flex;
+  transition: color 0.15s;
+}
+.cpp-obs-vis:hover { color: var(--color-text); }
+
+.cpp-obs-list { display: flex; flex-direction: column; gap: 2px; }
+
+.cpp-obs-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  transition: background 0.12s;
+}
+.cpp-obs-item:hover { background: var(--color-bg-tertiary); }
+
+.cpp-obs-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 6px;
+}
+
+.cpp-obs-body { flex: 1; min-width: 0; }
+.cpp-obs-text {
+  font-size: 13px; color: var(--color-text);
+  margin: 0; line-height: 1.5;
+}
+.cpp-obs-meta {
+  font-size: 10px; color: var(--color-text-tertiary);
+  display: block; margin-top: 3px;
+}
+
+.cpp-obs-del {
+  background: none; border: none;
+  color: var(--color-text-tertiary); cursor: pointer;
+  padding: 2px; display: flex; opacity: 0;
+  transition: opacity 0.12s; flex-shrink: 0;
+}
+.cpp-obs-item:hover .cpp-obs-del { opacity: 1; }
+.cpp-obs-del:hover { color: var(--color-red); }
+
+/* ─── Reviews link ─── */
+.cpp-reviews-link {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+  margin-top: 4px;
+}
+.cpp-reviews-link svg:first-child { color: var(--color-accent); }
+.cpp-reviews-link span { flex: 1; }
+.cpp-reviews-link:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+/* ─── Animations ─── */
+@keyframes cpp-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .cpp-plan-days {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .cpp-header { padding: 16px; gap: 12px; flex-wrap: wrap; }
+  .cpp-name { font-size: 24px; }
+  .cpp-header-actions { width: 100%; }
+  .cpp-plan-days { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .cpp-plan-days { grid-template-columns: repeat(2, 1fr); }
+}

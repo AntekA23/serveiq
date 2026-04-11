@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ChevronRight,
-  Calendar,
-  Target,
-  AlertCircle,
-  FileText,
-  Plus,
-  Link,
+  ChevronRight, Calendar, Target, Plus, Clock, Star,
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -15,87 +9,25 @@ import Avatar from '../../components/ui/Avatar/Avatar'
 import Button from '../../components/ui/Button/Button'
 import './Dashboard.css'
 
-function PlanPreview({ child, navigate }) {
-  const plan = child?.trainingPlan
-  const milestones = plan?.milestones || []
-  const schedule = plan?.weeklySchedule || []
-  const nextMilestone = milestones.find(m => !m.completed)
+const TYPE_LABELS = {
+  kort: 'Kort', sparing: 'Sparing', kondycja: 'Kondycja',
+  rozciaganie: 'Rozciąganie', mecz: 'Mecz', inne: 'Inne',
+  class: 'Zajęcia', camp: 'Obóz', tournament: 'Turniej',
+  training: 'Trening', match: 'Mecz', fitness: 'Kondycja',
+}
 
-  const dayNames = ['', 'Pon', 'Wt', 'Sr', 'Czw', 'Pt', 'Sb', 'Nd']
-  const typeLabels = {
-    kort: 'Kort', sparing: 'Sparing', kondycja: 'Kondycja',
-    rozciaganie: 'Rozciag.', mecz: 'Mecz', inne: 'Inne',
+function formatRelativeDate(dateStr) {
+  const d = new Date(dateStr)
+  const now = new Date()
+  const diffMs = d - now
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 0) return 'Dzisiaj'
+  if (diffDays === 1) return 'Jutro'
+  if (diffDays > 1 && diffDays <= 6) {
+    return d.toLocaleDateString('pl-PL', { weekday: 'long' })
   }
-
-  // Group schedule by day
-  const byDay = {}
-  schedule.forEach(s => {
-    if (!byDay[s.day]) byDay[s.day] = []
-    byDay[s.day].push(s)
-  })
-
-  return (
-    <div className="plan-preview card">
-      <div className="plan-preview-header">
-        <Calendar size={16} />
-        <span>Plan treningowy</span>
-        <button className="plan-preview-more" onClick={() => navigate('/parent/training-plan')}>
-          Zobacz wiecej <ChevronRight size={14} />
-        </button>
-      </div>
-      <div className="plan-preview-body">
-        {nextMilestone && (
-          <div className="plan-milestone">
-            <Target size={16} className="plan-milestone-icon" />
-            <div>
-              <div className="plan-milestone-text">{nextMilestone.text}</div>
-              {nextMilestone.date && (
-                <div className="plan-milestone-date">
-                  {new Date(nextMilestone.date).toLocaleDateString('pl-PL', {
-                    day: 'numeric', month: 'long', year: 'numeric'
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {schedule.length > 0 ? (
-          <div className="plan-schedule-preview">
-            <div className="plan-weekly">
-              <div className="plan-weekly-label">Harmonogram</div>
-              <div className="plan-weekly-value">
-                {schedule.length} treningow · {Math.round(schedule.reduce((s, i) => s + i.durationMinutes, 0) / 60 * 10) / 10}h / tydz
-              </div>
-            </div>
-            <div className="plan-schedule-days">
-              {Object.entries(byDay).sort(([a], [b]) => a - b).map(([day, items]) => (
-                <div key={day} className="plan-schedule-day">
-                  <span className="plan-schedule-day-name">{dayNames[day]}</span>
-                  {items.map((item, i) => (
-                    <span key={i} className="plan-schedule-type">{typeLabels[item.sessionType] || item.sessionType}</span>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : plan?.weeklyGoal?.sessionsPerWeek ? (
-          <div className="plan-weekly">
-            <div className="plan-weekly-label">Cel tygodniowy</div>
-            <div className="plan-weekly-value">
-              {plan.weeklyGoal.sessionsPerWeek} treningow / tydz
-            </div>
-          </div>
-        ) : null}
-
-        {!nextMilestone && schedule.length === 0 && !plan?.weeklyGoal?.sessionsPerWeek && (
-          <div className="plan-empty">
-            Brak aktywnego planu treningowego
-          </div>
-        )}
-      </div>
-    </div>
-  )
+  return d.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })
 }
 
 export default function Dashboard() {
@@ -103,15 +35,13 @@ export default function Dashboard() {
   const user = useAuthStore((s) => s.user)
   const [children, setChildren] = useState([])
   const [selectedChild, setSelectedChild] = useState(null)
+  const [nextActivities, setNextActivities] = useState([])
+  const [latestReview, setLatestReview] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true)
-
-        // Fetch children/players
         const { data: playersRaw } = await api.get('/players')
         const players = Array.isArray(playersRaw) ? playersRaw : playersRaw.players || []
         const childIds = user?.parentProfile?.children || []
@@ -119,62 +49,53 @@ export default function Dashboard() {
           ? players.filter((p) => childIds.includes(p._id))
           : players
         setChildren(myChildren)
-
-        if (myChildren.length > 0) {
-          setSelectedChild(myChildren[0])
-        }
-      } catch (err) {
-        setError('Nie udalo sie zaladowac danych')
-      } finally {
-        setLoading(false)
-      }
+        if (myChildren.length > 0) setSelectedChild(myChildren[0])
+      } catch { /* silent */ }
+      setLoading(false)
     }
-
     fetchData()
   }, [user])
 
-  const handleChildSelect = (child) => {
-    setSelectedChild(child)
-  }
+  // Fetch activities & reviews when child changes
+  useEffect(() => {
+    if (!selectedChild) return
+    const fetchChildData = async () => {
+      try {
+        const [activitiesRes, reviewsRes] = await Promise.all([
+          api.get('/activities?status=planned&limit=3').catch(() => ({ data: { activities: [] } })),
+          api.get(`/reviews?player=${selectedChild._id}&status=published&limit=1`).catch(() => ({ data: { reviews: [] } })),
+        ])
+
+        const acts = (activitiesRes.data.activities || [])
+          .filter((a) => new Date(a.date) >= new Date())
+          .slice(0, 3)
+        setNextActivities(acts)
+
+        const revs = reviewsRes.data.reviews || []
+        setLatestReview(revs.length > 0 ? revs[0] : null)
+      } catch { /* silent */ }
+    }
+    fetchChildData()
+  }, [selectedChild])
 
   if (loading) {
     return (
-      <div className="parent-dashboard">
-        <h1 className="page-title">Pulpit</h1>
-        <div className="parent-dashboard-loading">Ladowanie...</div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="parent-dashboard">
-        <h1 className="page-title">Pulpit</h1>
-        <div className="parent-dashboard-error">{error}</div>
+      <div className="pd-page">
+        <div className="pd-loading"><div className="pd-spinner" /></div>
       </div>
     )
   }
 
   if (children.length === 0) {
     return (
-      <div className="parent-dashboard">
-        <h1 className="page-title">Pulpit</h1>
-        <div className="parent-dashboard-empty">
-          <AlertCircle size={32} />
-          <h2 style={{ margin: '8px 0 4px' }}>Witaj w ServeIQ!</h2>
+      <div className="pd-page">
+        <div className="pd-empty">
+          <div className="pd-empty-icon">🎾</div>
+          <h2>Witaj w ServeIQ!</h2>
           <p>Dodaj swoje pierwsze dziecko, aby rozpocząć.</p>
-          <button
-            onClick={() => navigate('/my-children')}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              padding: '8px 16px', background: 'var(--color-accent)',
-              color: '#0B0E14', border: 'none',
-              borderRadius: 8, fontSize: 13, fontWeight: 600,
-              cursor: 'pointer', marginTop: 12
-            }}
-          >
+          <Button variant="primary" onClick={() => navigate('/my-children')}>
             <Plus size={16} /> Dodaj dziecko
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -184,77 +105,158 @@ export default function Dashboard() {
     ? Math.floor((Date.now() - new Date(selectedChild.dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
     : null
 
+  const skills = selectedChild?.skills || {}
+  const skillScores = Object.values(skills).map((s) => s?.score || 0).filter((s) => s > 0)
+  const avgSkill = skillScores.length > 0
+    ? Math.round(skillScores.reduce((a, b) => a + b, 0) / skillScores.length)
+    : null
+
+  const schedule = selectedChild?.trainingPlan?.weeklySchedule || []
+  const dayNames = ['', 'Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sb', 'Nd']
+
+  // Group schedule by day, show only days with sessions
+  const weekDays = {}
+  schedule.forEach((s) => {
+    if (!weekDays[s.day]) weekDays[s.day] = []
+    weekDays[s.day].push(s)
+  })
+
   return (
-    <div className="parent-dashboard">
-      {/* Child selector (if multiple) */}
+    <div className="pd-page">
+      {/* ─── Child selector ─── */}
       {children.length > 1 && (
-        <div className="child-selector">
+        <div className="pd-child-tabs">
           {children.map((child) => (
             <button
               key={child._id}
-              className={`child-selector-btn ${selectedChild?._id === child._id ? 'active' : ''}`}
-              onClick={() => handleChildSelect(child)}
+              className={`pd-child-tab ${selectedChild?._id === child._id ? 'active' : ''}`}
+              onClick={() => setSelectedChild(child)}
             >
-              <Avatar firstName={child.firstName} lastName={child.lastName} size={28} role="player" />
-              <span>{child.firstName}</span>
+              <Avatar firstName={child.firstName} lastName={child.lastName} size={24} role="player" />
+              {child.firstName}
             </button>
           ))}
+          <button className="pd-child-tab pd-child-add" onClick={() => navigate('/my-children')}>
+            <Plus size={14} />
+          </button>
         </div>
       )}
 
-      {/* Action buttons */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        <button
-          onClick={() => navigate('/my-children')}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '8px 16px', background: 'var(--color-accent-muted)',
-            color: 'var(--color-accent)', border: '1px solid var(--color-accent)',
-            borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer'
-          }}
-        >
-          <Plus size={16} /> Dodaj dziecko
-        </button>
-        <button
-          onClick={() => navigate('/parent/add-coach')}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '8px 16px', background: 'var(--color-accent-muted)',
-            color: 'var(--color-accent)', border: '1px solid var(--color-accent)',
-            borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer'
-          }}
-        >
-          <Link size={16} /> Dodaj trenera
-        </button>
-      </div>
-
-      {/* Hero section: child info */}
-      <div className="dashboard-hero">
-        <div className="dashboard-hero-child" onClick={() => navigate(`/parent/child/${selectedChild._id}`)}>
-          <Avatar
-            firstName={selectedChild.firstName}
-            lastName={selectedChild.lastName}
-            size={72}
-            role="player"
-            src={selectedChild.avatarUrl}
-          />
-          <div className="dashboard-hero-info">
-            <h1 className="dashboard-hero-name">
-              {selectedChild.firstName} {selectedChild.lastName}
-            </h1>
-            <div className="dashboard-hero-details">
-              {childAge && <span>{childAge} lat</span>}
-              {selectedChild.ranking?.pzt && <span>Ranking PZT: #{selectedChild.ranking.pzt}</span>}
-            </div>
-            <button className="dashboard-hero-profile-btn">
-              Zobacz profil <ChevronRight size={14} />
-            </button>
+      {/* ─── Hero: child identity ─── */}
+      <div className="pd-hero" onClick={() => navigate(`/parent/child/${selectedChild._id}`)}>
+        <Avatar
+          firstName={selectedChild.firstName}
+          lastName={selectedChild.lastName}
+          size={56}
+          role="player"
+          src={selectedChild.avatarUrl}
+        />
+        <div className="pd-hero-info">
+          <h1 className="pd-hero-name">{selectedChild.firstName} {selectedChild.lastName}</h1>
+          <div className="pd-hero-meta">
+            {childAge && <span>{childAge} lat</span>}
+            {selectedChild.pathwayStage && <span>{selectedChild.pathwayStage}</span>}
+            {selectedChild.ranking?.pzt && <span>PZT #{selectedChild.ranking.pzt}</span>}
           </div>
         </div>
+        {avgSkill !== null && (
+          <div className="pd-hero-score">
+            <span className="pd-hero-score-val">{avgSkill}</span>
+            <span className="pd-hero-score-label">średnia</span>
+          </div>
+        )}
+        <ChevronRight size={16} className="pd-hero-arrow" />
       </div>
 
-      {/* Plan preview */}
-      <PlanPreview child={selectedChild} navigate={navigate} />
+      {/* ─── This week ─── */}
+      {schedule.length > 0 && (
+        <section className="pd-section">
+          <div className="pd-section-head">
+            <h2 className="pd-section-title">Ten tydzień</h2>
+            <span className="pd-week-summary">{schedule.length} treningów · {Math.round(schedule.reduce((s, i) => s + (i.durationMinutes || 0), 0) / 60 * 10) / 10}h</span>
+          </div>
+          <div className="pd-week-grid">
+            {Object.entries(weekDays).sort(([a], [b]) => a - b).map(([day, items]) => (
+              <div key={day} className="pd-week-day">
+                <span className="pd-week-day-name">{dayNames[day]}</span>
+                <div className="pd-week-day-items">
+                  {items.map((item, i) => (
+                    <span key={i} className="pd-week-type">
+                      {TYPE_LABELS[item.sessionType] || item.sessionType}
+                      <span className="pd-week-dur">{item.durationMinutes}′</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ─── Upcoming ─── */}
+      {nextActivities.length > 0 && (
+        <section className="pd-section">
+          <div className="pd-section-head">
+            <h2 className="pd-section-title">Nadchodzące</h2>
+            <button className="pd-section-link" onClick={() => navigate('/calendar')}>
+              Kalendarz <ChevronRight size={14} />
+            </button>
+          </div>
+          <div className="pd-upcoming">
+            {nextActivities.map((a, i) => (
+              <div key={a._id} className="pd-upcoming-item" style={{ '--i': i }}>
+                <div className="pd-upcoming-date">
+                  <span className="pd-upcoming-day">{formatRelativeDate(a.date)}</span>
+                  {a.startTime && <span className="pd-upcoming-time">{a.startTime.slice(0, 5)}</span>}
+                </div>
+                <div className="pd-upcoming-info">
+                  <span className="pd-upcoming-title">{a.title || TYPE_LABELS[a.type] || 'Aktywność'}</span>
+                  {a.location && <span className="pd-upcoming-loc">{a.location}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ─── Latest review ─── */}
+      {latestReview && (
+        <section className="pd-section">
+          <div className="pd-section-head">
+            <h2 className="pd-section-title">Ostatnia ocena</h2>
+            <button className="pd-section-link" onClick={() => navigate('/reviews')}>
+              Wszystkie <ChevronRight size={14} />
+            </button>
+          </div>
+          <div className="pd-review-card" onClick={() => navigate('/reviews')}>
+            {latestReview.rating && (
+              <div className="pd-review-stars">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star key={s} size={14} fill={s <= latestReview.rating ? 'var(--color-amber)' : 'none'} color={s <= latestReview.rating ? 'var(--color-amber)' : 'var(--color-text-tertiary)'} />
+                ))}
+              </div>
+            )}
+            <p className="pd-review-excerpt">
+              {latestReview.whatHappened || latestReview.title || 'Ocena trenera'}
+            </p>
+            <span className="pd-review-meta">
+              {new Date(latestReview.createdAt || latestReview.periodStart).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })}
+            </span>
+          </div>
+        </section>
+      )}
+
+      {/* ─── Quick actions (subtle) ─── */}
+      {children.length <= 1 && (
+        <div className="pd-quick-actions">
+          <button className="pd-quick-btn" onClick={() => navigate('/my-children')}>
+            <Plus size={14} /> Dodaj dziecko
+          </button>
+          <button className="pd-quick-btn" onClick={() => navigate('/parent/add-coach')}>
+            <Plus size={14} /> Dodaj trenera
+          </button>
+        </div>
+      )}
     </div>
   )
 }
