@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
-import { X, Save, Trash2, Plus } from 'lucide-react'
+import { X, Save, Trash2, Plus, Repeat } from 'lucide-react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -273,23 +273,61 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
             </div>
           </div>
 
-          {/* Detailed fields — only in edit mode */}
-          {isEdit && (
-            <>
-              <div className="ccal-field">
-                <label>Nawierzchnia</label>
-                <div className="ccal-type-row">
-                  {SURFACES.map((s) => (
-                    <button key={s.value}
-                      className={`ccal-type-btn ${form.surface === s.value ? 'active' : ''}`}
-                      style={form.surface === s.value ? { background: 'var(--color-accent)', borderColor: 'var(--color-accent)', color: 'var(--color-accent-contrast)' } : {}}
-                      onClick={() => handleChange('surface', s.value)}>
-                      {s.label}
+          {/* Recurrence — inline toggle (new sessions only) */}
+          {!isEdit && (
+            <div className="ccal-recurrence">
+              <button
+                type="button"
+                className={`ccal-recurrence-toggle ${form.recurrence !== 'none' ? 'active' : ''}`}
+                onClick={() => handleChange('recurrence', form.recurrence === 'none' ? 'weekly' : 'none')}
+              >
+                <Repeat size={14} />
+                <span>{form.recurrence === 'none' ? 'Jednorazowa' : 'Powtarzaj'}</span>
+                <span className={`ccal-recurrence-dot ${form.recurrence !== 'none' ? 'on' : ''}`} />
+              </button>
+
+              {form.recurrence !== 'none' && (
+                <div className="ccal-recurrence-options">
+                  {RECURRENCE_OPTIONS.filter((r) => r.value !== 'none').map((r) => (
+                    <button
+                      key={r.value}
+                      type="button"
+                      className={`ccal-rec-opt ${form.recurrence === r.value ? 'active' : ''}`}
+                      onClick={() => handleChange('recurrence', r.value)}
+                    >
+                      {r.label}
                     </button>
                   ))}
+                  <span className="ccal-rec-hint">
+                    {form.recurrence === 'weekly' && '12 powtórzeń'}
+                    {form.recurrence === 'biweekly' && '6 powtórzeń'}
+                    {form.recurrence === 'monthly' && '6 powtórzeń'}
+                  </span>
                 </div>
-              </div>
+              )}
+            </div>
+          )}
 
+          {/* Nawierzchnia — always visible for kort/sparing/mecz */}
+          {['kort', 'sparing', 'mecz'].includes(form.sessionType) && (
+            <div className="ccal-field">
+              <label>Nawierzchnia</label>
+              <div className="ccal-type-row">
+                {SURFACES.map((s) => (
+                  <button key={s.value}
+                    className={`ccal-type-btn ${form.surface === s.value ? 'active' : ''}`}
+                    style={form.surface === s.value ? { background: 'var(--color-accent)', borderColor: 'var(--color-accent)', color: 'var(--color-accent-contrast)' } : {}}
+                    onClick={() => handleChange('surface', s.value)}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Notes + visibility — edit mode or expanded */}
+          {isEdit && (
+            <>
               <div className="ccal-field">
                 <label>Notatki</label>
                 <textarea rows={2} placeholder="Plan treningu, fokus..." value={form.notes}
