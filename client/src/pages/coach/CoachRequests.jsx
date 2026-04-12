@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import api from '../../api/axios'
+import Button from '../../components/ui/Button/Button'
+import './CoachRequests.css'
 
 export default function CoachRequests() {
   const [requests, setRequests] = useState([])
@@ -31,71 +33,48 @@ export default function CoachRequests() {
     }
   }
 
-  if (loading) return <div style={{ padding: 24 }}>Ładowanie...</div>
+  if (loading) return <div className="coach-req-loading">Ładowanie...</div>
 
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', padding: 24 }}>
-      <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 24 }}>
+    <div className="coach-req-page">
+      <h1 className="coach-req-title">
         Oczekujące prośby ({requests.length})
       </h1>
 
       {requests.length === 0 ? (
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: 14 }}>
-          Brak oczekujących próśb.
-        </p>
+        <p className="coach-req-empty">Brak oczekujących próśb.</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="coach-req-list">
           {requests.map(req => (
-            <div
-              key={req._id}
-              style={{
-                background: 'var(--color-bg-secondary)',
-                border: '1px solid var(--color-border-md)',
-                borderRadius: 12, padding: 20
-              }}
-            >
-              <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>
+            <div key={req._id} className="coach-req-card">
+              <div className="coach-req-name">
                 {req.parent?.firstName} {req.parent?.lastName}
               </div>
-              <div style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 8 }}>
-                {req.parent?.email}
-              </div>
+              <div className="coach-req-email">{req.parent?.email}</div>
 
-              <div style={{ fontSize: 13, marginBottom: 8 }}>
-                <span style={{ color: 'var(--color-text-tertiary)' }}>Dzieci: </span>
+              <div className="coach-req-children">
+                <span className="coach-req-children-label">Dzieci: </span>
                 {req.players?.map(p => `${p.firstName} ${p.lastName}`).join(', ')}
               </div>
 
               {req.message && (
-                <div style={{
-                  fontSize: 13, color: 'var(--color-text-secondary)',
-                  fontStyle: 'italic', marginBottom: 12,
-                  padding: '8px 12px', background: 'var(--color-bg)',
-                  borderRadius: 6
-                }}>
+                <div className="coach-req-message">
                   &ldquo;{req.message}&rdquo;
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button
+              <div className="coach-req-actions">
+                <Button
+                  variant="primary"
                   onClick={() => handleRespond(req._id, 'accepted')}
-                  disabled={responding === req._id}
-                  style={{
-                    flex: 1, padding: '10px 0', background: 'var(--color-accent)',
-                    color: '#0B0E14', border: 'none', borderRadius: 8,
-                    fontWeight: 600, fontSize: 14, cursor: 'pointer'
-                  }}
-                >Akceptuj</button>
-                <button
+                  loading={responding === req._id}
+                  className="coach-req-accept"
+                >Akceptuj</Button>
+                <Button
                   onClick={() => handleRespond(req._id, 'rejected')}
-                  disabled={responding === req._id}
-                  style={{
-                    flex: 1, padding: '10px 0', background: 'transparent',
-                    color: 'var(--color-text)', border: '1px solid var(--color-border-md)',
-                    borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer'
-                  }}
-                >Odrzuć</button>
+                  loading={responding === req._id}
+                  className="coach-req-reject"
+                >Odrzuć</Button>
               </div>
             </div>
           ))}

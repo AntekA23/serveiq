@@ -91,19 +91,24 @@ export default function CoachSessions() {
           </button>
         </div>
         {players.length > 1 && (
-          <select className="coach-filter-select" value={filterPlayer} onChange={(e) => setFilterPlayer(e.target.value)}>
-            <option value="">Wszyscy zawodnicy</option>
-            {players.map((p) => (
-              <option key={p._id} value={p._id}>{p.firstName} {p.lastName}</option>
-            ))}
-          </select>
+          <div className="coach-filter-row">
+            <select className="coach-filter-select" value={filterPlayer} onChange={(e) => setFilterPlayer(e.target.value)}>
+              <option value="">Wszyscy zawodnicy</option>
+              {players.map((p) => (
+                <option key={p._id} value={p._id}>{p.firstName} {p.lastName}</option>
+              ))}
+            </select>
+            {filterPlayer && (
+              <button className="coach-filter-clear" onClick={() => setFilterPlayer('')}>Wyczyść</button>
+            )}
+          </div>
         )}
       </div>
 
       {/* Monthly stats */}
       {filtered.length > 0 && (
         <div className="cs-month-stats">
-          <span><strong>{filtered.length}</strong> sesji</span>
+          <span><strong>{filtered.length}</strong>{filterPlayer ? ` z ${sessions.length}` : ''} sesji</span>
           <span><strong>{Math.round(filtered.reduce((s, sess) => s + (sess.durationMinutes || 0), 0) / 60)}</strong>h lacznie</span>
           <span><strong>{new Set(filtered.map((s) => s.playerId)).size}</strong> zawodnikow</span>
           <span><strong>{Object.keys(grouped).length}</strong> dni treningowych</span>
@@ -117,8 +122,11 @@ export default function CoachSessions() {
         ) : (
           Object.entries(grouped).map(([dateKey, daySessions]) => {
             const d = new Date(dateKey)
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+            const isPastDay = d < today
             return (
-              <div key={dateKey} className="coach-day-group">
+              <div key={dateKey} className={`coach-day-group${isPastDay ? ' coach-day-past' : ''}`}>
                 <div className="coach-day-label">
                   {d.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </div>

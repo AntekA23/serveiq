@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Save } from 'lucide-react'
 import api from '../../api/axios'
 import Button from '../../components/ui/Button/Button'
+import TagInput from '../../components/ui/TagInput'
 import useToast from '../../hooks/useToast'
 import { SKILL_NAMES, SKILL_LEVELS } from '../../constants/skillLevels'
 import './Coach.css'
@@ -44,13 +45,12 @@ export default function CoachNewSession() {
     durationMinutes: 90,
     title: '',
     notes: '',
-    focusAreas: '',
+    focusAreas: [],
     visibleToParent: true,
   })
 
   // Skill updates
   const [skillUpdates, setSkillUpdates] = useState([])
-  const [showSkills, setShowSkills] = useState(false)
 
   useEffect(() => {
     api.get('/players').then(({ data }) => {
@@ -95,7 +95,7 @@ export default function CoachNewSession() {
         durationMinutes: form.durationMinutes,
         title: form.title || `${SESSION_TYPES.find((t) => t.value === form.sessionType)?.label || 'Trening'}`,
         notes: form.notes || undefined,
-        focusAreas: form.focusAreas ? form.focusAreas.split(',').map((s) => s.trim()).filter(Boolean) : [],
+        focusAreas: form.focusAreas,
         visibleToParent: form.visibleToParent,
         skillUpdates: skillUpdates.length > 0 ? skillUpdates : undefined,
       }
@@ -193,9 +193,12 @@ export default function CoachNewSession() {
         </div>
 
         <div className="coach-form-group">
-          <label>Obszary fokusa (oddzielone przecinkami)</label>
-          <input type="text" placeholder="np. serwis, footwork, return" value={form.focusAreas}
-            onChange={(e) => handleChange('focusAreas', e.target.value)} />
+          <label>Obszary fokusa</label>
+          <TagInput
+            value={form.focusAreas}
+            onChange={(tags) => handleChange('focusAreas', tags)}
+            placeholder="np. serwis, footwork, return"
+          />
         </div>
 
         {/* Visibility */}
@@ -207,14 +210,8 @@ export default function CoachNewSession() {
 
         {/* Skill updates */}
         <div className="coach-form-group">
-          <label>
-            Aktualizacja umiejetnosci
-            <button className="coach-link-btn" onClick={() => setShowSkills(!showSkills)}>
-              {showSkills ? 'Ukryj' : 'Pokaz'}
-            </button>
-          </label>
-          {showSkills && (
-            <div className="coach-skill-updates">
+          <label>Aktualizacja umiejetnosci</label>
+          <div className="coach-skill-updates">
               <div className="coach-skill-add-row">
                 {Object.entries(SKILL_NAMES).map(([key, label]) => (
                   <button key={key} className="coach-skill-add-btn"
@@ -252,8 +249,7 @@ export default function CoachNewSession() {
                   </div>
                 </div>
               ))}
-            </div>
-          )}
+          </div>
         </div>
 
         {/* Submit */}

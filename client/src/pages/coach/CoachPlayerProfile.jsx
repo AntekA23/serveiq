@@ -7,6 +7,7 @@ import {
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import Button from '../../components/ui/Button/Button'
+import ConfirmModal from '../../components/ui/ConfirmModal'
 import useToast from '../../hooks/useToast'
 import { SKILL_LEVELS, SKILL_NAMES } from '../../constants/skillLevels'
 import './CoachPlayerProfile.css'
@@ -104,6 +105,9 @@ export default function CoachPlayerProfile() {
   const [planDirty, setPlanDirty] = useState(false)
   const [planSaving, setPlanSaving] = useState(false)
 
+  // Confirm modal
+  const [confirmAction, setConfirmAction] = useState(null)
+
   const fetchData = async () => {
     try {
       const [playerRes, sessionsRes, reviewsRes, goalsRes, obsRes] = await Promise.all([
@@ -181,11 +185,16 @@ export default function CoachPlayerProfile() {
   }
 
   const handleDeleteObs = async (obsId) => {
-    if (!confirm('Usunąć tę obserwację?')) return
-    try {
-      await api.delete(`/observations/${obsId}`)
-      setObservations((prev) => prev.filter((o) => o._id !== obsId))
-    } catch { toast.error('Nie udało się usunąć') }
+    setConfirmAction({
+      message: 'Usunąć tę obserwację?',
+      onConfirm: async () => {
+        setConfirmAction(null)
+        try {
+          await api.delete(`/observations/${obsId}`)
+          setObservations((prev) => prev.filter((o) => o._id !== obsId))
+        } catch { toast.error('Nie udało się usunąć') }
+      },
+    })
   }
 
   const handleGoalCreate = async () => {
@@ -212,11 +221,16 @@ export default function CoachPlayerProfile() {
   }
 
   const handleGoalDelete = async (goalId) => {
-    if (!confirm('Usunąć ten cel?')) return
-    try {
-      await api.delete(`/goals/${goalId}`)
-      setGoals((prev) => prev.filter((g) => g._id !== goalId))
-    } catch { toast.error('Nie udało się usunąć') }
+    setConfirmAction({
+      message: 'Usunąć ten cel?',
+      onConfirm: async () => {
+        setConfirmAction(null)
+        try {
+          await api.delete(`/goals/${goalId}`)
+          setGoals((prev) => prev.filter((g) => g._id !== goalId))
+        } catch { toast.error('Nie udało się usunąć') }
+      },
+    })
   }
 
   const handlePlanSave = async () => {
@@ -306,6 +320,9 @@ export default function CoachPlayerProfile() {
           </div>
         </div>
         <div className="cpp-header-actions">
+          <Button size="sm" onClick={() => setShowGoalForm(true)}>
+            <Target size={13} /> Cel
+          </Button>
           <Button size="sm" onClick={handleAiRecommendations} loading={aiLoading}>
             <Sparkles size={13} /> AI
           </Button>
@@ -447,7 +464,7 @@ export default function CoachPlayerProfile() {
       </Section>
 
       {/* ─── Goals ─── */}
-      <Section title="Cele" icon={Target} badge={activeGoals.length > 0 ? `${activeGoals.length} aktywnych` : null}>
+      <Section title="Cele" icon={Target} defaultOpen badge={activeGoals.length > 0 ? `${activeGoals.length} aktywnych` : null}>
         {/* Add goal */}
         {!showGoalForm ? (
           <button className="cpp-add-btn" onClick={() => setShowGoalForm(true)}>
@@ -497,28 +514,26 @@ export default function CoachPlayerProfile() {
         {/* Quick add form */}
         <div className="cpp-obs-form">
           <textarea className="cpp-obs-input" placeholder="Dodaj obserwację..." value={obsText} onChange={(e) => setObsText(e.target.value)} rows={2} />
-          {obsText.trim() && (
-            <div className="cpp-obs-form-row">
-              <div className="cpp-obs-types">
-                {OBS_TYPES.map((t) => (
-                  <button
-                    key={t.value}
-                    className={`cpp-obs-type-btn ${obsType === t.value ? 'active' : ''}`}
-                    style={obsType === t.value ? { background: t.color + '20', color: t.color, borderColor: t.color + '40' } : {}}
-                    onClick={() => setObsType(t.value)}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-              <div className="cpp-obs-form-actions">
-                <button className="cpp-obs-vis" onClick={() => setObsVisible(!obsVisible)} title={obsVisible ? 'Widoczna dla rodzica' : 'Ukryta'}>
-                  {obsVisible ? <Eye size={14} /> : <EyeOff size={14} />}
+          <div className="cpp-obs-form-row">
+            <div className="cpp-obs-types">
+              {OBS_TYPES.map((t) => (
+                <button
+                  key={t.value}
+                  className={`cpp-obs-type-btn ${obsType === t.value ? 'active' : ''}`}
+                  style={obsType === t.value ? { background: t.color + '20', color: t.color, borderColor: t.color + '40' } : {}}
+                  onClick={() => setObsType(t.value)}
+                >
+                  {t.label}
                 </button>
-                <Button variant="primary" size="sm" onClick={handleObsSubmit} loading={obsSaving}>Dodaj</Button>
-              </div>
+              ))}
             </div>
-          )}
+            <div className="cpp-obs-form-actions">
+              <button className="cpp-obs-vis" onClick={() => setObsVisible(!obsVisible)} title={obsVisible ? 'Widoczna dla rodzica' : 'Ukryta'}>
+                {obsVisible ? <Eye size={14} /> : <EyeOff size={14} />}
+              </button>
+              <Button variant="primary" size="sm" onClick={handleObsSubmit} loading={obsSaving} disabled={!obsText.trim()}>Dodaj</Button>
+            </div>
+          </div>
         </div>
 
         {/* List */}
@@ -552,6 +567,13 @@ export default function CoachPlayerProfile() {
           <ChevronDown size={14} style={{ transform: 'rotate(-90deg)' }} />
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!confirmAction}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={confirmAction?.onConfirm}
+        message={confirmAction?.message}
+      />
     </div>
   )
 }

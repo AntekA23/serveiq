@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Save, Trash2 } from 'lucide-react'
 import api from '../../api/axios'
 import Button from '../../components/ui/Button/Button'
+import ConfirmModal from '../../components/ui/ConfirmModal'
+import TagInput from '../../components/ui/TagInput'
 import useToast from '../../hooks/useToast'
 import { SKILL_NAMES, SKILL_LEVELS } from '../../constants/skillLevels'
 import './Coach.css'
@@ -51,7 +53,7 @@ export default function CoachEditSession() {
   })
 
   const [skillUpdates, setSkillUpdates] = useState([])
-  const [showSkills, setShowSkills] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -66,7 +68,7 @@ export default function CoachEditSession() {
           durationMinutes: s.durationMinutes || 90,
           title: s.title || '',
           notes: s.notes || '',
-          focusAreas: (s.focusAreas || []).join(', '),
+          focusAreas: s.focusAreas || [],
           visibleToParent: s.visibleToParent !== false,
         })
         if (s.skillUpdates && s.skillUpdates.length > 0) {
@@ -75,7 +77,6 @@ export default function CoachEditSession() {
             scoreBefore: su.scoreBefore,
             scoreAfter: su.scoreAfter,
           })))
-          setShowSkills(true)
         }
         const pName = s.player
           ? `${s.player.firstName || ''} ${s.player.lastName || ''}`.trim()
@@ -118,7 +119,7 @@ export default function CoachEditSession() {
         durationMinutes: form.durationMinutes,
         title: form.title,
         notes: form.notes || undefined,
-        focusAreas: form.focusAreas ? form.focusAreas.split(',').map((s) => s.trim()).filter(Boolean) : [],
+        focusAreas: form.focusAreas,
         visibleToParent: form.visibleToParent,
         skillUpdates: skillUpdates.length > 0 ? skillUpdates : undefined,
       }
@@ -132,7 +133,6 @@ export default function CoachEditSession() {
   }
 
   const handleDelete = async () => {
-    if (!window.confirm('Czy na pewno chcesz usunac te sesje?')) return
     setDeleting(true)
     try {
       await api.delete(`/sessions/${id}`)
@@ -159,7 +159,7 @@ export default function CoachEditSession() {
           <h1 className="page-title">Edytuj sesje</h1>
           <div className="coach-subtitle">{playerName}</div>
         </div>
-        <Button variant="danger" size="sm" onClick={handleDelete} loading={deleting}>
+        <Button variant="danger" size="sm" onClick={() => setShowConfirm(true)} loading={deleting}>
           <Trash2 size={14} /> Usun
         </Button>
       </div>
@@ -226,9 +226,12 @@ export default function CoachEditSession() {
         </div>
 
         <div className="coach-form-group">
-          <label>Obszary fokusa (oddzielone przecinkami)</label>
-          <input type="text" value={form.focusAreas}
-            onChange={(e) => handleChange('focusAreas', e.target.value)} />
+          <label>Obszary fokusa</label>
+          <TagInput
+            value={form.focusAreas}
+            onChange={(tags) => handleChange('focusAreas', tags)}
+            placeholder="np. serwis, footwork, return"
+          />
         </div>
 
         {/* Visibility */}
@@ -240,14 +243,8 @@ export default function CoachEditSession() {
 
         {/* Skill updates */}
         <div className="coach-form-group">
-          <label>
-            Aktualizacja umiejetnosci
-            <button className="coach-link-btn" onClick={() => setShowSkills(!showSkills)}>
-              {showSkills ? 'Ukryj' : 'Pokaz'}
-            </button>
-          </label>
-          {showSkills && (
-            <div className="coach-skill-updates">
+          <label>Aktualizacja umiejetnosci</label>
+          <div className="coach-skill-updates">
               <div className="coach-skill-add-row">
                 {Object.entries(SKILL_NAMES).map(([key, label]) => (
                   <button key={key} className="coach-skill-add-btn"
@@ -285,8 +282,7 @@ export default function CoachEditSession() {
                   </div>
                 </div>
               ))}
-            </div>
-          )}
+          </div>
         </div>
 
         {/* Submit */}
@@ -297,6 +293,13 @@ export default function CoachEditSession() {
           <button className="tp-cancel" onClick={() => navigate(-1)}>Anuluj</button>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={() => { setShowConfirm(false); handleDelete() }}
+        message="Czy na pewno chcesz usunąć tę sesję?"
+      />
     </div>
   )
 }

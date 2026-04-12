@@ -66,6 +66,7 @@
 .cp-controls { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
 .cp-controls .coach-search { flex: 1; }
 .cp-sort { padding: 10px 14px; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); background: var(--color-bg-secondary); color: var(--color-text); font-size: 13px; }
+.cp-result-count { font-size: 12px; color: var(--color-text-tertiary); margin-bottom: 8px; }
 
 /* Player avg ring */
 .cp-player-avg { position: relative; width: 36px; height: 36px; flex-shrink: 0; }
@@ -150,6 +151,9 @@
 .coach-session-controls { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
 .coach-month-nav { display: flex; align-items: center; gap: 10px; }
 .coach-filter-select { padding: 7px 12px; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); background: var(--color-bg-secondary); color: var(--color-text); font-size: 13px; }
+.coach-filter-row { display: flex; align-items: center; gap: 8px; }
+.coach-filter-clear { padding: 6px 12px; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); background: transparent; color: var(--color-text-secondary); font-size: 12px; cursor: pointer; transition: all 0.15s; }
+.coach-filter-clear:hover { background: var(--color-bg-tertiary); color: var(--color-text); }
 
 /* Monthly stats */
 .cs-month-stats { display: flex; gap: 16px; margin-bottom: 16px; padding: 10px 14px; background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 13px; color: var(--color-text-secondary); flex-wrap: wrap; }
@@ -157,6 +161,8 @@
 
 .coach-sessions-grouped { display: flex; flex-direction: column; gap: 4px; }
 .coach-day-group { margin-bottom: 12px; }
+.coach-day-past { opacity: 0.45; }
+.coach-day-past:hover { opacity: 0.7; }
 .coach-day-label { font-size: 12px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 0; margin-bottom: 4px; border-bottom: 1px solid var(--color-border); }
 .coach-session-card { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); margin-bottom: 2px; }
 .coach-session-type-dot { width: 4px; border-radius: 2px; min-height: 24px; align-self: stretch; flex-shrink: 0; }

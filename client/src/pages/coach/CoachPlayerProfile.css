@@ -506,5 +506,5 @@
 }
 
 @media (max-width: 480px) {
-  .cpp-plan-days { grid-template-columns: repeat(2, 1fr); }
+  .cpp-plan-days { grid-template-columns: 1fr; }
 }

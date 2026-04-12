@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Save, Send, Trash2, Sparkles, Database } from 'lucide-react'
 import api from '../../api/axios'
 import Button from '../../components/ui/Button/Button'
+import ConfirmModal from '../../components/ui/ConfirmModal'
 import useToast from '../../hooks/useToast'
 import './Coach.css'
 
@@ -44,6 +45,7 @@ export default function CoachNewReview() {
 
   const [prefilling, setPrefilling] = useState(false)
   const [prefillData, setPrefillData] = useState(null)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   useEffect(() => {
     const fetch = async () => {
@@ -202,7 +204,6 @@ export default function CoachNewReview() {
   }
 
   const handleDelete = async () => {
-    if (!window.confirm('Usunac ten przeglad?')) return
     try {
       await api.delete(`/reviews/${editId}`)
       toast.success('Przeglad usuniety')
@@ -225,7 +226,7 @@ export default function CoachNewReview() {
       <div className="coach-header">
         <h1 className="page-title">{isEdit ? 'Edytuj przeglad' : 'Nowy przeglad'}</h1>
         {isEdit && (
-          <Button variant="danger" size="sm" onClick={handleDelete}>
+          <Button variant="danger" size="sm" onClick={() => setShowConfirm(true)}>
             <Trash2 size={14} /> Usun
           </Button>
         )}
@@ -321,6 +322,13 @@ export default function CoachNewReview() {
           <button className="tp-cancel" onClick={() => navigate(-1)}>Anuluj</button>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={() => { setShowConfirm(false); handleDelete() }}
+        message="Usunąć ten przegląd?"
+      />
     </div>
   )
 }

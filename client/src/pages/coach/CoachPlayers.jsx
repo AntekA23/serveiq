@@ -81,6 +81,10 @@ export default function CoachPlayers() {
         </select>
       </div>
 
+      {search && sorted.length > 0 && (
+        <div className="cp-result-count">{sorted.length} {sorted.length === 1 ? 'zawodnik' : 'zawodników'}</div>
+      )}
+
       <div className="coach-players-list">
         {sorted.map((p) => {
           const age = p.dateOfBirth ? new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear() : null

@@ -176,6 +176,14 @@
   box-shadow: -3px 0 0 var(--type-color, var(--color-accent));
 }
 
+.cd-today-past {
+  opacity: 0.45;
+}
+
+.cd-today-past:hover {
+  opacity: 0.7;
+}
+
 .cd-today-time {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 20px;

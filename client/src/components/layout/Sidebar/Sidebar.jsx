@@ -3,6 +3,7 @@ import {
   LayoutDashboard, Users, User, CalendarDays, CalendarClock, ClipboardList,
   MessageCircle, Settings, LogOut, Baby, Link2,
   Newspaper, Dumbbell, Building2, BarChart3, CreditCard, Cog,
+  FileText, Trophy,
 } from 'lucide-react'
 import useAuthStore from '../../../store/authStore'
 import useUiStore from '../../../store/uiStore'
@@ -15,6 +16,11 @@ const coachNav = [
   { to: '/coach/calendar', label: 'Kalendarz', icon: CalendarClock },
   { to: '/players', label: 'Zawodnicy', icon: User },
   { to: '/messages', label: 'Wiadomości', icon: MessageCircle },
+  { section: 'Zarządzanie' },
+  { to: '/coach/sessions', label: 'Sesje', icon: ClipboardList },
+  { to: '/coach/reviews', label: 'Oceny', icon: FileText },
+  { to: '/coach/payments', label: 'Płatności', icon: CreditCard },
+  { to: '/coach/tournaments', label: 'Turnieje', icon: Trophy },
   { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]
 

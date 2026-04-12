@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import { X, Save, Trash2, Plus, Repeat } from 'lucide-react'
+import ConfirmModal from '../../components/ui/ConfirmModal'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -52,6 +53,7 @@ function ActivityModal({ data, onClose, onChanged, toast }) {
   const isCancelled = data.status === 'cancelled'
   const [reason, setReason] = useState('')
   const [saving, setSaving] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const handleCancel = async () => {
     setSaving(true)
@@ -79,7 +81,7 @@ function ActivityModal({ data, onClose, onChanged, toast }) {
 
   const handleDeleteSeries = async () => {
     if (!data.recurrence?.seriesId) return
-    if (!window.confirm('Usunac wszystkie powtorzenia tej aktywnosci?')) return
+    setShowDeleteConfirm(false)
     setSaving(true)
     try {
       await api.delete(`/activities/series/${data.recurrence.seriesId}`)
@@ -117,7 +119,7 @@ function ActivityModal({ data, onClose, onChanged, toast }) {
 
         <div className="ccal-modal-footer">
           {data.recurrence?.seriesId && (
-            <button className="ccal-btn-danger" onClick={handleDeleteSeries} disabled={saving}>
+            <button className="ccal-btn-danger" onClick={() => setShowDeleteConfirm(true)} disabled={saving}>
               <Trash2 size={14} /> Usun serie
             </button>
           )}
@@ -134,6 +136,13 @@ function ActivityModal({ data, onClose, onChanged, toast }) {
             )}
           </div>
         </div>
+
+        <ConfirmModal
+          isOpen={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={handleDeleteSeries}
+          message="Usunąć wszystkie powtórzenia tej aktywności?"
+        />
       </div>
     </div>
   )
@@ -163,6 +172,7 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
     recurrence: 'none',
   })
   const [saving, setSaving] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const handleChange = (field, value) => setForm((p) => ({ ...p, [field]: value }))
 
@@ -208,7 +218,7 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
   }
 
   const handleDelete = async () => {
-    if (!window.confirm('Usunac te sesje?')) return
+    setShowDeleteConfirm(false)
     try {
       await api.delete(`/sessions/${data._id}`)
       toast.success('Sesja usunieta')
@@ -345,7 +355,7 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
 
         <div className="ccal-modal-footer">
           {isEdit && (
-            <button className="ccal-btn-danger" onClick={handleDelete}><Trash2 size={14} /> Usun</button>
+            <button className="ccal-btn-danger" onClick={() => setShowDeleteConfirm(true)}><Trash2 size={14} /> Usun</button>
           )}
           <div className="ccal-modal-footer-right">
             <button className="ccal-btn-secondary" onClick={onClose}>Anuluj</button>
@@ -354,6 +364,13 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
             </button>
           </div>
         </div>
+
+        <ConfirmModal
+          isOpen={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={handleDelete}
+          message="Usunąć tę sesję?"
+        />
       </div>
     </div>
   )

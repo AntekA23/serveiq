@@ -1,0 +1,365 @@
+.dpt-loading,
+.dpt-no-data {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-tertiary);
+}
+
+/* ── No program selector ── */
+.dpt-selector {
+  padding: 1.5rem;
+}
+
+.dpt-selector-box {
+  background: var(--color-bg-tertiary);
+  border: 2px dashed var(--color-border-md);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.dpt-selector-icon {
+  color: var(--color-text-tertiary);
+  margin: 0 auto 12px;
+  display: block;
+}
+
+.dpt-selector-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: var(--color-text);
+}
+
+.dpt-selector-desc {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.dpt-program-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.dpt-program-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-border-md);
+  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  transition: all 0.15s;
+}
+
+.dpt-program-btn:hover:not(:disabled) {
+  border-color: var(--color-blue);
+  background: var(--color-bg-tertiary);
+}
+
+.dpt-program-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dpt-flag {
+  font-size: 18px;
+}
+
+/* ── Main view ── */
+.dpt-page {
+  padding: 1rem;
+}
+
+/* Header */
+.dpt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.dpt-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dpt-header-flag {
+  font-size: 24px;
+}
+
+.dpt-header-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.dpt-header-stage {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.dpt-program-select {
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border-md);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+}
+
+/* Stage transition alert */
+.dpt-transition-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-amber)10;
+  border: 1px solid var(--color-amber);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.dpt-transition-icon {
+  color: var(--color-amber);
+  flex-shrink: 0;
+}
+
+.dpt-transition-text {
+  flex: 1;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.dpt-transition-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.dpt-transition-confirm {
+  padding: 6px 12px;
+  background: var(--color-green);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dpt-transition-dismiss {
+  padding: 6px 12px;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-md);
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* Stage stepper */
+.dpt-stepper {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.dpt-stepper-item {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.dpt-stepper-label {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.dpt-stepper-label.current {
+  font-weight: 700;
+  background: var(--color-blue);
+  color: #fff;
+}
+
+.dpt-stepper-label.suggested {
+  background: var(--color-amber)15;
+  color: var(--color-amber);
+  border-color: var(--color-amber);
+}
+
+.dpt-stepper-connector {
+  width: 12px;
+  height: 2px;
+  background: var(--color-border-md);
+  flex-shrink: 0;
+}
+
+/* Comparison cards */
+.dpt-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 16px;
+}
+
+.dpt-card {
+  border-radius: 10px;
+  padding: 0.875rem;
+  flex: 1 1 calc(50% - 0.5rem);
+  min-width: 160px;
+  border: 1px solid;
+}
+
+.dpt-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.dpt-card-label {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.dpt-card-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dpt-card-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.dpt-card-rec {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  margin-bottom: 8px;
+}
+
+.dpt-card-bar {
+  height: 6px;
+  background: var(--color-bg-tertiary);
+  border-radius: 3px;
+  position: relative;
+  overflow: visible;
+}
+
+.dpt-card-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+/* Suggestions */
+.dpt-suggestions {
+  background: var(--color-blue)10;
+  border: 1px solid var(--color-blue)40;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.dpt-suggestions-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-blue);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dpt-suggestion-item {
+  font-size: 13px;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+/* Expandable details */
+.dpt-details-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-md);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.dpt-details-body {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-md);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  padding: 14px;
+}
+
+.dpt-details-section {
+  margin-bottom: 10px;
+}
+
+.dpt-details-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.dpt-details-text {
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.dpt-focus-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.dpt-focus-tag {
+  padding: 3px 8px;
+  background: var(--color-blue)20;
+  color: var(--color-blue);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.dpt-details-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}

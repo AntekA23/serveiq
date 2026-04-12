@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Plus, ChevronRight, CreditCard, FileText, UserPlus,
-  Check, X, Clock, MapPin, Users,
+  Plus, ChevronRight, CreditCard, Clock, Users,
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -41,12 +40,10 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [playersRes, sessionsRes, paymentsRes, reviewsRes, requestsRes] = await Promise.all([
+        const [playersRes, sessionsRes, paymentsRes] = await Promise.all([
           api.get('/players'),
           api.get('/sessions'),
           api.get('/payments').catch(() => ({ data: { payments: [] } })),
-          api.get('/reviews').catch(() => ({ data: { reviews: [] } })),
-          api.get('/players/coach-requests').catch(() => ({ data: { requests: [] } })),
         ])
 
         const p = playersRes.data.players || playersRes.data || []
@@ -83,33 +80,16 @@ export default function Dashboard() {
         const allPayments = paymentsRes.data.payments || []
         const pendingPayments = allPayments.filter((py) => py.status === 'pending' || py.status === 'overdue').length
 
-        const allReviews = reviewsRes.data.reviews || []
-        const draftReviews = allReviews.filter((r) => r.status === 'draft').length
-
         setAlerts({
           payments: pendingPayments,
-          drafts: draftReviews,
-          requests: requestsRes.data.requests || [],
+          drafts: 0,
+          requests: [],
         })
       } catch { /* silent */ }
       setLoading(false)
     }
     fetchData()
   }, [])
-
-  const handleJoinRequest = async (playerId, action) => {
-    try {
-      await api.put(`/players/${playerId}/coach-request`, { action })
-      setAlerts((prev) => ({
-        ...prev,
-        requests: prev.requests.filter((r) => r._id !== playerId),
-      }))
-      if (action === 'accept') {
-        const { data } = await api.get('/players')
-        setPlayers(data.players || data || [])
-      }
-    } catch { /* silent */ }
-  }
 
   // Recent players — sorted by most recent session
   const recentPlayers = players.slice(0, 4)
@@ -118,8 +98,7 @@ export default function Dashboard() {
     return <div className="cd-page"><div className="cd-loading"><div className="cd-spinner" /></div></div>
   }
 
-  const hasAlerts = alerts.payments > 0 || alerts.drafts > 0 || alerts.requests.length > 0
-  const totalAlerts = alerts.payments + alerts.drafts + alerts.requests.length
+  const hasAlerts = alerts.payments > 0
 
   return (
     <div className="cd-page">
@@ -135,26 +114,12 @@ export default function Dashboard() {
       </div>
 
       {/* ─── Alerts bar ─── */}
-      {hasAlerts && (
+      {alerts.payments > 0 && (
         <div className="cd-alerts-bar">
-          {alerts.requests.length > 0 && (
-            <button className="cd-alert-chip cd-alert-requests" onClick={() => document.getElementById('cd-requests')?.scrollIntoView({ behavior: 'smooth' })}>
-              <UserPlus size={14} />
-              <span>{alerts.requests.length} {alerts.requests.length === 1 ? 'prośba' : 'prośby'}</span>
-            </button>
-          )}
-          {alerts.payments > 0 && (
-            <button className="cd-alert-chip cd-alert-payments" onClick={() => navigate('/coach/payments')}>
-              <CreditCard size={14} />
-              <span>{alerts.payments} {alerts.payments === 1 ? 'płatność' : 'płatności'}</span>
-            </button>
-          )}
-          {alerts.drafts > 0 && (
-            <button className="cd-alert-chip cd-alert-drafts" onClick={() => navigate('/coach/reviews')}>
-              <FileText size={14} />
-              <span>{alerts.drafts} {alerts.drafts === 1 ? 'szkic' : 'szkice'}</span>
-            </button>
-          )}
+          <button className="cd-alert-chip cd-alert-payments" onClick={() => navigate('/coach/payments')}>
+            <CreditCard size={14} />
+            <span>{alerts.payments} {alerts.payments === 1 ? 'płatność' : 'płatności'}</span>
+          </button>
         </div>
       )}
 
@@ -177,10 +142,14 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="cd-today-list">
-            {todaySessions.map((s, i) => (
+            {todaySessions.map((s, i) => {
+              const now = new Date()
+              const sessionTime = s.startTime ? new Date(`${new Date(s.date).toISOString().split('T')[0]}T${s.startTime}`) : null
+              const isPast = sessionTime && sessionTime < now
+              return (
               <div
                 key={s._id}
-                className="cd-today-item"
+                className={`cd-today-item${isPast ? ' cd-today-past' : ''}`}
                 onClick={() => navigate(`/coach/sessions/${s._id}/edit`)}
                 style={{ '--item-delay': `${i * 60}ms`, '--type-color': TYPE_ACCENTS[s.sessionType] || TYPE_ACCENTS.inne }}
               >
@@ -197,44 +166,11 @@ export default function Dashboard() {
                 </div>
                 <ChevronRight size={14} className="cd-today-arrow" />
               </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* ─── Join requests (if any) ─── */}
-      {alerts.requests.length > 0 && (
-        <section className="cd-section" id="cd-requests">
-          <div className="cd-section-head">
-            <h2 className="cd-section-title">Prośby o dołączenie</h2>
-            <span className="cd-badge">{alerts.requests.length}</span>
-          </div>
-          <div className="cd-requests-list">
-            {alerts.requests.map((req) => {
-              const parentName = req.parents?.[0] ? `${req.parents[0].firstName} ${req.parents[0].lastName}` : 'Rodzic'
-              const age = req.dateOfBirth ? new Date().getFullYear() - new Date(req.dateOfBirth).getFullYear() : null
-              return (
-                <div key={req._id} className="cd-request-card">
-                  <div className="cd-request-info">
-                    <span className="cd-request-name">{req.firstName} {req.lastName}</span>
-                    <span className="cd-request-meta">
-                      {age && `${age} lat · `}{parentName}
-                    </span>
-                  </div>
-                  <div className="cd-request-actions">
-                    <button className="cd-req-accept" onClick={() => handleJoinRequest(req._id, 'accept')} title="Akceptuj">
-                      <Check size={15} />
-                    </button>
-                    <button className="cd-req-reject" onClick={() => handleJoinRequest(req._id, 'reject')} title="Odrzuć">
-                      <X size={15} />
-                    </button>
-                  </div>
-                </div>
               )
             })}
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       {/* ─── Recent players ─── */}
       <section className="cd-section">
