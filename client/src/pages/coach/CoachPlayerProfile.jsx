@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, ChevronDown, ChevronUp, Plus, Save, Trash2, Target,
-  Calendar, FileText, Eye, EyeOff, Clock, Star, MessageSquare, Sparkles, Loader,
+  Calendar, FileText, Eye, EyeOff, Clock, Sparkles,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import Button from '../../components/ui/Button/Button'
 import ConfirmModal from '../../components/ui/ConfirmModal'
 import useToast from '../../hooks/useToast'
-import { SKILL_LEVELS, SKILL_NAMES } from '../../constants/skillLevels'
 import './CoachPlayerProfile.css'
 
 const DAY_NAMES = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sb', 'Nd']
@@ -75,11 +74,6 @@ export default function CoachPlayerProfile() {
   const [observations, setObservations] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Skill editing
-  const [editSkill, setEditSkill] = useState(null)
-  const [editSkillVal, setEditSkillVal] = useState(1)
-  const [editSkillNote, setEditSkillNote] = useState('')
-
   // Observation form
   const [obsText, setObsText] = useState('')
   const [obsType, setObsType] = useState('general')
@@ -132,18 +126,6 @@ export default function CoachPlayerProfile() {
   useEffect(() => { fetchData() }, [id])
 
   /* ── Handlers ── */
-  const handleSkillSave = async () => {
-    if (!editSkill) return
-    try {
-      const { data } = await api.put(`/players/${id}`, {
-        skills: { [editSkill]: { score: editSkillVal, notes: editSkillNote } },
-      })
-      setPlayer(data.player || data)
-      setEditSkill(null)
-      toast.success('Umiejętność zapisana')
-    } catch { toast.error('Nie udało się zapisać') }
-  }
-
   const handlePathwayChange = async (newStage) => {
     setPathwayStage(newStage)
     setPathwaySaving(true)
@@ -270,19 +252,6 @@ export default function CoachPlayerProfile() {
     ? Math.floor((Date.now() - new Date(player.dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
     : null
 
-  const skills = player.skills || {}
-  const skillEntries = Object.entries(SKILL_NAMES).map(([key, label]) => {
-    const d = skills[key]
-    const score = typeof d === 'object' ? (d?.score ?? 0) : (d ?? 0)
-    const notes = typeof d === 'object' ? d?.notes : null
-    const level = SKILL_LEVELS.find((l) => l.value === Math.round(score)) || SKILL_LEVELS[0]
-    return { key, label, score, notes, level }
-  })
-
-  const avgSkill = skillEntries.filter((s) => s.score > 0).length > 0
-    ? Math.round(skillEntries.filter((s) => s.score > 0).reduce((sum, s) => sum + s.score, 0) / skillEntries.filter((s) => s.score > 0).length)
-    : 0
-
   const activeGoals = goals.filter((g) => g.status !== 'completed')
   const completedGoals = goals.filter((g) => g.status === 'completed')
 
@@ -354,50 +323,6 @@ export default function CoachPlayerProfile() {
           </div>
         </div>
       )}
-
-      {/* ─── Summary (default open) ─── */}
-      <Section title="Umiejętności" icon={Star} defaultOpen badge={avgSkill > 0 ? `Śr. ${avgSkill}` : null}>
-        <div className="cpp-skills">
-          {skillEntries.map((s) => (
-            <div key={s.key} className="cpp-skill-row">
-              <button
-                className="cpp-skill-main"
-                onClick={() => {
-                  setEditSkill(editSkill === s.key ? null : s.key)
-                  setEditSkillVal(Math.round(s.score) || 1)
-                  setEditSkillNote(s.notes || '')
-                }}
-              >
-                <span className="cpp-skill-label">{s.label}</span>
-                <div className="cpp-skill-bar-track">
-                  <div className="cpp-skill-bar-fill" style={{ width: `${s.score}%`, background: s.level.color }} />
-                </div>
-                <span className="cpp-skill-badge" style={{ color: s.level.color, background: s.level.bg }}>
-                  {s.level.label}
-                </span>
-              </button>
-              {editSkill === s.key && (
-                <div className="cpp-skill-edit">
-                  <div className="cpp-skill-levels">
-                    {SKILL_LEVELS.map((l) => (
-                      <button
-                        key={l.value}
-                        className={`cpp-level-btn ${editSkillVal === l.value ? 'active' : ''}`}
-                        style={editSkillVal === l.value ? { background: l.bg, color: l.color, borderColor: l.color } : {}}
-                        onClick={() => setEditSkillVal(l.value)}
-                      >
-                        {l.label}
-                      </button>
-                    ))}
-                  </div>
-                  <input className="cpp-skill-note" placeholder="Notatka..." value={editSkillNote} onChange={(e) => setEditSkillNote(e.target.value)} />
-                  <Button variant="primary" size="sm" onClick={handleSkillSave}><Save size={12} /> Zapisz</Button>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </Section>
 
       {/* ─── Plan ─── */}
       <Section title="Plan treningowy" icon={Calendar} badge={schedule.length > 0 ? `${schedule.length} sesji · ${totalHours}h/tyg` : null}>
