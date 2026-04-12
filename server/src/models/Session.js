@@ -52,13 +52,6 @@ const sessionSchema = new mongoose.Schema(
       trim: true,
     },
     focusAreas: [String],
-    skillUpdates: [
-      {
-        skill: String,
-        scoreBefore: Number,
-        scoreAfter: Number,
-      },
-    ],
     visibleToParent: {
       type: Boolean,
       default: true,

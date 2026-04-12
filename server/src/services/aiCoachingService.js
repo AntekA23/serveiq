@@ -46,16 +46,6 @@ async function getPlayerContext(playerId, days = 30) {
     }),
   ]);
 
-  // Build skill summary
-  const skills = {};
-  if (player.skills) {
-    for (const [key, val] of Object.entries(player.skills.toObject ? player.skills.toObject() : player.skills)) {
-      if (val && typeof val.score === 'number') {
-        skills[key] = { score: val.score, notes: val.notes || '' };
-      }
-    }
-  }
-
   // Build session summary
   const sessionSummary = sessions.map((s) => ({
     date: s.date.toISOString().split('T')[0],
@@ -63,11 +53,6 @@ async function getPlayerContext(playerId, days = 30) {
     duration: s.durationMinutes,
     title: s.title,
     focusAreas: s.focusAreas || [],
-    skillUpdates: (s.skillUpdates || []).map((su) => ({
-      skill: su.skill,
-      before: su.scoreBefore,
-      after: su.scoreAfter,
-    })),
   }));
 
   // Build wearable summary
@@ -107,7 +92,6 @@ async function getPlayerContext(playerId, days = 30) {
       gender: player.gender,
       ranking: player.ranking,
     },
-    skills,
     sessions: sessionSummary,
     wearable: wearableSummary,
     tournaments: tournamentSummary,
@@ -131,11 +115,8 @@ DANE ZAWODNIKA:
 - Płeć: ${ctx.player.gender === 'M' ? 'chłopiec' : ctx.player.gender === 'F' ? 'dziewczyna' : 'nieznana'}
 ${ctx.player.ranking?.pzt ? `- Ranking PZT: #${ctx.player.ranking.pzt}` : ''}
 
-UMIEJĘTNOŚCI (0-100):
-${Object.entries(ctx.skills).map(([k, v]) => `- ${k}: ${v.score}${v.notes ? ` (${v.notes})` : ''}`).join('\n')}
-
 OSTATNIE SESJE (14 dni):
-${ctx.sessions.length > 0 ? ctx.sessions.map((s) => `- ${s.date}: ${s.type} (${s.duration}min) "${s.title}" ${s.skillUpdates.length > 0 ? '→ ' + s.skillUpdates.map((u) => `${u.skill}: ${u.before}→${u.after}`).join(', ') : ''}`).join('\n') : 'Brak sesji'}
+${ctx.sessions.length > 0 ? ctx.sessions.map((s) => `- ${s.date}: ${s.type} (${s.duration}min) "${s.title}"`).join('\n') : 'Brak sesji'}
 
 DANE ZDROWOTNE (ostatnie 7 dni):
 ${ctx.wearable.length > 0 ? ctx.wearable.map((w) => `- ${w.date}: recovery=${w.recovery || '?'}%, HRV=${w.hrv || '?'}ms, HR=${w.restingHR || '?'}bpm, sen=${w.sleepQuality || '?'}%`).join('\n') : 'Brak danych'}
@@ -191,11 +172,8 @@ DANE ZAWODNIKA:
 - Imię: ${ctx.player.name}, wiek: ${ctx.player.age || '?'} lat
 - Okres oceny: ${new Date(periodStart).toLocaleDateString('pl-PL')} — ${new Date(periodEnd).toLocaleDateString('pl-PL')}
 
-UMIEJĘTNOŚCI (0-100):
-${Object.entries(ctx.skills).map(([k, v]) => `- ${k}: ${v.score}`).join('\n')}
-
 SESJE W OKRESIE (${ctx.sessions.length} sesji):
-${ctx.sessions.slice(0, 15).map((s) => `- ${s.date}: ${s.type} (${s.duration}min) "${s.title}" ${s.skillUpdates.map((u) => `${u.skill}: ${u.before}→${u.after}`).join(', ')}`).join('\n') || 'Brak'}
+${ctx.sessions.slice(0, 15).map((s) => `- ${s.date}: ${s.type} (${s.duration}min) "${s.title}"`).join('\n') || 'Brak'}
 
 TURNIEJE:
 ${ctx.tournaments.map((t) => `- ${t.name}: ${t.result}`).join('\n') || 'Brak'}

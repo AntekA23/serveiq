@@ -14,7 +14,6 @@ import {
   addMilestone,
   updateMilestone,
   deleteMilestone,
-  getSkillHistory,
   searchCoaches,
   requestCoach,
   getCoachRequests,
@@ -34,8 +33,6 @@ const router = Router();
 router.post('/self', verifyToken, requireRole('parent'), createPlayerSelf);
 router.put('/:id/avatar', verifyToken, uploadMiddleware, uploadAvatar);
 router.get('/:id/timeline', verifyToken, getTimeline);
-router.get('/:id/skill-history', verifyToken, getSkillHistory);
-
 // Program rozwoju federacji
 router.put('/:id/federation-program', verifyToken, requireRole('coach', 'clubAdmin'), setFederationProgram);
 router.put('/:id/federation-program/confirm-stage', verifyToken, requireRole('coach', 'clubAdmin'), confirmStage);

@@ -912,7 +912,7 @@ export const getClubPlayers = async (req, res, next) => {
     const players = await Player.find(filter)
       .populate('coaches', 'firstName lastName')
       .populate('parents', 'firstName lastName email')
-      .select('firstName lastName dateOfBirth pathwayStage coaches parents active skills avatarUrl updatedAt createdAt')
+      .select('firstName lastName dateOfBirth pathwayStage coaches parents active avatarUrl updatedAt createdAt')
       .sort(sortObj)
       .lean();
 

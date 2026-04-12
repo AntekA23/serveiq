@@ -223,16 +223,6 @@ const seed = async () => {
       ],
       developmentLevel: 'tennis10',
       ranking: { pzt: 0 },
-      skills: {
-        serve: { score: beginnerSkill(), notes: 'Uczy sie tossu' },
-        forehand: { score: beginnerSkill(), notes: 'Dobry kontakt z pilka' },
-        backhand: { score: beginnerSkill(), notes: 'Podstawy obourecznego' },
-        volley: { score: beginnerSkill(), notes: '' },
-        movement: { score: beginnerSkill(), notes: 'Naturalna koordynacja' },
-        tactics: { score: beginnerSkill(), notes: '' },
-        mental: { score: beginnerSkill(), notes: 'Bardzo zaangazowany' },
-        fitness: { score: beginnerSkill(), notes: '' },
-      },
       trainingPlan: {
         weeklySchedule: [
           { day: 2, sessionType: 'kort', durationMinutes: 60, startTime: '16:00', notes: 'Zajecia grupowe Tennis 10' },
@@ -268,16 +258,6 @@ const seed = async () => {
       ],
       developmentLevel: 'advanced',
       ranking: { pzt: 28, te: 450 },
-      skills: {
-        serve: { score: advancedSkill(), notes: 'Dobry slice, rozwija plaski' },
-        forehand: { score: advancedSkill(), notes: 'Glowna bron — stabilna rotacja' },
-        backhand: { score: advancedSkill(), notes: 'Oboureczny solidny, jednoreczny slice w rozwoju' },
-        volley: { score: advancedSkill(), notes: 'Swietne wyczucie przy siatce' },
-        movement: { score: advancedSkill(), notes: 'Szybka, dobry footwork' },
-        tactics: { score: advancedSkill(), notes: 'Czyta gre rywala' },
-        mental: { score: advancedSkill(), notes: 'Musi pracowac nad opanowaniem w tie-breakach' },
-        fitness: { score: 3, notes: '3-setowe mecze — wymaga poprawy wydolnosci' },
-      },
       trainingPlan: {
         weeklySchedule: [
           { day: 1, sessionType: 'kort', durationMinutes: 90, startTime: '15:00', notes: 'Trening techniczny' },
@@ -315,16 +295,6 @@ const seed = async () => {
       ],
       developmentLevel: 'beginner',
       ranking: {},
-      skills: {
-        serve: { score: 1, notes: '' },
-        forehand: { score: 1.5, notes: 'Uczy sie chwytu' },
-        backhand: { score: 1, notes: '' },
-        volley: { score: 1, notes: '' },
-        movement: { score: 2, notes: 'Ruchliwy, dobra koordynacja na swoj wiek' },
-        tactics: { score: 0.5, notes: '' },
-        mental: { score: 2.5, notes: 'Chetny, lubi rywalizacje' },
-        fitness: { score: 2, notes: '' },
-      },
       trainingPlan: {
         weeklySchedule: [
           { day: 2, sessionType: 'kort', durationMinutes: 60, startTime: '16:00', notes: 'Zajecia grupowe Tennis 10' },
@@ -612,10 +582,6 @@ const seed = async () => {
         durationMinutes: 90,
         notes: 'Praca nad plaskim serwisem. Return z bekhendu wymaga korekty glebokosci.',
         focusAreas: ['serwis', 'return'],
-        skillUpdates: [
-          { skill: 'serve', scoreBefore: 3, scoreAfter: 4 },
-          { skill: 'backhand', scoreBefore: 3, scoreAfter: 3 },
-        ],
       },
       {
         player: julia._id,
@@ -627,9 +593,6 @@ const seed = async () => {
         durationMinutes: 120,
         notes: 'Symulacja meczowa. Julia gra bardziej agresywnie na returnach.',
         focusAreas: ['taktyka', 'return'],
-        skillUpdates: [
-          { skill: 'tactics', scoreBefore: 3, scoreAfter: 4 },
-        ],
       },
       {
         player: julia._id,
@@ -640,9 +603,6 @@ const seed = async () => {
         durationMinutes: 60,
         notes: 'Interwaly + core. Widac poprawe wydolnosci.',
         focusAreas: ['kondycja', 'szybkosc'],
-        skillUpdates: [
-          { skill: 'fitness', scoreBefore: 2, scoreAfter: 3 },
-        ],
       },
     ];
 
@@ -660,7 +620,6 @@ const seed = async () => {
         title: sData.title,
         notes: sData.notes,
         focusAreas: sData.focusAreas,
-        skillUpdates: sData.skillUpdates || [],
         visibleToParent: true,
       });
     }

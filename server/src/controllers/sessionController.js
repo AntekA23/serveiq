@@ -16,15 +16,6 @@ const createSessionSchema = z.object({
   title: z.string().min(1, 'Tytuł treningu jest wymagany'),
   notes: z.string().optional(),
   focusAreas: z.array(z.string()).optional(),
-  skillUpdates: z
-    .array(
-      z.object({
-        skill: z.string(),
-        scoreBefore: z.number().min(0).max(100),
-        scoreAfter: z.number().min(0).max(100),
-      })
-    )
-    .optional(),
   visibleToParent: z.boolean().optional(),
 });
 
@@ -37,15 +28,6 @@ const updateSessionSchema = z.object({
   title: z.string().min(1, 'Tytuł treningu jest wymagany').optional(),
   notes: z.string().optional().nullable(),
   focusAreas: z.array(z.string()).optional(),
-  skillUpdates: z
-    .array(
-      z.object({
-        skill: z.string(),
-        scoreBefore: z.number().min(0).max(100),
-        scoreAfter: z.number().min(0).max(100),
-      })
-    )
-    .optional(),
   visibleToParent: z.boolean().optional(),
 });
 
@@ -100,7 +82,7 @@ export const getSessions = async (req, res, next) => {
 /**
  * POST /api/sessions
  * Utwórz nowy trening.
- * Coach: wymaga player należącego do trenera, opcjonalnie skillUpdates.
+ * Coach: wymaga player należącego do trenera.
  * Parent: wymaga player będącego dzieckiem rodzica, prostsza walidacja.
  */
 export const createSession = async (req, res, next) => {
@@ -127,7 +109,6 @@ export const createSession = async (req, res, next) => {
 
       sessionData.coach = req.user._id;
       sessionData.source = 'coach';
-      sessionData.skillUpdates = data.skillUpdates;
       sessionData.visibleToParent = data.visibleToParent;
     } else {
       player = await Player.findOne({ _id: data.player, parents: req.user._id, active: true });
@@ -138,17 +119,6 @@ export const createSession = async (req, res, next) => {
     }
 
     const session = await Session.create(sessionData);
-
-    // Aktualizuj skill scores na Player jeśli podano skillUpdates (tylko coach)
-    if (req.user.role === 'coach' && data.skillUpdates && data.skillUpdates.length > 0) {
-      for (const update of data.skillUpdates) {
-        if (player.skills && player.skills[update.skill]) {
-          player.skills[update.skill].score = update.scoreAfter;
-        }
-      }
-      player.markModified('skills');
-      await player.save();
-    }
 
     // Powiadom rodziców o nowej sesji (jeśli coach stworzył i widoczna)
     if (req.user.role === 'coach' && sessionData.visibleToParent !== false) {
@@ -239,22 +209,7 @@ export const updateSession = async (req, res, next) => {
     if (data.title !== undefined) session.title = data.title;
     if (data.notes !== undefined) session.notes = data.notes;
     if (data.focusAreas !== undefined) session.focusAreas = data.focusAreas;
-    if (data.skillUpdates !== undefined) session.skillUpdates = data.skillUpdates;
     if (data.visibleToParent !== undefined) session.visibleToParent = data.visibleToParent;
-
-    // Aktualizuj skill scores na Player jeśli podano nowe skillUpdates
-    if (data.skillUpdates && data.skillUpdates.length > 0) {
-      const player = await Player.findById(session.player);
-      if (player) {
-        for (const update of data.skillUpdates) {
-          if (player.skills && player.skills[update.skill]) {
-            player.skills[update.skill].score = update.scoreAfter;
-          }
-        }
-        player.markModified('skills');
-        await player.save();
-      }
-    }
 
     await session.save();
 

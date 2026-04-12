@@ -6,7 +6,6 @@ import Button from '../../components/ui/Button/Button'
 import ConfirmModal from '../../components/ui/ConfirmModal'
 import TagInput from '../../components/ui/TagInput'
 import useToast from '../../hooks/useToast'
-import { SKILL_NAMES, SKILL_LEVELS } from '../../constants/skillLevels'
 import './Coach.css'
 
 const SESSION_TYPES = [
@@ -28,7 +27,6 @@ const SURFACES = [
 
 const SURFACE_TYPES = ['kort', 'sparing', 'mecz']
 
-// SKILL_NAMES imported from constants/skillLevels
 
 export default function CoachEditSession() {
   const { id } = useParams()
@@ -52,7 +50,6 @@ export default function CoachEditSession() {
     visibleToParent: true,
   })
 
-  const [skillUpdates, setSkillUpdates] = useState([])
   const [showConfirm, setShowConfirm] = useState(false)
 
   useEffect(() => {
@@ -71,13 +68,6 @@ export default function CoachEditSession() {
           focusAreas: s.focusAreas || [],
           visibleToParent: s.visibleToParent !== false,
         })
-        if (s.skillUpdates && s.skillUpdates.length > 0) {
-          setSkillUpdates(s.skillUpdates.map((su) => ({
-            skill: su.skill,
-            scoreBefore: su.scoreBefore,
-            scoreAfter: su.scoreAfter,
-          })))
-        }
         const pName = s.player
           ? `${s.player.firstName || ''} ${s.player.lastName || ''}`.trim()
           : 'Zawodnik'
@@ -95,19 +85,6 @@ export default function CoachEditSession() {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  const addSkillUpdate = (skill) => {
-    if (skillUpdates.some((s) => s.skill === skill)) return
-    setSkillUpdates((prev) => [...prev, { skill, scoreBefore: 0, scoreAfter: 0 }])
-  }
-
-  const updateSkill = (skill, field, value) => {
-    setSkillUpdates((prev) => prev.map((s) => s.skill === skill ? { ...s, [field]: Number(value) } : s))
-  }
-
-  const removeSkillUpdate = (skill) => {
-    setSkillUpdates((prev) => prev.filter((s) => s.skill !== skill))
-  }
-
   const handleSubmit = async () => {
     setSaving(true)
     try {
@@ -121,7 +98,6 @@ export default function CoachEditSession() {
         notes: form.notes || undefined,
         focusAreas: form.focusAreas,
         visibleToParent: form.visibleToParent,
-        skillUpdates: skillUpdates.length > 0 ? skillUpdates : undefined,
       }
       await api.put(`/sessions/${id}`, payload)
       toast.success('Sesja zaktualizowana')
@@ -240,50 +216,6 @@ export default function CoachEditSession() {
             onChange={(e) => handleChange('visibleToParent', e.target.checked)} />
           Widoczna dla rodzica
         </label>
-
-        {/* Skill updates */}
-        <div className="coach-form-group">
-          <label>Aktualizacja umiejetnosci</label>
-          <div className="coach-skill-updates">
-              <div className="coach-skill-add-row">
-                {Object.entries(SKILL_NAMES).map(([key, label]) => (
-                  <button key={key} className="coach-skill-add-btn"
-                    disabled={skillUpdates.some((s) => s.skill === key)}
-                    onClick={() => addSkillUpdate(key)}>
-                    + {label}
-                  </button>
-                ))}
-              </div>
-              {skillUpdates.map((su) => (
-                <div key={su.skill} className="coach-skill-update-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 6 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span className="coach-skill-update-name">{SKILL_NAMES[su.skill]}</span>
-                    <button className="coach-skill-remove" onClick={() => removeSkillUpdate(su.skill)}>×</button>
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                    <label style={{ fontSize: 11, color: 'var(--color-text-tertiary)', minWidth: 40 }}>Przed:</label>
-                    {SKILL_LEVELS.map((l) => (
-                      <button key={l.value} className={`coach-skill-level-btn ${su.scoreBefore === l.value ? 'active' : ''}`}
-                        style={su.scoreBefore === l.value ? { background: l.bg, color: l.color, borderColor: l.color } : {}}
-                        onClick={() => updateSkill(su.skill, 'scoreBefore', l.value)}>
-                        {l.label}
-                      </button>
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                    <label style={{ fontSize: 11, color: 'var(--color-text-tertiary)', minWidth: 40 }}>Po:</label>
-                    {SKILL_LEVELS.map((l) => (
-                      <button key={l.value} className={`coach-skill-level-btn ${su.scoreAfter === l.value ? 'active' : ''}`}
-                        style={su.scoreAfter === l.value ? { background: l.bg, color: l.color, borderColor: l.color } : {}}
-                        onClick={() => updateSkill(su.skill, 'scoreAfter', l.value)}>
-                        {l.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
 
         {/* Submit */}
         <div className="coach-form-actions">

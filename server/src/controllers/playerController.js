@@ -346,42 +346,6 @@ export const updatePlayer = async (req, res, next) => {
       player.ranking = { ...player.ranking?.toObject?.() || {}, ...data.ranking };
     }
 
-    // Aktualizuj skills
-    if (data.skills) {
-      const skillChanges = [];
-      for (const [skillName, skillData] of Object.entries(data.skills)) {
-        if (skillData) {
-          if (!player.skills) player.skills = {};
-          if (!player.skills[skillName]) player.skills[skillName] = {};
-          const oldScore = player.skills[skillName].score;
-          if (skillData.score !== undefined) {
-            player.skills[skillName].score = skillData.score;
-            if (oldScore !== skillData.score) skillChanges.push(skillName);
-          }
-          if (skillData.notes !== undefined) player.skills[skillName].notes = skillData.notes;
-        }
-      }
-      player.markModified('skills');
-
-      // Powiadom rodzicow o zmianach umiejetnosci
-      if (skillChanges.length > 0) {
-        const parentIds = player.parents || [];
-        const skillLabels = { serve: 'serwis', forehand: 'forhend', backhand: 'bekhend', volley: 'wolej', tactics: 'taktyka', fitness: 'kondycja' };
-        const changedNames = skillChanges.map((s) => skillLabels[s] || s).join(', ');
-        for (const parentId of parentIds) {
-          await Notification.create({
-            user: parentId,
-            type: 'system',
-            title: 'Aktualizacja umiejetnosci',
-            body: `Trener zaktualizowal umiejetnosci ${player.firstName}: ${changedNames}`,
-            severity: 'info',
-            player: player._id,
-            actionUrl: `/parent/child/${player._id}`,
-          });
-        }
-      }
-    }
-
     await player.save();
 
     const updatedPlayer = await Player.findById(player._id).populate(
@@ -792,76 +756,6 @@ export const deleteMilestone = async (req, res, next) => {
     await player.save();
 
     res.json({ message: 'Kamień milowy usunięty' });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * GET /api/players/:id/skill-history
- * Zwraca historię umiejętności na podstawie sesji z skillUpdates
- */
-export const getSkillHistory = async (req, res, next) => {
-  try {
-    const playerId = req.params.id;
-
-    // Verify access
-    const player = await Player.findById(playerId);
-    if (!player) {
-      return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
-    }
-
-    if (req.user.role === 'parent') {
-      const childrenIds = (req.user.parentProfile?.children || []).map(String);
-      if (!childrenIds.includes(String(playerId))) {
-        return res.status(403).json({ message: 'Brak dostępu' });
-      }
-    } else if (req.user.role === 'coach') {
-      if (String(player.coach) !== String(req.user._id)) {
-        return res.status(403).json({ message: 'Brak dostępu' });
-      }
-    }
-
-    // Get all sessions with skill updates for this player
-    const filter = {
-      player: playerId,
-      skillUpdates: { $exists: true, $not: { $size: 0 } },
-    };
-
-    if (req.user.role === 'parent') {
-      filter.visibleToParent = true;
-    }
-
-    const sessions = await Session.find(filter)
-      .select('date skillUpdates sessionType title')
-      .sort({ date: 1 });
-
-    // Build skill history timeline
-    const history = {};
-    const skills = ['serve', 'forehand', 'backhand', 'volley', 'tactics', 'fitness'];
-    skills.forEach((s) => { history[s] = []; });
-
-    for (const session of sessions) {
-      for (const su of session.skillUpdates) {
-        if (skills.includes(su.skill)) {
-          history[su.skill].push({
-            date: session.date,
-            scoreBefore: su.scoreBefore,
-            scoreAfter: su.scoreAfter,
-            sessionTitle: session.title,
-            sessionType: session.sessionType,
-          });
-        }
-      }
-    }
-
-    // Add current scores as the latest data point
-    const currentSkills = {};
-    for (const skill of skills) {
-      currentSkills[skill] = player.skills?.[skill]?.score ?? 0;
-    }
-
-    res.json({ history, currentSkills });
   } catch (error) {
     next(error);
   }

@@ -1,15 +1,5 @@
 import mongoose from 'mongoose';
 
-const skillSchema = {
-  score: {
-    type: Number,
-    min: 0,
-    max: 5,
-    default: 0,
-  },
-  notes: String,
-};
-
 const plannedSessionSchema = new mongoose.Schema(
   {
     day: {
@@ -101,16 +91,6 @@ const playerSchema = new mongoose.Schema(
       status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
       message: String,
       createdAt: { type: Date, default: Date.now },
-    },
-    skills: {
-      serve: skillSchema,
-      forehand: skillSchema,
-      backhand: skillSchema,
-      volley: skillSchema,
-      movement: skillSchema,
-      tactics: skillSchema,
-      mental: skillSchema,
-      fitness: skillSchema,
     },
     trainingPlan: {
       weeklyGoal: {

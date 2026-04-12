@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, ChevronRight, TrendingUp, Target, Star, Calendar, Clock, Award, Dumbbell,
+  ArrowLeft, ChevronRight, Target, Star, Calendar, Clock, Award, Dumbbell,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
-import { SKILL_NAMES } from '../../constants/skillLevels'
 import './ChildProfile.css'
 
 function formatRelDate(dateStr) {
@@ -55,18 +54,6 @@ export default function ChildProfile() {
   const age = child.dateOfBirth
     ? Math.floor((Date.now() - new Date(child.dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
     : null
-
-  // Skills average
-  const skills = child.skills || {}
-  const skillEntries = Object.entries(SKILL_NAMES).map(([key, label]) => {
-    const d = skills[key]
-    const score = typeof d === 'object' ? (d?.score ?? 0) : (d ?? 0)
-    return { key, label, score }
-  }).filter((s) => s.score > 0)
-
-  const avgSkill = skillEntries.length > 0
-    ? Math.round(skillEntries.reduce((sum, s) => sum + s.score, 0) / skillEntries.length)
-    : 0
 
   // Goals
   const activeGoals = (child.goals || []).filter((g) => !g.completed).slice(0, 4)
@@ -213,42 +200,6 @@ export default function ChildProfile() {
               <span className="cp-plan-notes-text">{planNotes}</span>
             </div>
           )}
-        </section>
-      )}
-
-      {/* ─── 3. Progress ─── */}
-      {skillEntries.length > 0 && (
-        <section className="cp-section">
-          <div className="cp-section-head">
-            <h2 className="cp-section-title"><TrendingUp size={14} /> Postępy</h2>
-            <button className="cp-section-link" onClick={() => navigate(`/parent/child/${id}/timeline`)}>
-              Szczegóły <ChevronRight size={14} />
-            </button>
-          </div>
-
-          {/* Average bar */}
-          <div className="cp-progress-avg">
-            <div className="cp-progress-bar-track">
-              <div
-                className="cp-progress-bar-fill"
-                style={{ width: `${avgSkill}%` }}
-              />
-            </div>
-            <span className="cp-progress-val">{avgSkill}<span className="cp-progress-max">/100</span></span>
-          </div>
-
-          {/* Individual skills — compact */}
-          <div className="cp-skills-grid">
-            {skillEntries.map((s, i) => (
-              <div key={s.key} className="cp-skill-item" style={{ '--i': i }}>
-                <span className="cp-skill-name">{s.label}</span>
-                <div className="cp-skill-bar-track">
-                  <div className="cp-skill-bar-fill" style={{ width: `${s.score}%` }} />
-                </div>
-                <span className="cp-skill-score">{s.score}</span>
-              </div>
-            ))}
-          </div>
         </section>
       )}
 

@@ -56,17 +56,6 @@ export const getTimeline = async (req, res, next) => {
         sessionType: s.sessionType,
       });
 
-      // Also add skill updates if present
-      if (s.skillUpdates && s.skillUpdates.length > 0) {
-        s.skillUpdates.forEach((su) => {
-          events.push({
-            type: 'skill_update',
-            date: s.date,
-            title: `${su.skill}: ${su.scoreBefore}% -> ${su.scoreAfter}%`,
-            description: s.title,
-          });
-        });
-      }
     });
 
     // 2. Cele ukonczone

@@ -35,10 +35,6 @@
 .coach-player-info { flex: 1; min-width: 0; }
 .coach-player-name { font-size: 14px; font-weight: 600; color: var(--color-text); display: block; }
 .coach-player-meta { font-size: 11px; color: var(--color-text-tertiary); }
-.coach-player-skill { display: flex; align-items: center; gap: 6px; }
-.coach-player-skill-bar { width: 60px; height: 4px; background: var(--color-bg-tertiary); border-radius: var(--radius-full); overflow: hidden; }
-.coach-player-skill-fill { height: 100%; background: var(--color-accent); border-radius: var(--radius-full); }
-.coach-player-skill-val { font-size: 11px; font-weight: 700; color: var(--color-text-secondary); min-width: 20px; }
 .coach-player-arrow { color: var(--color-text-tertiary); flex-shrink: 0; }
 .coach-player-recovery { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-full); flex-shrink: 0; }
 .coach-player-recovery.good { background: var(--color-green-bg); color: var(--color-green); }
@@ -81,8 +77,6 @@
 .coach-player-age { font-size: 12px; color: var(--color-text-tertiary); }
 .coach-player-stage { font-size: 11px; color: var(--color-blue); background: var(--color-blue-bg); padding: 1px 8px; border-radius: var(--radius-full); font-weight: 600; }
 .coach-player-ranking { font-size: 11px; color: var(--color-accent); font-weight: 600; }
-.coach-player-skills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-.coach-skill-chip { font-size: 10px; padding: 2px 8px; border-radius: var(--radius-full); background: transparent; border: 1px solid var(--color-border-md); font-weight: 600; }
 .coach-player-parents { font-size: 11px; color: var(--color-text-tertiary); margin-top: 4px; }
 
 /* ═══ Player Profile ═══ */
@@ -108,21 +102,6 @@
 .coach-tab { display: flex; align-items: center; gap: 6px; padding: 10px 20px; border: none; background: none; color: var(--color-text-tertiary); font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
 .coach-tab:hover { color: var(--color-text-secondary); }
 .coach-tab.active { color: var(--color-accent); border-bottom-color: var(--color-accent); }
-
-/* Skills */
-.coach-skills-section { display: flex; flex-direction: column; gap: 2px; }
-.coach-skill-row { background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden; }
-.coach-skill-header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; }
-.coach-skill-header:hover { background: var(--color-bg-tertiary); }
-.coach-skill-name { font-size: 13px; font-weight: 600; color: var(--color-text); min-width: 80px; }
-.coach-skill-level { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-full); margin-left: auto; }
-
-.coach-skill-edit { padding: 12px 16px; background: var(--color-bg-tertiary); display: flex; flex-direction: column; gap: 8px; }
-.coach-skill-level-selector { display: flex; gap: 4px; flex-wrap: wrap; }
-.coach-skill-level-btn { display: inline-flex; align-items: center; padding: 6px 12px; border: 1px solid var(--color-border-md); border-radius: var(--radius-full); background: transparent; color: var(--color-text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-.coach-skill-level-btn:hover { border-color: var(--color-text-tertiary); }
-.coach-skill-level-btn.active { font-weight: 700; }
-.coach-skill-note { width: 100%; padding: 8px 12px; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); background: var(--color-bg-secondary); color: var(--color-text); font-size: 13px; box-sizing: border-box; }
 
 /* Sessions list (profile) */
 .coach-sessions-list { display: flex; flex-direction: column; gap: 2px; }
@@ -201,17 +180,6 @@
 .coach-link-btn { background: none; border: none; color: var(--color-accent); font-size: 11px; cursor: pointer; text-decoration: underline; }
 
 /* Skill updates in form */
-.coach-skill-updates { display: flex; flex-direction: column; gap: 8px; }
-.coach-skill-add-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
-.coach-skill-add-btn { font-size: 11px; padding: 4px 10px; border: 1px solid var(--color-border-md); border-radius: var(--radius-full); background: transparent; color: var(--color-text-secondary); cursor: pointer; }
-.coach-skill-add-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
-.coach-skill-add-btn:disabled { opacity: 0.3; cursor: default; }
-.coach-skill-update-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-.coach-skill-update-row input { width: 60px; padding: 4px 8px; border: 1px solid var(--color-border-md); border-radius: var(--radius-sm); background: var(--color-bg-secondary); color: var(--color-text); text-align: center; }
-.coach-skill-update-row label { color: var(--color-text-tertiary); }
-.coach-skill-update-name { font-weight: 600; min-width: 70px; }
-.coach-skill-remove { background: none; border: none; color: var(--color-heart); cursor: pointer; font-size: 16px; }
-
 /* ═══ Payments ═══ */
 .coach-payments-list { display: flex; flex-direction: column; gap: 4px; }
 .coach-payment-card { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); }
@@ -313,10 +281,7 @@
 .coach-rating-stars { display: flex; gap: 4px; }
 .coach-star-btn { background: none; border: none; cursor: pointer; padding: 2px; }
 
-/* Skill snapshot in form */
-.coach-skill-snapshot { display: flex; flex-direction: column; gap: 6px; }
-.coach-skill-snap-row { display: flex; align-items: center; gap: 10px; }
-.coach-skill-snap-name { font-size: 12px; color: var(--color-text-secondary); min-width: 70px; }
+
 
 /* ═══ Responsive ═══ */
 @media (max-width: 768px) {

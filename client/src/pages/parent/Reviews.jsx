@@ -9,11 +9,6 @@ const TYPE_LABELS = {
   milestone: 'Kamien milowy', general: 'Ogolna',
 }
 
-const SKILL_NAMES = {
-  serve: 'Serwis', forehand: 'Forhend', backhand: 'Bekhend',
-  volley: 'Wolej', tactics: 'Taktyka', fitness: 'Kondycja',
-}
-
 export default function Reviews() {
   const { id: playerId } = useParams()
   const navigate = useNavigate()
@@ -143,27 +138,6 @@ export default function Reviews() {
                       </div>
                     )}
 
-                    {/* Skill snapshot */}
-                    {r.skillRatings && Object.values(r.skillRatings).some((v) => v > 0) && (
-                      <div className="review-section">
-                        <div className="review-section-header">Umiejetnosci</div>
-                        <div className="review-skills">
-                          {Object.entries(SKILL_NAMES).map(([key, label]) => {
-                            const val = r.skillRatings[key]
-                            if (!val) return null
-                            return (
-                              <div key={key} className="review-skill-row">
-                                <span className="review-skill-name">{label}</span>
-                                <div className="review-skill-bar">
-                                  <div className="review-skill-fill" style={{ width: `${val}%` }} />
-                                </div>
-                                <span className="review-skill-val">{val}</span>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
