@@ -1184,29 +1184,35 @@ const seed = async () => {
       { player: kacper._id, badgeSlug: 'first-session', earnedAt: new Date('2026-02-15') },
       { player: kacper._id, badgeSlug: 'regular-player', earnedAt: new Date('2026-03-10') },
       { player: kacper._id, badgeSlug: 'weekly-streak', earnedAt: new Date('2026-03-20') },
-      { player: kacper._id, badgeSlug: 'first-step', earnedAt: new Date('2026-02-28') },
-      { player: kacper._id, badgeSlug: 'practitioner', earnedAt: new Date('2026-03-25') },
+      { player: kacper._id, badgeSlug: 'hours-10', earnedAt: new Date('2026-03-01') },
       { player: kacper._id, badgeSlug: 'tournament-debut', earnedAt: new Date('2026-04-01') },
+      { player: kacper._id, badgeSlug: 'goal-achieved', earnedAt: new Date('2026-03-28') },
     ]);
     console.log('  Kacper: 6 odznak');
 
-    // Julia — zaawansowana, więcej odznak
+    // Julia — zaawansowana, dużo odznak + ręczne od trenera
     await PlayerBadge.insertMany([
       { player: julia._id, badgeSlug: 'first-session', earnedAt: new Date('2025-09-01') },
       { player: julia._id, badgeSlug: 'regular-player', earnedAt: new Date('2025-10-15') },
+      { player: julia._id, badgeSlug: 'session-25', earnedAt: new Date('2025-12-01') },
       { player: julia._id, badgeSlug: 'training-machine', earnedAt: new Date('2026-01-20') },
+      { player: julia._id, badgeSlug: 'hours-10', earnedAt: new Date('2025-10-01') },
+      { player: julia._id, badgeSlug: 'hours-50', earnedAt: new Date('2026-01-10') },
       { player: julia._id, badgeSlug: 'weekly-streak', earnedAt: new Date('2025-10-01') },
       { player: julia._id, badgeSlug: 'streak-master', earnedAt: new Date('2025-11-15') },
-      { player: julia._id, badgeSlug: 'first-step', earnedAt: new Date('2025-09-10') },
-      { player: julia._id, badgeSlug: 'practitioner', earnedAt: new Date('2025-10-20') },
-      { player: julia._id, badgeSlug: 'stable-player', earnedAt: new Date('2026-01-10') },
-      { player: julia._id, badgeSlug: 'all-rounder', earnedAt: new Date('2026-02-01') },
       { player: julia._id, badgeSlug: 'tournament-debut', earnedAt: new Date('2025-11-01') },
       { player: julia._id, badgeSlug: 'winner', earnedAt: new Date('2026-01-15') },
+      { player: julia._id, badgeSlug: 'tournament-5', earnedAt: new Date('2026-03-01') },
+      { player: julia._id, badgeSlug: 'finalist', earnedAt: new Date('2026-03-15') },
       { player: julia._id, badgeSlug: 'court-traveler', earnedAt: new Date('2026-02-20') },
       { player: julia._id, badgeSlug: 'goal-achieved', earnedAt: new Date('2026-01-05') },
+      { player: julia._id, badgeSlug: 'three-goals', earnedAt: new Date('2026-02-10') },
+      { player: julia._id, badgeSlug: 'pathway-advance', earnedAt: new Date('2026-01-01') },
+      // Ręczne odznaki od trenera
+      { player: julia._id, badgeSlug: 'coach-mvp', earnedAt: new Date('2026-04-01'), type: 'manual', awardedBy: coach._id, awardedNote: 'Świetna postawa na turnieju w Krakowie!' },
+      { player: julia._id, badgeSlug: 'coach-sportsmanship', earnedAt: new Date('2026-03-20'), type: 'manual', awardedBy: coach._id, awardedNote: 'Zawsze fair play na korcie.' },
     ]);
-    console.log('  Julia: 13 odznak');
+    console.log('  Julia: 18 odznak (w tym 2 ręczne od trenera)');
 
     // Antoni — nowy, tylko pierwsza sesja
     await PlayerBadge.insertMany([

@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, ChevronDown, ChevronUp, Plus, Save, Trash2, Target,
-  Calendar, FileText, Eye, EyeOff, Clock, Sparkles,
+  Calendar, FileText, Eye, EyeOff, Clock, Sparkles, Award,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import Button from '../../components/ui/Button/Button'
 import ConfirmModal from '../../components/ui/ConfirmModal'
+import BadgeGrid from '../../components/badges/BadgeGrid'
+import BadgeAwardModal from '../../components/badges/BadgeAwardModal'
 import useToast from '../../hooks/useToast'
 import './CoachPlayerProfile.css'
 
@@ -89,6 +91,11 @@ export default function CoachPlayerProfile() {
   // Pathway stage
   const [pathwayStage, setPathwayStage] = useState('')
   const [pathwaySaving, setPathwaySaving] = useState(false)
+
+  // Badges
+  const [showAwardModal, setShowAwardModal] = useState(false)
+  const [badgeEarnedCount, setBadgeEarnedCount] = useState(0)
+  const [badgeRefreshKey, setBadgeRefreshKey] = useState(0)
 
   // AI Recommendations
   const [aiRecs, setAiRecs] = useState(null)
@@ -483,6 +490,28 @@ export default function CoachPlayerProfile() {
           </div>
         )}
       </Section>
+
+      {/* ─── Badges ─── */}
+      <Section title="Odznaki" icon={Award} badge={badgeEarnedCount > 0 ? `${badgeEarnedCount} zdobytych` : null}>
+        <BadgeGrid
+          key={badgeRefreshKey}
+          playerId={id}
+          onBadgesLoaded={(badges) => setBadgeEarnedCount(badges.filter(b => b.earned).length)}
+        />
+        <div style={{ marginTop: '0.75rem' }}>
+          <Button size="sm" onClick={() => setShowAwardModal(true)}>
+            <Plus size={14} /> Przyznaj odznakę
+          </Button>
+        </div>
+      </Section>
+
+      {showAwardModal && (
+        <BadgeAwardModal
+          playerId={id}
+          onClose={() => setShowAwardModal(false)}
+          onAwarded={() => setBadgeRefreshKey(k => k + 1)}
+        />
+      )}
 
       {/* ─── Reviews quick link ─── */}
       {reviews.length > 0 && (

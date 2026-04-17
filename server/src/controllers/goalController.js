@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import DevelopmentGoal from '../models/DevelopmentGoal.js';
+import Player from '../models/Player.js';
+import { evaluateBadges } from '../services/badgeEngine.js';
 
 // ====== Zod Schemas ======
 
@@ -160,6 +162,15 @@ export const updateGoal = async (req, res, next) => {
     }
 
     await goal.save();
+
+    // Ewaluacja odznak przy ukończeniu celu (fire-and-forget)
+    if (data.status === 'completed') {
+      const playerForBadges = await Player.findById(goal.player).select('parents').lean();
+      if (playerForBadges) {
+        const parentIds = (playerForBadges.parents || []).map(String);
+        evaluateBadges(goal.player, parentIds).catch(() => {});
+      }
+    }
 
     const updatedGoal = await DevelopmentGoal.findById(goal._id)
       .populate('player', 'firstName lastName')

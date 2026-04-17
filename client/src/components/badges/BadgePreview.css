@@ -1,0 +1,41 @@
+.badge-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.badge-preview-icons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.badge-preview-icon {
+  flex-shrink: 0;
+}
+
+.badge-preview-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-accent);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.badge-preview-link:hover {
+  background: var(--color-accent-muted, rgba(99,102,241,0.08));
+}
+
+.badge-preview-count {
+  color: var(--color-text-tertiary);
+  font-size: 11px;
+}

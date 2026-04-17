@@ -3,7 +3,6 @@
   border-radius: 12px;
   border: 1px solid var(--color-border, #e5e7eb);
   padding: 1.25rem;
-  margin-top: 1.25rem;
 }
 
 .badge-grid-header {
@@ -30,6 +29,7 @@
   font-size: 12px;
   color: var(--color-text-tertiary);
   margin-left: auto;
+  font-weight: 600;
 }
 
 .badge-grid-category { margin-bottom: 1rem; }
@@ -58,6 +58,11 @@
   width: 80px;
   cursor: default;
   position: relative;
+  transition: transform 0.15s ease;
+}
+
+.badge-grid-item:hover {
+  transform: translateY(-2px);
 }
 
 .badge-grid-item-name {
@@ -87,6 +92,7 @@
   transition: width 0.3s ease;
 }
 
+/* Tooltip */
 .badge-grid-tooltip {
   display: none;
   position: absolute;
@@ -97,7 +103,7 @@
   border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 8px 12px;
-  min-width: 140px;
+  min-width: 160px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   z-index: 10;
   pointer-events: none;
@@ -109,6 +115,20 @@
 .badge-grid-tooltip-desc { font-size: 11px; color: var(--color-text-secondary); }
 .badge-grid-tooltip-date { font-size: 10px; color: var(--color-accent); margin-top: 4px; }
 
+.badge-grid-tooltip-awarded {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+.badge-grid-tooltip-note {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+/* Earned animation */
 @keyframes badgeEarned {
   0% { transform: scale(1); }
   50% { transform: scale(1.1); }

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import Tournament from '../models/Tournament.js';
 import Player from '../models/Player.js';
+import { evaluateBadges } from '../services/badgeEngine.js';
 
 // ====== Zod Schemas ======
 
@@ -117,6 +118,10 @@ export const createTournament = async (req, res, next) => {
       .populate('player', 'firstName lastName')
       .populate('coach', 'firstName lastName');
 
+    // Ewaluacja odznak (fire-and-forget)
+    const parentIds = (player.parents || []).map(String);
+    evaluateBadges(tournament.player, parentIds).catch(() => {});
+
     res.status(201).json({ message: 'Turniej został dodany', tournament: populated });
   } catch (error) {
     next(error);
@@ -188,6 +193,13 @@ export const updateTournament = async (req, res, next) => {
     const updated = await Tournament.findById(tournament._id)
       .populate('player', 'firstName lastName')
       .populate('coach', 'firstName lastName');
+
+    // Ewaluacja odznak (fire-and-forget)
+    const playerForBadges = await Player.findById(tournament.player).select('parents').lean();
+    if (playerForBadges) {
+      const parentIds = (playerForBadges.parents || []).map(String);
+      evaluateBadges(tournament.player, parentIds).catch(() => {});
+    }
 
     res.json({ message: 'Turniej został zaktualizowany', tournament: updated });
   } catch (error) {

@@ -5,6 +5,7 @@ import {
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
+import BadgePreview from '../../components/badges/BadgePreview'
 import './ChildProfile.css'
 
 function formatRelDate(dateStr) {
@@ -285,10 +286,24 @@ export default function ChildProfile() {
         </section>
       )}
 
+      {/* ─── 6. Odznaki ─── */}
+      <section className="cp-section">
+        <div className="cp-section-head">
+          <h2 className="cp-section-title"><Award size={14} /> Odznaki</h2>
+          <button className="cp-section-link" onClick={() => navigate(`/parent/child/${id}/badges`)}>
+            Wszystkie <ChevronRight size={14} />
+          </button>
+        </div>
+        <BadgePreview playerId={id} />
+      </section>
+
       {/* ─── Quick links ─── */}
       <div className="cp-quick-links">
         <button className="cp-quick-link" onClick={() => navigate(`/parent/child/${id}/timeline`)}>
           <Clock size={14} /> Historia
+        </button>
+        <button className="cp-quick-link" onClick={() => navigate(`/parent/child/${id}/badges`)}>
+          <Award size={14} /> Odznaki
         </button>
         <button className="cp-quick-link" onClick={() => navigate('/reviews')}>
           <Star size={14} /> Oceny

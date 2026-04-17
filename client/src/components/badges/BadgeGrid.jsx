@@ -6,30 +6,33 @@ import './BadgeGrid.css'
 
 const CATEGORY_LABELS = {
   training: 'Treningowe',
-  skills: 'Umiejetnosci',
   tournament: 'Turniejowe',
-  special: 'Specjalne',
+  development: 'Rozwojowe',
+  coach: 'Od trenera',
 }
 
-const CATEGORY_ORDER = ['training', 'skills', 'tournament', 'special']
+const CATEGORY_ORDER = ['training', 'tournament', 'development', 'coach']
 
-export default function BadgeGrid({ playerId }) {
+export default function BadgeGrid({ playerId, onBadgesLoaded }) {
   const [badges, setBadges] = useState([])
   const [loading, setLoading] = useState(true)
 
+  const fetchBadges = async () => {
+    try {
+      setLoading(true)
+      const { data } = await api.get(`/badges/${playerId}`)
+      const b = data.badges || []
+      setBadges(b)
+      if (onBadgesLoaded) onBadgesLoaded(b)
+    } catch {
+      setBadges([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (!playerId) return
-    const fetchBadges = async () => {
-      try {
-        setLoading(true)
-        const { data } = await api.get(`/badges/${playerId}`)
-        setBadges(data.badges || [])
-      } catch {
-        setBadges([])
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchBadges()
   }, [playerId])
 
@@ -69,7 +72,7 @@ export default function BadgeGrid({ playerId }) {
                     <BadgeIcon icon={badge.icon} earned={badge.earned} size={56} />
                   </div>
                   <span className="badge-grid-item-name">{badge.name}</span>
-                  {!badge.earned && badge.progress && badge.progress.target > 1 && (
+                  {!badge.earned && !badge.isManual && badge.progress && badge.progress.target > 1 && (
                     <div className="badge-grid-progress">
                       <div className="badge-grid-progress-fill" style={{ width: `${(badge.progress.current / badge.progress.target) * 100}%` }} />
                     </div>
@@ -82,9 +85,17 @@ export default function BadgeGrid({ playerId }) {
                         Zdobyta: {new Date(badge.earnedAt).toLocaleDateString('pl-PL')}
                       </div>
                     )}
-                    {!badge.earned && badge.progress && (
+                    {badge.earned && badge.awardedBy && (
+                      <div className="badge-grid-tooltip-awarded">
+                        Przyznana przez: {badge.awardedBy.firstName} {badge.awardedBy.lastName}
+                      </div>
+                    )}
+                    {badge.earned && badge.awardedNote && (
+                      <div className="badge-grid-tooltip-note">„{badge.awardedNote}"</div>
+                    )}
+                    {!badge.earned && !badge.isManual && badge.progress && (
                       <div className="badge-grid-tooltip-date">
-                        Postep: {badge.progress.current} / {badge.progress.target}
+                        Postęp: {badge.progress.current} / {badge.progress.target}
                       </div>
                     )}
                   </div>

@@ -15,6 +15,20 @@ const playerBadgeSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    type: {
+      type: String,
+      enum: ['automatic', 'manual'],
+      default: 'automatic',
+    },
+    awardedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    awardedNote: {
+      type: String,
+      trim: true,
+      maxlength: 200,
+    },
   },
   { timestamps: true }
 );

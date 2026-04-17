@@ -69,6 +69,7 @@ import PaymentCancel from './pages/parent/PaymentCancel'
 import Landing from './pages/Landing'
 import Terms from './pages/legal/Terms'
 import Privacy from './pages/legal/Privacy'
+import BadgePage from './pages/shared/BadgePage'
 
 function ProtectedRoute({ children, role }) {
   const user = useAuthStore((s) => s.user)
@@ -191,6 +192,14 @@ export default function App() {
           }
         />
         <Route
+          path="/coach/player/:id/badges"
+          element={
+            <ProtectedRoute role={['coach', 'clubAdmin']}>
+              <AppShell><BadgePage /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/coach/players/new"
           element={
             <ProtectedRoute role={['coach', 'clubAdmin']}>
@@ -303,6 +312,14 @@ export default function App() {
           element={
             <ProtectedRoute role="parent">
               <AppShell><ParentTimeline /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/child/:id/badges"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><BadgePage /></AppShell>
             </ProtectedRoute>
           }
         />

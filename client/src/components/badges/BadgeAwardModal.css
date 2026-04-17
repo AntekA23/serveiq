@@ -1,0 +1,143 @@
+.bam-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.bam-modal {
+  background: var(--color-surface, #fff);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.bam-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.bam-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.bam-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-tertiary);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+}
+
+.bam-close:hover {
+  color: var(--color-text);
+  background: var(--color-bg-tertiary);
+}
+
+.bam-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.bam-badge-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: var(--color-bg-secondary, #f9fafb);
+  cursor: pointer;
+  width: 72px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.bam-badge-option:hover {
+  border-color: var(--color-border);
+}
+
+.bam-badge-option.selected {
+  border-color: var(--color-accent);
+  background: var(--color-accent-muted, rgba(99, 102, 241, 0.08));
+}
+
+.bam-badge-name {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.bam-note-group {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.bam-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.bam-note {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: none;
+  background: var(--color-bg-secondary, #f9fafb);
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+.bam-note:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.bam-char-count {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+}
+
+.bam-error {
+  font-size: 12px;
+  color: var(--color-danger, #ef4444);
+  margin-bottom: 0.75rem;
+}
+
+.bam-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

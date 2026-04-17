@@ -9,6 +9,7 @@ import Session from '../models/Session.js';
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
 import { sendInviteEmail } from '../services/emailService.js';
+import { evaluateBadges } from '../services/badgeEngine.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -322,6 +323,10 @@ export const updatePlayer = async (req, res, next) => {
         notes: data.pathwayStageNotes || '',
       });
       player.pathwayStage = data.pathwayStage;
+
+      // Ewaluacja odznak po zmianie ścieżki (fire-and-forget)
+      const parentIds = (player.parents || []).map(String);
+      evaluateBadges(player._id, parentIds).catch(() => {});
     }
 
     // Ustawienie nextStep
