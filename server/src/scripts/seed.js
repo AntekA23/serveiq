@@ -238,6 +238,19 @@ const seed = async () => {
         updatedAt: daysAgo(5),
         updatedBy: coach._id,
       },
+      idol: {
+        name: 'Iga Świątek',
+        facts: [
+          'Iga zaczęła grać w tenisa mając zaledwie 5 lat, inspirowana przez ojca Tomasza, który sam był wioślarzem olimpijskim.',
+          'Przed wielkimi meczami Iga słucha muzyki rockowej — to jej sposób na skupienie i kontrolę emocji na korcie.',
+          'W 2020 roku Iga wygrała Roland Garros nie tracąc ani jednego seta w całym turnieju — miała wtedy zaledwie 19 lat.',
+          'Iga pracuje z psychologiem sportowym od 16. roku życia — uważa, że siła mentalna jest równie ważna jak technika.',
+          'Jako juniorka Iga grała na kortach w Raszynie pod Warszawą — daleko od wielkich akademii tenisowych.',
+          'Iga Świątek była pierwszą Polką, która zdobyła numer 1 w rankingu WTA, i utrzymała tę pozycję przez ponad rok.',
+          'Ulubione ćwiczenie Igi to skakanka — robi ją przed każdym treningiem, bo poprawia koordynację i szybkość nóg.',
+        ],
+        generatedAt: new Date(),
+      },
     });
 
     // Demo Record B — Sonia-light (advanced junior pathway)
@@ -276,6 +289,19 @@ const seed = async () => {
         text: 'Przygotowanie do turnieju w Krakowie. Cel: polfinał. Potem ocena gotowosci do Performance.',
         updatedAt: daysAgo(3),
         updatedBy: coach._id,
+      },
+      idol: {
+        name: 'Carlos Alcaraz',
+        facts: [
+          'Carlos zaczął grać w tenisa w wieku 4 lat, trenowany przez ojca Carlosa Sr., który był zawodnikiem na poziomie krajowym.',
+          'W wieku 18 lat Alcaraz pokonał Rafaela Nadala — swojego idola z dzieciństwa — w turnieju ATP w Madrycie.',
+          'Carlos trenuje w akademii Juana Carlosa Ferrero w Villenie — codziennie wstaje o 7:00 i trenuje 4-5 godzin.',
+          'Alcaraz jest znany z „drop shotów" — skrótów, które ćwiczył godzinami jako dziecko, bo uważał je za najbardziej kreatywny zagranie.',
+          'W 2022 roku Carlos został najmłodszą „jedynką" w historii rankingu ATP — miał zaledwie 19 lat.',
+          'Mimo sukcesów Carlos mówi, że najważniejsza lekcja to nauczyć się przegrywać — „porażki uczą więcej niż wygrane".',
+          'Carlos uwielbia grę w padla i PlayStation — uważa, że odpoczynek mentalny jest kluczowy dla osiągania szczytowej formy.',
+        ],
+        generatedAt: new Date(),
       },
     });
 

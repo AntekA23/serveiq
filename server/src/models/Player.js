@@ -117,6 +117,11 @@ const playerSchema = new mongoose.Schema(
       updatedAt: Date,
       updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     },
+    idol: {
+      name: { type: String, trim: true },
+      facts: [String],
+      generatedAt: Date,
+    },
     active: {
       type: Boolean,
       default: true,

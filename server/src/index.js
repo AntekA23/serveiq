@@ -35,6 +35,7 @@ import timelineRoutes from './routes/timeline.js';
 import coachLinkRoutes from './routes/coachLinks.js';
 import badgeRoutes from './routes/badges.js';
 import developmentProgramRoutes from './routes/developmentPrograms.js';
+import aiRoutes from './routes/ai.js';
 
 // ====== Konfiguracja ======
 
@@ -117,6 +118,7 @@ app.use('/api/timeline', timelineRoutes);
 app.use('/api/coach-links', coachLinkRoutes);
 app.use('/api/badges', badgeRoutes);
 app.use('/api/development-programs', developmentProgramRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

@@ -160,6 +160,46 @@ Odpowiedz w formacie JSON (bez markdown):
 }
 
 /**
+ * Generuje motywujące ciekawostki o ulubionym tenisiście dziecka
+ */
+export async function generateIdolFacts(idolName) {
+  const prompt = `Jesteś ekspertem od tenisa i motywacji sportowej. Wygeneruj dokładnie 7 ciekawostek i motywujących faktów o zawodniku/zawodniczce ${idolName} — profesjonalnym/ej tenisiście/tenisistce.
+
+Fakty powinny dotyczyć:
+- Drogi do sukcesu, początków kariery
+- Nawyków treningowych, codziennej rutyny
+- Siły mentalnej, sposobu radzenia sobie z porażkami
+- Ciekawostek, mniej znanych faktów
+- Cytatów lub motywujących wypowiedzi
+- Rzeczy, które mogą zainspirować młodego tenisistę/tenisistkę
+
+Każdy fakt to 1-2 zdania, pisane po polsku, w sposób angażujący i zrozumiały dla rodzica dziecka grającego w tenisa. Pisz w trzeciej osobie.
+
+Odpowiedz w formacie JSON (bez markdown):
+{ "facts": ["fakt 1", "fakt 2", "fakt 3", "fakt 4", "fakt 5", "fakt 6", "fakt 7"] }`;
+
+  const response = await getClient().messages.create({
+    model: MODEL,
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  const text = response.content[0]?.text || '{}';
+
+  try {
+    const parsed = JSON.parse(text);
+    return parsed.facts || [];
+  } catch {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      const parsed = JSON.parse(match[0]);
+      return parsed.facts || [];
+    }
+    return [];
+  }
+}
+
+/**
  * Generuje szkic oceny okresowej na podstawie danych
  */
 export async function generateReviewDraft(playerId, periodStart, periodEnd) {

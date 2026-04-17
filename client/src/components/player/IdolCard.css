@@ -1,0 +1,236 @@
+/* ── Empty state ── */
+.idol-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px dashed var(--color-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.idol-empty:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-muted, rgba(99, 102, 241, 0.04));
+}
+
+.idol-empty-icon {
+  color: #F59E0B;
+  flex-shrink: 0;
+}
+
+.idol-empty-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  display: block;
+}
+
+.idol-empty-sub {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  display: block;
+  line-height: 1.3;
+}
+
+/* ── Card ── */
+.idol-card {
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid #F59E0B;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.idol-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.idol-star {
+  color: #F59E0B;
+  flex-shrink: 0;
+}
+
+.idol-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+  color: var(--color-text);
+}
+
+.idol-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.idol-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-tertiary);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  transition: color 0.15s, background 0.15s;
+}
+
+.idol-action-btn:hover {
+  color: var(--color-text);
+  background: var(--color-bg-tertiary);
+}
+
+.idol-action-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Fact row ── */
+.idol-fact-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.idol-fact {
+  flex: 1;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.idol-fact-empty {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+.idol-nav {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-tertiary);
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.idol-nav:hover {
+  color: var(--color-text);
+}
+
+/* ── Dots ── */
+.idol-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.idol-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-bg-tertiary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.idol-dot.active {
+  background: #F59E0B;
+}
+
+/* ── Loading ── */
+.idol-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  padding: 8px 0;
+}
+
+@keyframes idolSpin {
+  to { transform: rotate(360deg); }
+}
+
+.idol-spin {
+  animation: idolSpin 1s linear infinite;
+}
+
+/* ── Error ── */
+.idol-error {
+  font-size: 11px;
+  color: var(--color-danger, #ef4444);
+  margin-top: 6px;
+}
+
+/* ── Modal ── */
+.idol-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.idol-modal {
+  background: var(--color-surface, #fff);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.idol-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text);
+  margin: 0 0 4px;
+}
+
+.idol-modal-sub {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  margin: 0 0 12px;
+}
+
+.idol-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--color-bg-secondary, #f9fafb);
+  color: var(--color-text);
+  box-sizing: border-box;
+  margin-bottom: 12px;
+}
+
+.idol-input:focus {
+  outline: none;
+  border-color: #F59E0B;
+}
+
+.idol-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
