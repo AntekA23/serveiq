@@ -677,7 +677,7 @@ export default function MyChildren() {
   return (
     <div style={styles.page}>
       <div style={styles.header}>
-        <h1 style={styles.title}>Dzieci</h1>
+        <h1 style={styles.title}>Zawodnicy</h1>
         {!loading && children.length > 0 && children.length < 2 && (
           <button style={styles.addBtn} onClick={() => setShowAddModal(true)}>
             <Plus size={16} />
