@@ -46,7 +46,7 @@ import AddCoach from './pages/parent/AddCoach'
 
 // Club pages
 import ClubDashboard from './pages/club/ClubDashboard'
-import ClubFacility from './pages/club/ClubFacility'
+import FacilityWizard from './pages/club/FacilityWizard'
 import ClubSettings from './pages/club/ClubSettings'
 import ClubPlayers from './pages/club/ClubPlayers'
 import ClubPayments from './pages/club/ClubPayments'
@@ -379,7 +379,7 @@ export default function App() {
           path="/club/facility"
           element={
             <ProtectedRoute role="clubAdmin">
-              <AppShell><ClubFacility /></AppShell>
+              <AppShell><FacilityWizard /></AppShell>
             </ProtectedRoute>
           }
         />

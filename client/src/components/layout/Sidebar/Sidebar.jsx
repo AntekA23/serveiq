@@ -34,6 +34,7 @@ const parentNav = [
 
 const clubAdminNav = [
   { to: '/club/dashboard', label: 'Panel', icon: LayoutDashboard },
+  { to: '/club/facility', label: 'Infrastruktura', icon: Building2 },
   { to: '/club/players', label: 'Zawodnicy', icon: User },
   { to: '/coaches', label: 'Trenerzy', icon: Dumbbell },
   { to: '/club/payments', label: 'Płatności', icon: CreditCard },
