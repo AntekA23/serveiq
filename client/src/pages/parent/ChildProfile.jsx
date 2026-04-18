@@ -6,7 +6,7 @@ import {
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import BadgePreview from '../../components/badges/BadgePreview'
-import IdolCard from '../../components/player/IdolCard'
+import IdolReadOnly from '../../components/player/IdolReadOnly'
 import './ChildProfile.css'
 
 function formatRelDate(dateStr) {
@@ -287,17 +287,15 @@ export default function ChildProfile() {
         </section>
       )}
 
-      {/* ─── 6. Twój Idol ─── */}
-      <section className="cp-section">
-        <div className="cp-section-head">
-          <h2 className="cp-section-title"><Star size={14} /> Twój Idol</h2>
-        </div>
-        <IdolCard
-          playerId={id}
-          idol={child.idol}
-          onUpdate={(newIdol) => setChild((prev) => ({ ...prev, idol: newIdol }))}
-        />
-      </section>
+      {/* ─── 6. Twój Idol (read-only) ─── */}
+      {child.idol?.name && (
+        <section className="cp-section">
+          <div className="cp-section-head">
+            <h2 className="cp-section-title"><Star size={14} /> Twój Idol</h2>
+          </div>
+          <IdolReadOnly idol={child.idol} />
+        </section>
+      )}
 
       {/* ─── 7. Odznaki ─── */}
       <section className="cp-section">

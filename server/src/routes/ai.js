@@ -12,6 +12,6 @@ router.use(verifyToken);
 
 router.post('/recommendations/:playerId', getRecommendations);
 router.post('/review-draft/:playerId', requireRole('coach', 'clubAdmin'), getReviewDraft);
-router.post('/idol-facts/:playerId', requireRole('parent'), generatePlayerIdolFacts);
+router.post('/idol-facts/:playerId', requireRole('coach', 'clubAdmin'), generatePlayerIdolFacts);
 
 export default router;

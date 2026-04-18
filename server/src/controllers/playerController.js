@@ -297,7 +297,6 @@ export const updatePlayer = async (req, res, next) => {
       if (data.lastName !== undefined) allowedFields.lastName = data.lastName;
       if (data.dateOfBirth !== undefined) allowedFields.dateOfBirth = new Date(data.dateOfBirth);
       if (data.gender !== undefined) allowedFields.gender = data.gender;
-      if (data.idol !== undefined) allowedFields.idol = data.idol;
 
       const updated = await Player.findByIdAndUpdate(req.params.id, allowedFields, { new: true })
         .populate('parents', 'firstName lastName email phone');

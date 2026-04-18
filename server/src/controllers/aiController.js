@@ -77,7 +77,7 @@ export const getReviewDraft = async (req, res, next) => {
 
 /**
  * POST /api/ai/idol-facts/:playerId
- * Generuje ciekawostki o ulubionym tenisiście dziecka (tylko rodzic)
+ * Generuje ciekawostki o ulubionym tenisiście dziecka (trener/clubAdmin)
  */
 export const generatePlayerIdolFacts = async (req, res, next) => {
   try {
@@ -88,13 +88,12 @@ export const generatePlayerIdolFacts = async (req, res, next) => {
       return res.status(400).json({ message: 'Podaj imię i nazwisko tenisisty' });
     }
 
-    // Weryfikacja — tylko rodzic swojego dziecka
-    const childrenIds = (req.user.parentProfile?.children || []).map(String);
-    if (!childrenIds.includes(String(playerId))) {
-      return res.status(403).json({ message: 'Brak dostępu do tego zawodnika' });
-    }
-
-    const player = await Player.findById(playerId);
+    // Weryfikacja — trener tego zawodnika
+    const player = await Player.findOne({
+      _id: playerId,
+      $or: [{ coach: req.user._id }, { coaches: req.user._id }],
+      active: true,
+    });
     if (!player) {
       return res.status(404).json({ message: 'Zawodnik nie znaleziony' });
     }

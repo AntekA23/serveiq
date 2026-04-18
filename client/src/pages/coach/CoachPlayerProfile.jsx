@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, ChevronDown, ChevronUp, Plus, Save, Trash2, Target,
-  Calendar, FileText, Eye, EyeOff, Clock, Sparkles, Award,
+  Calendar, FileText, Eye, EyeOff, Clock, Sparkles, Award, Star,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -10,6 +10,7 @@ import Button from '../../components/ui/Button/Button'
 import ConfirmModal from '../../components/ui/ConfirmModal'
 import BadgeGrid from '../../components/badges/BadgeGrid'
 import BadgeAwardModal from '../../components/badges/BadgeAwardModal'
+import IdolCard from '../../components/player/IdolCard'
 import useToast from '../../hooks/useToast'
 import './CoachPlayerProfile.css'
 
@@ -489,6 +490,15 @@ export default function CoachPlayerProfile() {
             })}
           </div>
         )}
+      </Section>
+
+      {/* ─── Idol ─── */}
+      <Section title="Idol zawodnika" icon={Star}>
+        <IdolCard
+          playerId={id}
+          idol={player.idol}
+          onUpdate={(newIdol) => setPlayer((prev) => ({ ...prev, idol: newIdol }))}
+        />
       </Section>
 
       {/* ─── Badges ─── */}
