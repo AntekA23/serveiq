@@ -136,7 +136,7 @@ export default function ClubReports() {
               <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
                 <th style={thStyle}>Trener</th>
                 <th style={thStyle}>Aktywnosci</th>
-                <th style={thStyle}>Sesje</th>
+                <th style={thStyle}>Treningi</th>
                 <th style={thStyle}>Przeglady</th>
               </tr>
             </thead>

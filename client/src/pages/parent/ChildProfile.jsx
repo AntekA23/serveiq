@@ -140,7 +140,7 @@ export default function ChildProfile() {
           <div className="cp-plan-stats">
             <div className="cp-plan-stat">
               <span className="cp-plan-stat-val">{totalSessions}</span>
-              <span className="cp-plan-stat-label">sesji/tyg</span>
+              <span className="cp-plan-stat-label">treningów/tyg</span>
             </div>
             <div className="cp-plan-stat-sep" />
             <div className="cp-plan-stat">

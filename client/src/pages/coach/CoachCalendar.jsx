@@ -189,7 +189,7 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
     try {
       if (isEdit) {
         await api.put(`/sessions/${data._id}`, form)
-        toast.success('Sesja zaktualizowana')
+        toast.success('Trening zaktualizowany')
       } else if (form.recurrence !== 'none') {
         // Create as activity with recurrence
         const playerObj = players.find((p) => p._id === form.player)
@@ -205,14 +205,14 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
           visibleToParent: form.visibleToParent,
           recurrence: { type: form.recurrence },
         })
-        toast.success('Sesja dodana z powtarzaniem')
+        toast.success('Trening dodany z powtarzaniem')
       } else {
         await api.post('/sessions', form)
-        toast.success('Sesja dodana')
+        toast.success('Trening dodany')
       }
       onSaved()
     } catch {
-      toast.error('Nie udalo sie zapisac sesji')
+      toast.error('Nie udało się zapisać treningu')
     }
     setSaving(false)
   }
@@ -221,7 +221,7 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
     setShowDeleteConfirm(false)
     try {
       await api.delete(`/sessions/${data._id}`)
-      toast.success('Sesja usunieta')
+      toast.success('Trening usunięty')
       onDeleted()
     } catch {
       toast.error('Nie udalo sie usunac')
@@ -232,7 +232,7 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
     <div className="ccal-modal-overlay" onClick={onClose}>
       <div className="ccal-modal" onClick={(e) => e.stopPropagation()}>
         <div className="ccal-modal-header">
-          <h3>{isEdit ? 'Edytuj sesje' : 'Nowa sesja'}</h3>
+          <h3>{isEdit ? 'Edytuj trening' : 'Nowy trening'}</h3>
           <button className="ccal-modal-close" onClick={onClose}><X size={18} /></button>
         </div>
 
@@ -369,7 +369,7 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
           isOpen={showDeleteConfirm}
           onClose={() => setShowDeleteConfirm(false)}
           onConfirm={handleDelete}
-          message="Usunąć tę sesję?"
+          message="Usunąć ten trening?"
         />
       </div>
     </div>
@@ -441,7 +441,7 @@ export default function CoachCalendar() {
 
         return {
           id: `ses-${s._id}`,
-          title: s.title || 'Sesja',
+          title: s.title || 'Trening',
           start, end,
           backgroundColor: SESSION_COLORS[s.sessionType] || '#6b7280',
           borderColor: 'transparent',
@@ -513,10 +513,10 @@ export default function CoachCalendar() {
       const newDate = info.event.start.toISOString()
       const newTime = toTimeStr(info.event.start)
       await api.put(`/sessions/${props._id}`, { date: newDate, startTime: newTime })
-      toast.success('Sesja przeniesiona')
+      toast.success('Trening przeniesiony')
     } catch {
       info.revert()
-      toast.error('Nie udalo sie przeniesc sesji')
+      toast.error('Nie udało się przenieść treningu')
     }
   }
 
@@ -566,9 +566,9 @@ export default function CoachCalendar() {
     <div className="coach-calendar-page">
       <div className="ccal-top-bar">
         <button className="ccal-add-btn" onClick={handleNewSession}>
-          <Plus size={16} /> Nowa sesja
+          <Plus size={16} /> Nowy trening
         </button>
-        <span className="ccal-hint">Kliknij na slot w kalendarzu aby dodac sesje w konkretnym terminie</span>
+        <span className="ccal-hint">Kliknij na slot w kalendarzu aby dodać trening w konkretnym terminie</span>
       </div>
       <div className="coach-calendar-wrapper">
         <FullCalendar

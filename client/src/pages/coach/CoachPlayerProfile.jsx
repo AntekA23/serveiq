@@ -333,7 +333,7 @@ export default function CoachPlayerProfile() {
       )}
 
       {/* ─── Plan ─── */}
-      <Section title="Plan treningowy" icon={Calendar} badge={schedule.length > 0 ? `${schedule.length} sesji · ${totalHours}h/tyg` : null}>
+      <Section title="Plan treningowy" icon={Calendar} badge={schedule.length > 0 ? `${schedule.length} treningów · ${totalHours}h/tyg` : null}>
         <div className="cpp-plan">
           {planDirty && (
             <div className="cpp-plan-save">
@@ -374,7 +374,7 @@ export default function CoachPlayerProfile() {
       {/* ─── Recent sessions ─── */}
       <Section title="Ostatnie sesje" icon={Clock} badge={sessions.length > 0 ? sessions.length : null}>
         {sessions.length === 0 ? (
-          <div className="cpp-empty">Brak sesji</div>
+          <div className="cpp-empty">Brak treningów</div>
         ) : (
           <div className="cpp-sessions">
             {sessions.slice(0, 8).map((s) => (

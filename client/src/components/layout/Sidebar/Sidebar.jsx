@@ -17,7 +17,7 @@ const coachNav = [
   { to: '/players', label: 'Zawodnicy', icon: User },
   { to: '/messages', label: 'Wiadomości', icon: MessageCircle },
   { section: 'Zarządzanie' },
-  { to: '/coach/sessions', label: 'Sesje', icon: ClipboardList },
+  { to: '/coach/sessions', label: 'Treningi', icon: ClipboardList },
   { to: '/coach/reviews', label: 'Oceny', icon: FileText },
   { to: '/coach/payments', label: 'Płatności', icon: CreditCard },
   { to: '/coach/tournaments', label: 'Turnieje', icon: Trophy },

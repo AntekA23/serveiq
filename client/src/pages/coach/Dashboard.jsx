@@ -109,7 +109,7 @@ export default function Dashboard() {
           <p className="cd-greeting-date">{getTodayLabel()}</p>
         </div>
         <Button variant="primary" size="sm" onClick={() => navigate('/coach/sessions/new')}>
-          <Plus size={14} /> Nowa sesja
+          <Plus size={14} /> Nowy trening
         </Button>
       </div>
 
@@ -135,9 +135,9 @@ export default function Dashboard() {
         {todaySessions.length === 0 ? (
           <div className="cd-today-empty">
             <Clock size={20} />
-            <p>Brak zaplanowanych sesji na dziś</p>
+            <p>Brak zaplanowanych treningów na dziś</p>
             <Button variant="primary" size="sm" onClick={() => navigate('/coach/sessions/new')}>
-              <Plus size={14} /> Zaplanuj sesję
+              <Plus size={14} /> Zaplanuj trening
             </Button>
           </div>
         ) : (
