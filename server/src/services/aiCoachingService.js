@@ -1,7 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import Player from '../models/Player.js';
 import Session from '../models/Session.js';
-import WearableData from '../models/WearableData.js';
 import Tournament from '../models/Tournament.js';
 
 // ====== Claude API klient ======
@@ -30,13 +29,8 @@ async function getPlayerContext(playerId, days = 30) {
   const since = new Date();
   since.setDate(since.getDate() - days);
 
-  const [sessions, wearableData, tournaments] = await Promise.all([
+  const [sessions, tournaments] = await Promise.all([
     Session.find({ player: playerId, date: { $gte: since } }).sort({ date: -1 }),
-    WearableData.find({
-      player: playerId,
-      date: { $gte: since },
-      type: 'daily_summary',
-    }).sort({ date: -1 }).limit(days),
     Tournament.find({
       player: playerId,
       $or: [
@@ -45,6 +39,9 @@ async function getPlayerContext(playerId, days = 30) {
       ],
     }),
   ]);
+
+  // WearableData model nie istnieje w MVP — pusta tablica
+  const wearableData = [];
 
   // Build session summary
   const sessionSummary = sessions.map((s) => ({
