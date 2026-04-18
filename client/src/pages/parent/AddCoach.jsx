@@ -161,7 +161,7 @@ export default function AddCoach() {
                   color: '#0B0E14', border: 'none', borderRadius: 8,
                   fontWeight: 600, fontSize: 14, cursor: 'pointer'
                 }}
-              >Dodaj zawodnika</button>
+              >Dodaj dziecko</button>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>

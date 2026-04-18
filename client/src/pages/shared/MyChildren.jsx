@@ -410,7 +410,7 @@ function ChildFormModal({ child, onClose, onSaved }) {
         </button>
 
         <h2 style={styles.modalTitle}>
-          {isEdit ? 'Edytuj zawodnika' : 'Dodaj zawodnika'}
+          {isEdit ? 'Edytuj dziecko' : 'Dodaj dziecko'}
         </h2>
 
         {apiError && (
@@ -677,11 +677,11 @@ export default function MyChildren() {
   return (
     <div style={styles.page}>
       <div style={styles.header}>
-        <h1 style={styles.title}>Zawodnicy</h1>
-        {!loading && children.length > 0 && (
+        <h1 style={styles.title}>Dzieci</h1>
+        {!loading && children.length > 0 && children.length < 2 && (
           <button style={styles.addBtn} onClick={() => setShowAddModal(true)}>
             <Plus size={16} />
-            Dodaj zawodnika
+            Dodaj dziecko
           </button>
         )}
       </div>
@@ -705,14 +705,14 @@ export default function MyChildren() {
           <div style={styles.emptyIcon}>
             <Users size={32} />
           </div>
-          <h2 style={styles.emptyTitle}>Brak zawodników</h2>
+          <h2 style={styles.emptyTitle}>Brak dzieci</h2>
           <p style={styles.emptyDesc}>
-            Dodaj swojego pierwszego zawodnika, aby rozpocząć śledzenie
+            Dodaj swoje pierwsze dziecko, aby rozpocząć śledzenie
             postępów tenisowych.
           </p>
           <button style={styles.addBtn} onClick={() => setShowAddModal(true)}>
             <UserPlus size={16} />
-            Dodaj zawodnika
+            Dodaj dziecko
           </button>
         </div>
       )}

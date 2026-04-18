@@ -92,9 +92,9 @@ export default function Dashboard() {
         <div className="pd-empty">
           <div className="pd-empty-icon">🎾</div>
           <h2>Witaj w ServeIQ!</h2>
-          <p>Dodaj swojego pierwszego zawodnika, aby rozpocząć.</p>
+          <p>Dodaj swoje pierwsze dziecko, aby rozpocząć.</p>
           <Button variant="primary" onClick={() => navigate('/my-children')}>
-            <Plus size={16} /> Dodaj zawodnika
+            <Plus size={16} /> Dodaj dziecko
           </Button>
         </div>
       </div>
@@ -136,9 +136,11 @@ export default function Dashboard() {
               {child.firstName}
             </button>
           ))}
-          <button className="pd-child-tab pd-child-add" onClick={() => navigate('/my-children')}>
-            <Plus size={14} />
-          </button>
+          {children.length < 2 && (
+            <button className="pd-child-tab pd-child-add" onClick={() => navigate('/my-children')}>
+              <Plus size={14} />
+            </button>
+          )}
         </div>
       )}
 
@@ -250,7 +252,7 @@ export default function Dashboard() {
       {children.length <= 1 && (
         <div className="pd-quick-actions">
           <button className="pd-quick-btn" onClick={() => navigate('/my-children')}>
-            <Plus size={14} /> Dodaj zawodnika
+            <Plus size={14} /> Dodaj dziecko
           </button>
           <button className="pd-quick-btn" onClick={() => navigate('/parent/add-coach')}>
             <Plus size={14} /> Dodaj trenera

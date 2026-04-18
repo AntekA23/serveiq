@@ -253,7 +253,7 @@ export default function Timeline() {
           </div>
           <div style={{ fontSize: '0.8125rem', marginTop: 4 }}>
             {role === 'parent'
-              ? 'Dodaj zawodnika, aby zobaczyć historię'
+              ? 'Dodaj dziecko, aby zobaczyć historię'
               : 'Dodaj zawodnika, aby zobaczyc os czasu'}
           </div>
         </div>

@@ -513,6 +513,12 @@ export const updateGoal = async (req, res, next) => {
  */
 export const createPlayerSelf = async (req, res, next) => {
   try {
+    // Limit 2 dzieci na rodzica
+    const currentChildren = req.user.parentProfile?.children || [];
+    if (currentChildren.length >= 2) {
+      return res.status(400).json({ message: 'Możesz dodać maksymalnie 2 dzieci' });
+    }
+
     const data = createPlayerSelfSchema.parse(req.body);
 
     const playerData = {
