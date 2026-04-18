@@ -1,4 +1,5 @@
 // BadgeIcon.jsx — SVG badge icons for ServeIQ gamification system
+import { useState } from 'react'
 
 const CATEGORY_COLORS = {
   training: '#3B82F6',
@@ -9,8 +10,16 @@ const CATEGORY_COLORS = {
 
 const LOCKED_COLOR = '#374151'
 
+// Unique ID counter for SVG gradients (avoids collisions when multiple badges render)
+let _gid = 0
+function uid() { return `_b${++_gid}` }
+
 function BadgeShell({ earned, color, size = 64, children }) {
   const c = earned ? color : LOCKED_COLOR
+  const [pfx] = useState(uid)
+  const g1 = `${pfx}_g1`
+  const g2 = `${pfx}_g2`
+  const g3 = `${pfx}_gl`
 
   return (
     <svg
@@ -23,10 +32,30 @@ function BadgeShell({ earned, color, size = 64, children }) {
     >
       {earned ? (
         <>
-          <circle cx="32" cy="32" r="31" fill={c} fillOpacity="0.15" />
-          <circle cx="32" cy="32" r="30" stroke={c} strokeWidth="3" fill="none" />
-          <circle cx="32" cy="32" r="27" fill={c} />
-          <ellipse cx="32" cy="22" rx="16" ry="10" fill="white" fillOpacity="0.2" />
+          <defs>
+            <radialGradient id={g1} cx="40%" cy="35%" r="60%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.25" />
+              <stop offset="100%" stopColor={c} stopOpacity="0" />
+            </radialGradient>
+            <linearGradient id={g2} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={c} />
+              <stop offset="100%" stopColor={c} stopOpacity="0.6" />
+            </linearGradient>
+            <radialGradient id={g3} cx="50%" cy="50%" r="50%">
+              <stop offset="70%" stopColor={c} stopOpacity="0" />
+              <stop offset="100%" stopColor={c} stopOpacity="0.3" />
+            </radialGradient>
+          </defs>
+          {/* Outer glow */}
+          <circle cx="32" cy="32" r="31" fill={`url(#${g3})`} />
+          {/* Border */}
+          <circle cx="32" cy="32" r="30" stroke={c} strokeWidth="2.5" fill="none" />
+          {/* Main fill with gradient */}
+          <circle cx="32" cy="32" r="28" fill={`url(#${g2})`} />
+          {/* Glossy shine */}
+          <ellipse cx="32" cy="21" rx="18" ry="12" fill={`url(#${g1})`} />
+          {/* Rim highlight */}
+          <circle cx="32" cy="32" r="28" stroke="white" strokeWidth="0.5" strokeOpacity="0.15" fill="none" />
         </>
       ) : (
         <>
@@ -36,7 +65,7 @@ function BadgeShell({ earned, color, size = 64, children }) {
       )}
       {children}
       {earned && (
-        <circle cx="21" cy="19" r="5" fill="white" fillOpacity="0.25" />
+        <circle cx="20" cy="18" r="4" fill="white" fillOpacity="0.2" />
       )}
       {!earned && (
         <g opacity="0.7">
@@ -54,146 +83,203 @@ function ic(earned) { return earned ? '#ffffff' : LOCKED_COLOR }
 
 // ───── TRAINING BADGES ─────
 
-// 1. FirstSession — Tennis ball
+// 1. FirstSession — Neon tennis ball with glow
 function FirstSession({ earned, size }) {
   return (
     <BadgeShell earned={earned} color={CATEGORY_COLORS.training} size={size}>
-      <circle cx="32" cy="32" r="13" fill={earned ? '#CDFF50' : LOCKED_COLOR} fillOpacity={earned ? 0.9 : 0.5} />
-      <path d="M21 26 Q32 30 21 38" stroke="white" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-      <path d="M43 26 Q32 30 43 38" stroke="white" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+      {earned && (
+        <circle cx="32" cy="32" r="14" fill="#CDFF50" fillOpacity="0.15" />
+      )}
+      <circle cx="32" cy="32" r="12" fill={earned ? '#CDFF50' : LOCKED_COLOR} fillOpacity={earned ? 1 : 0.5} />
+      {earned && <circle cx="32" cy="32" r="12" fill="url(#fs_ball)" />}
+      {earned && (
+        <defs>
+          <radialGradient id="fs_ball" cx="40%" cy="35%">
+            <stop offset="0%" stopColor="#E8FF80" />
+            <stop offset="60%" stopColor="#CDFF50" />
+            <stop offset="100%" stopColor="#9ACD32" />
+          </radialGradient>
+        </defs>
+      )}
+      <path d="M21 26 Q32 30 21 38" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeOpacity={earned ? 0.9 : 0.4} />
+      <path d="M43 26 Q32 30 43 38" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeOpacity={earned ? 0.9 : 0.4} />
+      {earned && <ellipse cx="28" cy="28" rx="4" ry="3" fill="white" fillOpacity="0.3" />}
     </BadgeShell>
   )
 }
 
-// 2. RegularPlayer — Racket with "10"
+// 2. RegularPlayer — Golden racket with "10"
 function RegularPlayer({ earned, size }) {
   const c = ic(earned)
   return (
     <BadgeShell earned={earned} color={CATEGORY_COLORS.training} size={size}>
-      <ellipse cx="32" cy="27" rx="10" ry="12" stroke={c} strokeWidth="2" fill="none" />
-      <line x1="22" y1="24" x2="42" y2="24" stroke={c} strokeWidth="1" opacity="0.5" />
-      <line x1="22" y1="28" x2="42" y2="28" stroke={c} strokeWidth="1" opacity="0.5" />
-      <line x1="22" y1="32" x2="42" y2="32" stroke={c} strokeWidth="1" opacity="0.5" />
-      <line x1="27" y1="16" x2="27" y2="38" stroke={c} strokeWidth="1" opacity="0.5" />
-      <line x1="32" y1="16" x2="32" y2="38" stroke={c} strokeWidth="1" opacity="0.5" />
-      <line x1="37" y1="16" x2="37" y2="38" stroke={c} strokeWidth="1" opacity="0.5" />
-      <line x1="32" y1="39" x2="32" y2="50" stroke={c} strokeWidth="3" strokeLinecap="round" />
-      <text x="32" y="29" textAnchor="middle" fontSize="9" fontWeight="700" fill={c} fontFamily="system-ui">10</text>
+      <ellipse cx="32" cy="26" rx="11" ry="13" stroke={c} strokeWidth="2" fill={earned ? 'white' : 'none'} fillOpacity={earned ? 0.1 : 0} />
+      <line x1="22" y1="23" x2="42" y2="23" stroke={c} strokeWidth="1" opacity="0.4" />
+      <line x1="22" y1="27" x2="42" y2="27" stroke={c} strokeWidth="1" opacity="0.4" />
+      <line x1="22" y1="31" x2="42" y2="31" stroke={c} strokeWidth="1" opacity="0.4" />
+      <line x1="27" y1="14" x2="27" y2="38" stroke={c} strokeWidth="1" opacity="0.4" />
+      <line x1="32" y1="14" x2="32" y2="38" stroke={c} strokeWidth="1" opacity="0.4" />
+      <line x1="37" y1="14" x2="37" y2="38" stroke={c} strokeWidth="1" opacity="0.4" />
+      <line x1="32" y1="39" x2="32" y2="49" stroke={earned ? '#FCD34D' : c} strokeWidth="3.5" strokeLinecap="round" />
+      <rect x="29" y="49" width="6" height="3" rx="1" fill={earned ? '#D4A017' : c} fillOpacity={earned ? 0.8 : 0.3} />
+      <circle cx="32" cy="27" r="8" fill={earned ? '#FCD34D' : 'none'} fillOpacity={earned ? 0.2 : 0} />
+      <text x="32" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={c} fontFamily="system-ui">10</text>
     </BadgeShell>
   )
 }
 
-// 3. Session25 — Racket with "25"
+// 3. Session25 — Silver racket with "25"
 function Session25({ earned, size }) {
   const c = ic(earned)
   return (
     <BadgeShell earned={earned} color={CATEGORY_COLORS.training} size={size}>
-      <ellipse cx="32" cy="27" rx="10" ry="12" stroke={c} strokeWidth="2" fill="none" />
-      <line x1="27" y1="16" x2="27" y2="38" stroke={c} strokeWidth="1" opacity="0.4" />
-      <line x1="32" y1="16" x2="32" y2="38" stroke={c} strokeWidth="1" opacity="0.4" />
-      <line x1="37" y1="16" x2="37" y2="38" stroke={c} strokeWidth="1" opacity="0.4" />
-      <line x1="32" y1="39" x2="32" y2="50" stroke={c} strokeWidth="3" strokeLinecap="round" />
-      <text x="32" y="30" textAnchor="middle" fontSize="9" fontWeight="700" fill={c} fontFamily="system-ui">25</text>
+      <ellipse cx="32" cy="26" rx="11" ry="13" stroke={c} strokeWidth="2" fill={earned ? 'white' : 'none'} fillOpacity={earned ? 0.1 : 0} />
+      <line x1="27" y1="14" x2="27" y2="38" stroke={c} strokeWidth="1" opacity="0.3" />
+      <line x1="32" y1="14" x2="32" y2="38" stroke={c} strokeWidth="1" opacity="0.3" />
+      <line x1="37" y1="14" x2="37" y2="38" stroke={c} strokeWidth="1" opacity="0.3" />
+      <line x1="32" y1="39" x2="32" y2="49" stroke={earned ? '#C0C0C0' : c} strokeWidth="3.5" strokeLinecap="round" />
+      <rect x="29" y="49" width="6" height="3" rx="1" fill={earned ? '#A0A0A0' : c} fillOpacity={earned ? 0.8 : 0.3} />
+      <circle cx="32" cy="27" r="8" fill={earned ? '#E0E0E0' : 'none'} fillOpacity={earned ? 0.15 : 0} />
+      <text x="32" y="30" textAnchor="middle" fontSize="10" fontWeight="800" fill={c} fontFamily="system-ui">25</text>
     </BadgeShell>
   )
 }
 
-// 4. TrainingMachine — Gear with "50"
+// 4. TrainingMachine — Golden gear with "50"
 function TrainingMachine({ earned, size }) {
   const c = ic(earned)
+  const gearFill = earned ? '#FCD34D' : 'none'
   return (
     <BadgeShell earned={earned} color={CATEGORY_COLORS.training} size={size}>
       <path
         d="M32 18 L34 14 L36 18 L40 16 L40 20 L44 22 L42 26 L46 28 L44 32 L46 36 L42 38 L40 42 L36 40 L34 44 L32 40 L28 44 L26 40 L22 42 L20 38 L16 36 L18 32 L16 28 L20 26 L18 22 L22 20 L22 16 L26 18 Z"
-        fill="none" stroke={c} strokeWidth="2"
+        fill={gearFill} fillOpacity={earned ? 0.2 : 0} stroke={c} strokeWidth="2"
       />
-      <circle cx="32" cy="29" r="7" fill="none" stroke={c} strokeWidth="1.5" />
-      <text x="32" y="33" textAnchor="middle" fontSize="8" fontWeight="700" fill={c} fontFamily="system-ui">50</text>
+      <circle cx="32" cy="29" r="9" fill={earned ? '#FCD34D' : 'none'} fillOpacity={earned ? 0.15 : 0} stroke={c} strokeWidth="1.5" />
+      <text x="32" y="33" textAnchor="middle" fontSize="9" fontWeight="800" fill={earned ? '#FCD34D' : c} fontFamily="system-ui">50</text>
+      {earned && <circle cx="27" cy="22" r="2" fill="white" fillOpacity="0.2" />}
     </BadgeShell>
   )
 }
 
-// 5. SessionCenturion — Shield with "100"
+// 5. SessionCenturion — Epic shield with star
 function SessionCenturion({ earned, size }) {
   const c = ic(earned)
   return (
     <BadgeShell earned={earned} color={CATEGORY_COLORS.training} size={size}>
-      <path d="M32 16 L44 21 L44 32 C44 38 38 43 32 46 C26 43 20 38 20 32 L20 21 Z"
-        stroke={c} strokeWidth="2" fill={c} fillOpacity="0.15" />
-      <text x="32" y="35" textAnchor="middle" fontSize="10" fontWeight="700" fill={c} fontFamily="system-ui">100</text>
+      <path d="M32 14 L46 20 L46 33 C46 40 39 46 32 49 C25 46 18 40 18 33 L18 20 Z"
+        stroke={c} strokeWidth="2" fill={earned ? '#FCD34D' : c} fillOpacity={earned ? 0.15 : 0.1} />
+      {earned && (
+        <path d="M32 18 L44 23 L44 33 C44 38 38 44 32 46 C26 44 20 38 20 33 L20 23 Z"
+          fill="white" fillOpacity="0.08" />
+      )}
+      <text x="32" y="35" textAnchor="middle" fontSize="11" fontWeight="900" fill={earned ? '#FCD34D' : c} fontFamily="system-ui">100</text>
+      {earned && (
+        <path d="M32 18 L33 21 L36 21 L33.5 23 L34.5 26 L32 24.5 L29.5 26 L30.5 23 L28 21 L31 21 Z"
+          fill="#FCD34D" fillOpacity="0.9" />
+      )}
     </BadgeShell>
   )
 }
 
-// 6. Hours10 — Clock with "10h"
+// 6. Hours10 — Vibrant clock
 function Hours10({ earned, size }) {
   const c = ic(earned)
   return (
     <BadgeShell earned={earned} color={CATEGORY_COLORS.training} size={size}>
-      <circle cx="32" cy="30" r="14" stroke={c} strokeWidth="2" fill="none" />
-      <line x1="32" y1="20" x2="32" y2="30" stroke={c} strokeWidth="2" strokeLinecap="round" />
-      <line x1="32" y1="30" x2="40" y2="34" stroke={c} strokeWidth="2" strokeLinecap="round" />
-      <text x="32" y="50" textAnchor="middle" fontSize="8" fontWeight="700" fill={c} fontFamily="system-ui">10h</text>
+      <circle cx="32" cy="29" r="14" stroke={c} strokeWidth="2" fill={earned ? 'white' : 'none'} fillOpacity={earned ? 0.08 : 0} />
+      {earned && <>
+        {[12, 3, 6, 9].map((h, i) => {
+          const a = (h * 30 - 90) * Math.PI / 180
+          return <circle key={i} cx={32 + Math.cos(a) * 11} cy={29 + Math.sin(a) * 11} r="1.5" fill={c} fillOpacity="0.5" />
+        })}
+      </>}
+      <line x1="32" y1="19" x2="32" y2="29" stroke={earned ? '#CDFF50' : c} strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="32" y1="29" x2="40" y2="33" stroke={earned ? '#FCD34D' : c} strokeWidth="2" strokeLinecap="round" />
+      <circle cx="32" cy="29" r="2" fill={earned ? '#CDFF50' : c} />
+      <text x="32" y="50" textAnchor="middle" fontSize="9" fontWeight="800" fill={earned ? '#CDFF50' : c} fontFamily="system-ui">10h</text>
     </BadgeShell>
   )
 }
 
-// 7. Hours50 — Clock with "50h"
+// 7. Hours50 — Richer clock with glow hands
 function Hours50({ earned, size }) {
   const c = ic(earned)
   return (
     <BadgeShell earned={earned} color={CATEGORY_COLORS.training} size={size}>
-      <circle cx="32" cy="30" r="14" stroke={c} strokeWidth="2" fill="none" />
-      <line x1="32" y1="20" x2="32" y2="30" stroke={c} strokeWidth="2" strokeLinecap="round" />
-      <line x1="32" y1="30" x2="38" y2="24" stroke={c} strokeWidth="2" strokeLinecap="round" />
-      <text x="32" y="50" textAnchor="middle" fontSize="8" fontWeight="700" fill={c} fontFamily="system-ui">50h</text>
+      <circle cx="32" cy="29" r="14" stroke={c} strokeWidth="2" fill={earned ? 'white' : 'none'} fillOpacity={earned ? 0.08 : 0} />
+      {earned && <>
+        {[12, 3, 6, 9].map((h, i) => {
+          const a = (h * 30 - 90) * Math.PI / 180
+          return <circle key={i} cx={32 + Math.cos(a) * 11} cy={29 + Math.sin(a) * 11} r="1.5" fill={c} fillOpacity="0.5" />
+        })}
+      </>}
+      <line x1="32" y1="19" x2="32" y2="29" stroke={earned ? '#FCD34D' : c} strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="32" y1="29" x2="38" y2="23" stroke={earned ? '#CDFF50' : c} strokeWidth="2" strokeLinecap="round" />
+      <circle cx="32" cy="29" r="2" fill={earned ? '#FCD34D' : c} />
+      <text x="32" y="50" textAnchor="middle" fontSize="9" fontWeight="800" fill={earned ? '#FCD34D' : c} fontFamily="system-ui">50h</text>
     </BadgeShell>
   )
 }
 
-// 8. Hours100 — Clock + star
+// 8. Hours100 — Golden clock with prominent star
 function Hours100({ earned, size }) {
   const c = ic(earned)
   return (
     <BadgeShell earned={earned} color={CATEGORY_COLORS.training} size={size}>
-      <circle cx="32" cy="28" r="12" stroke={c} strokeWidth="2" fill="none" />
-      <line x1="32" y1="19" x2="32" y2="28" stroke={c} strokeWidth="2" strokeLinecap="round" />
-      <line x1="32" y1="28" x2="39" y2="32" stroke={c} strokeWidth="2" strokeLinecap="round" />
-      <path d="M32 42 L33.2 45 L36.5 45 L34 47 L35 50 L32 48 L29 50 L30 47 L27.5 45 L30.8 45 Z"
-        fill={earned ? '#FCD34D' : c} />
+      <circle cx="32" cy="26" r="12" stroke={c} strokeWidth="2" fill={earned ? 'white' : 'none'} fillOpacity={earned ? 0.08 : 0} />
+      <line x1="32" y1="17" x2="32" y2="26" stroke={earned ? '#FCD34D' : c} strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="32" y1="26" x2="39" y2="30" stroke={earned ? '#CDFF50' : c} strokeWidth="2" strokeLinecap="round" />
+      <circle cx="32" cy="26" r="2" fill={earned ? '#FCD34D' : c} />
+      {/* Big star */}
+      <path d="M32 40 L33.8 44 L38 44.5 L35 47.5 L36 52 L32 49.5 L28 52 L29 47.5 L26 44.5 L30.2 44 Z"
+        fill={earned ? '#FCD34D' : c} fillOpacity={earned ? 1 : 0.4}
+        stroke={earned ? '#D4A017' : 'none'} strokeWidth="0.5" />
+      {earned && <circle cx="29" cy="42" r="1.5" fill="white" fillOpacity="0.3" />}
     </BadgeShell>
   )
 }
 
-// 9. WeeklyStreak — Calendar with checkmarks
+// 9. WeeklyStreak — Vibrant calendar with green checks
 function WeeklyStreak({ earned, size }) {
   const c = ic(earned)
-  const checkColor = earned ? '#CDFF50' : '#6b7280'
   return (
     <BadgeShell earned={earned} color={CATEGORY_COLORS.training} size={size}>
-      <rect x="18" y="20" width="28" height="24" rx="3" stroke={c} strokeWidth="2" fill="none" />
-      <rect x="18" y="20" width="28" height="7" rx="3" fill={c} fillOpacity="0.4" />
-      <line x1="24" y1="17" x2="24" y2="23" stroke={c} strokeWidth="2" strokeLinecap="round" />
-      <line x1="40" y1="17" x2="40" y2="23" stroke={c} strokeWidth="2" strokeLinecap="round" />
-      <path d="M22 33 L24 36 L29 30" stroke={checkColor} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M30 33 L32 36 L37 30" stroke={checkColor} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M38 33 L40 36 L45 30" stroke={checkColor} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="17" y="19" width="30" height="26" rx="3" stroke={c} strokeWidth="2" fill={earned ? 'white' : 'none'} fillOpacity={earned ? 0.05 : 0} />
+      <rect x="17" y="19" width="30" height="8" rx="3" fill={earned ? '#EF4444' : c} fillOpacity={earned ? 0.7 : 0.3} />
+      <line x1="24" y1="16" x2="24" y2="22" stroke={c} strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="40" y1="16" x2="40" y2="22" stroke={c} strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M22 34 L25 37 L30 31" stroke={earned ? '#22C55E' : '#6b7280'} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M30 34 L33 37 L38 31" stroke={earned ? '#22C55E' : '#6b7280'} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M38 34 L41 37 L46 31" stroke={earned ? '#CDFF50' : '#6b7280'} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
     </BadgeShell>
   )
 }
 
-// 10. StreakMaster — Flame
+// 10. StreakMaster — Multi-layer fire with glow
 function StreakMaster({ earned, size }) {
   return (
     <BadgeShell earned={earned} color={CATEGORY_COLORS.training} size={size}>
+      {earned && <circle cx="32" cy="36" r="14" fill="#FCD34D" fillOpacity="0.1" />}
+      {/* Outer flame */}
       <path
-        d="M32 16 C32 16 40 24 40 32 C40 38 36 44 32 44 C28 44 24 38 24 32 C24 26 28 20 32 16Z"
-        fill={earned ? '#FCD34D' : LOCKED_COLOR} fillOpacity={earned ? 0.9 : 0.5}
+        d="M32 14 C32 14 42 23 42 33 C42 40 37 46 32 46 C27 46 22 40 22 33 C22 25 28 18 32 14Z"
+        fill={earned ? '#F59E0B' : LOCKED_COLOR} fillOpacity={earned ? 0.9 : 0.5}
       />
+      {/* Mid flame */}
       <path
-        d="M32 26 C32 26 37 31 37 36 C37 40 35 43 32 43 C29 43 27 40 27 36 C27 31 32 26 32 26Z"
-        fill={earned ? '#EF4444' : '#6b7280'} fillOpacity={earned ? 0.85 : 0.5}
+        d="M32 22 C32 22 39 28 39 35 C39 40 36 44 32 44 C28 44 25 40 25 35 C25 29 30 24 32 22Z"
+        fill={earned ? '#EF4444' : '#6b7280'} fillOpacity={earned ? 0.9 : 0.5}
       />
+      {/* Inner flame */}
+      <path
+        d="M32 30 C32 30 36 33 36 37 C36 40 34 43 32 43 C30 43 28 40 28 37 C28 34 31 31 32 30Z"
+        fill={earned ? '#FCD34D' : '#555'} fillOpacity={earned ? 1 : 0.4}
+      />
+      {/* Hot core */}
+      {earned && (
+        <ellipse cx="32" cy="39" rx="2" ry="3" fill="white" fillOpacity="0.5" />
+      )}
     </BadgeShell>
   )
 }
