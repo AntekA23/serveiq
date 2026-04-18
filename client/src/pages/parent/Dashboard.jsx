@@ -38,6 +38,7 @@ export default function Dashboard() {
   const [nextActivities, setNextActivities] = useState([])
   const [latestReview, setLatestReview] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,7 +51,9 @@ export default function Dashboard() {
           : players
         setChildren(myChildren)
         if (myChildren.length > 0) setSelectedChild(myChildren[0])
-      } catch { /* silent */ }
+      } catch {
+        setError(true)
+      }
       setLoading(false)
     }
     fetchData()
@@ -73,7 +76,7 @@ export default function Dashboard() {
 
         const revs = reviewsRes.data.reviews || []
         setLatestReview(revs.length > 0 ? revs[0] : null)
-      } catch { /* silent */ }
+      } catch { /* child data error non-blocking */ }
     }
     fetchChildData()
   }, [selectedChild])
@@ -86,15 +89,26 @@ export default function Dashboard() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="pd-page">
+        <div className="pd-empty">
+          <p style={{ fontSize: 15, marginBottom: 12, color: 'var(--color-text-secondary)' }}>Nie udało się załadować danych</p>
+          <Button variant="secondary" size="sm" onClick={() => window.location.reload()}>Odśwież</Button>
+        </div>
+      </div>
+    )
+  }
+
   if (children.length === 0) {
     return (
       <div className="pd-page">
         <div className="pd-empty">
           <div className="pd-empty-icon">🎾</div>
           <h2>Witaj w ServeIQ!</h2>
-          <p>Dodaj swoje pierwsze dziecko, aby rozpocząć.</p>
+          <p>Dodaj swojego pierwszego zawodnika, aby rozpocząć.</p>
           <Button variant="primary" onClick={() => navigate('/my-children')}>
-            <Plus size={16} /> Dodaj dziecko
+            <Plus size={16} /> Dodaj zawodnika
           </Button>
         </div>
       </div>

@@ -70,6 +70,7 @@ import Landing from './pages/Landing'
 import Terms from './pages/legal/Terms'
 import Privacy from './pages/legal/Privacy'
 import BadgePage from './pages/shared/BadgePage'
+import NotFound from './pages/NotFound'
 
 function ProtectedRoute({ children, role }) {
   const user = useAuthStore((s) => s.user)
@@ -525,6 +526,9 @@ export default function App() {
         {/* Payment callback routes */}
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/cancel" element={<PaymentCancel />} />
+
+        {/* 404 catch-all */}
+        <Route path="*" element={<NotFound />} />
 
       </Routes>
 

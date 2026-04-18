@@ -13,7 +13,12 @@ const createPaymentSchema = z.object({
   amount: z.number().positive('Kwota musi być dodatnia'),
   currency: z.string().default('PLN'),
   description: z.string().optional(),
-  dueDate: z.string().min(1, 'Termin płatności jest wymagany'),
+  dueDate: z.string().min(1, 'Termin płatności jest wymagany').refine((val) => {
+    const d = new Date(val);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return d >= today;
+  }, { message: 'Termin płatności nie może być w przeszłości' }),
 });
 
 // ====== Kontrolery ======

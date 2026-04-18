@@ -21,7 +21,11 @@ export default function BadgePage() {
       .finally(() => setLoading(false))
   }, [id])
 
-  if (loading) return null
+  if (loading) return (
+    <div className="bp-page" style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
+      <div style={{ color: 'var(--color-text-tertiary)', fontSize: 14 }}>Ładowanie...</div>
+    </div>
+  )
   if (!player) return <div className="bp-page"><p>Nie znaleziono zawodnika.</p></div>
 
   const earned = badges.filter(b => b.earned)

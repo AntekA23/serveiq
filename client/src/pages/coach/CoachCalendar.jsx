@@ -309,9 +309,9 @@ function SessionModal({ mode, data, players, onClose, onSaved, onDeleted, toast 
                     </button>
                   ))}
                   <span className="ccal-rec-hint">
-                    {form.recurrence === 'weekly' && '12 powtórzeń'}
-                    {form.recurrence === 'biweekly' && '6 powtórzeń'}
-                    {form.recurrence === 'monthly' && '6 powtórzeń'}
+                    {form.recurrence === 'weekly' && '12 powtórzeń · widoczne w Aktywności'}
+                    {form.recurrence === 'biweekly' && '6 powtórzeń · widoczne w Aktywności'}
+                    {form.recurrence === 'monthly' && '6 powtórzeń · widoczne w Aktywności'}
                   </span>
                 </div>
               )}

@@ -32,8 +32,9 @@ export default function Payments() {
       const { data } = await api.post(`/payments/${paymentId}/checkout`)
       window.location.href = data.url
     } catch {
-      setError('Nie udało się utworzyć sesji płatności')
+      setError('Nie udało się utworzyć sesji płatności. Spróbuj ponownie.')
       setPayingId(null)
+      setTimeout(() => setError(''), 5000)
     }
   }
 
@@ -53,11 +54,13 @@ export default function Payments() {
     )
   }
 
-  if (error) {
+  if (error && !payments.length) {
     return (
       <div className="parent-payments">
         <h1 className="page-title">Płatności</h1>
-        <div className="parent-payments-error">{error}</div>
+        <div className="parent-payments-error" onClick={() => setError('')} style={{ cursor: 'pointer' }}>
+          {error} <span style={{ opacity: 0.6, fontSize: 12 }}>(kliknij aby zamknąć)</span>
+        </div>
       </div>
     )
   }
@@ -65,6 +68,12 @@ export default function Payments() {
   return (
     <div className="parent-payments">
       <h1 className="page-title">Płatności</h1>
+
+      {error && (
+        <div className="parent-payments-error" onClick={() => setError('')} style={{ cursor: 'pointer', marginBottom: 12 }}>
+          {error} <span style={{ opacity: 0.6, fontSize: 12 }}>(kliknij aby zamknąć)</span>
+        </div>
+      )}
 
       <div className="parent-payments-section">
         <div className="parent-payments-section-title">Oczekujące</div>

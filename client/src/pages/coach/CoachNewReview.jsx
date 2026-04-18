@@ -291,16 +291,28 @@ export default function CoachNewReview() {
             onChange={(e) => handleChange('title', e.target.value)} />
         </div>
 
-        {/* Narrative — simplified to 2 fields */}
+        {/* Narrative */}
         <div className="coach-form-group">
           <label>Podsumowanie okresu</label>
-          <textarea rows={4} placeholder="Co sie dzialo, co poszlo dobrze, mocne strony..." value={form.whatHappened}
+          <textarea rows={4} placeholder="Co się działo w tym okresie..." value={form.whatHappened}
             onChange={(e) => handleChange('whatHappened', e.target.value)} />
         </div>
 
         <div className="coach-form-group">
+          <label>Co poszło dobrze</label>
+          <textarea rows={3} placeholder="Mocne strony, postępy, osiągnięcia..." value={form.whatWentWell}
+            onChange={(e) => handleChange('whatWentWell', e.target.value)} />
+        </div>
+
+        <div className="coach-form-group">
+          <label>Do poprawy</label>
+          <textarea rows={3} placeholder="Obszary wymagające uwagi..." value={form.whatNeedsFocus}
+            onChange={(e) => handleChange('whatNeedsFocus', e.target.value)} />
+        </div>
+
+        <div className="coach-form-group">
           <label>Rekomendacje i kolejne kroki</label>
-          <textarea rows={4} placeholder="Obszary do poprawy, rekomendacje na nastepny okres..." value={form.nextSteps}
+          <textarea rows={3} placeholder="Rekomendacje na następny okres..." value={form.nextSteps}
             onChange={(e) => handleChange('nextSteps', e.target.value)} />
         </div>
 

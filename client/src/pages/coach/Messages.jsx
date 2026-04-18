@@ -45,6 +45,7 @@ export default function Messages() {
 
   const socketRef = useRef(null)
   const messagesEndRef = useRef(null)
+  const [socketConnected, setSocketConnected] = useState(false)
 
   const scrollToBottom = useCallback(() => {
     if (messagesEndRef.current) {
@@ -130,9 +131,14 @@ export default function Messages() {
     socketRef.current = socket
 
     socket.on('connect', () => {
+      setSocketConnected(true)
       if (user?._id) {
         socket.emit('join', user._id)
       }
+    })
+
+    socket.on('disconnect', () => {
+      setSocketConnected(false)
     })
 
     socket.on('message', (msg) => {
@@ -325,6 +331,11 @@ export default function Messages() {
             </div>
 
             <div className="chat-input">
+              {!socketConnected && (
+                <span style={{ fontSize: 11, color: 'var(--color-warning, #f59e0b)', marginRight: 8, whiteSpace: 'nowrap' }}>
+                  ● offline
+                </span>
+              )}
               <input
                 type="text"
                 className="input"

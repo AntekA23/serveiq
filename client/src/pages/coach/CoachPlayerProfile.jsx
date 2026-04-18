@@ -268,7 +268,7 @@ export default function CoachPlayerProfile() {
   return (
     <div className="cpp-page">
       {/* Back */}
-      <button className="cpp-back" onClick={() => navigate('/players')}>
+      <button className="cpp-back" onClick={() => navigate(-1)}>
         <ArrowLeft size={16} /> Zawodnicy
       </button>
 
@@ -303,7 +303,7 @@ export default function CoachPlayerProfile() {
           <Button size="sm" onClick={handleAiRecommendations} loading={aiLoading}>
             <Sparkles size={13} /> AI
           </Button>
-          <Button size="sm" onClick={() => navigate('/coach/reviews/new')}>
+          <Button size="sm" onClick={() => navigate(`/coach/reviews/new?player=${id}`)}>
             <FileText size={13} /> Ocena
           </Button>
         </div>

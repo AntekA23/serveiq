@@ -9,6 +9,10 @@ import Session from '../models/Session.js';
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
 import { sendInviteEmail } from '../services/emailService.js';
+import Activity from '../models/Activity.js';
+import DevelopmentGoal from '../models/DevelopmentGoal.js';
+import Payment from '../models/Payment.js';
+import Tournament from '../models/Tournament.js';
 import { evaluateBadges } from '../services/badgeEngine.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -399,12 +403,30 @@ export const deletePlayer = async (req, res, next) => {
     player.active = false;
     await player.save();
 
-    // Usun z parentProfile.children
-    if (req.user.role === 'parent') {
-      await User.findByIdAndUpdate(req.user._id, {
-        $pull: { 'parentProfile.children': player._id },
-      });
+    // Usun z parentProfile.children dla WSZYSTKICH rodziców
+    const parentIds = player.parents || [];
+    if (parentIds.length > 0) {
+      await User.updateMany(
+        { _id: { $in: parentIds } },
+        { $pull: { 'parentProfile.children': player._id } }
+      );
     }
+
+    // Kaskadowe czyszczenie powiązanych danych
+    const playerId = player._id;
+    await Promise.all([
+      Session.deleteMany({ player: playerId }),
+      Tournament.deleteMany({ player: playerId }),
+      DevelopmentGoal.deleteMany({ player: playerId }),
+      Activity.updateMany(
+        { players: playerId },
+        { $pull: { players: playerId } }
+      ),
+      Payment.updateMany(
+        { player: playerId, status: 'pending' },
+        { status: 'cancelled' }
+      ),
+    ]);
 
     res.json({ message: 'Zawodnik został usunięty' });
   } catch (error) {
@@ -903,6 +925,11 @@ export const respondCoachRequest = async (req, res, next) => {
 
     if (action === 'accept') {
       player.coach = req.user._id;
+      // Synchronizuj coaches array
+      if (!player.coaches) player.coaches = [];
+      if (!player.coaches.some((c) => c.toString() === req.user._id.toString())) {
+        player.coaches.push(req.user._id);
+      }
       player.coachRequest.status = 'accepted';
 
       // Powiadom rodzicow

@@ -641,7 +641,7 @@ export default function MyChildren() {
           : players
       setChildren(myChildren)
     } catch {
-      setError('Nie udalo sie zaladowac listy dzieci')
+      setError('Nie udalo sie zaladowac listy zawodnikow')
     } finally {
       setLoading(false)
     }
@@ -681,7 +681,7 @@ export default function MyChildren() {
         {!loading && children.length > 0 && children.length < 2 && (
           <button style={styles.addBtn} onClick={() => setShowAddModal(true)}>
             <Plus size={16} />
-            Dodaj dziecko
+            Dodaj zawodnika
           </button>
         )}
       </div>
@@ -705,14 +705,14 @@ export default function MyChildren() {
           <div style={styles.emptyIcon}>
             <Users size={32} />
           </div>
-          <h2 style={styles.emptyTitle}>Brak dzieci</h2>
+          <h2 style={styles.emptyTitle}>Brak zawodników</h2>
           <p style={styles.emptyDesc}>
-            Dodaj swoje pierwsze dziecko, aby rozpocząć śledzenie
+            Dodaj swojego pierwszego zawodnika, aby rozpocząć śledzenie
             postępów tenisowych.
           </p>
           <button style={styles.addBtn} onClick={() => setShowAddModal(true)}>
             <UserPlus size={16} />
-            Dodaj dziecko
+            Dodaj zawodnika
           </button>
         </div>
       )}

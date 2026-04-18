@@ -346,7 +346,7 @@ export default function Reviews() {
               onChange={(e) => setFilterPlayer(e.target.value)}
               style={filterSelect}
             >
-              <option value="">Wszystkie dzieci</option>
+              <option value="">Wszyscy zawodnicy</option>
               {players.map((p) => (
                 <option key={p._id} value={p._id}>
                   {playerName(p)}

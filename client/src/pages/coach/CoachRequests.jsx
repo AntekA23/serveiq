@@ -53,7 +53,7 @@ export default function CoachRequests() {
               <div className="coach-req-email">{req.parent?.email}</div>
 
               <div className="coach-req-children">
-                <span className="coach-req-children-label">Dzieci: </span>
+                <span className="coach-req-children-label">Zawodnicy: </span>
                 {req.players?.map(p => `${p.firstName} ${p.lastName}`).join(', ')}
               </div>
 

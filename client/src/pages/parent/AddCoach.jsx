@@ -142,7 +142,7 @@ export default function AddCoach() {
           </div>
 
           <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>
-            Wybierz dzieci do przypisania:
+            Wybierz zawodników do przypisania:
           </h3>
 
           {childrenLoading ? (

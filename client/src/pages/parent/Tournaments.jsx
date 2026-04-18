@@ -4,6 +4,7 @@ import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
 import useToast from '../../hooks/useToast'
 import Avatar from '../../components/ui/Avatar/Avatar'
+import ConfirmModal from '../../components/ui/ConfirmModal'
 import TournamentCard from './tournaments/TournamentCard'
 import AddTournamentForm from './tournaments/AddTournamentForm'
 import ResultForm from './tournaments/ResultForm'
@@ -21,6 +22,7 @@ export default function Tournaments() {
   const [editing, setEditing] = useState(null)
   const [resultFor, setResultFor] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [deleteTarget, setDeleteTarget] = useState(null)
 
   const fetchChildren = useCallback(async () => {
     try {
@@ -71,12 +73,14 @@ export default function Tournaments() {
     refresh()
   }
 
-  const handleDelete = async (t) => {
+  const handleDelete = async () => {
+    if (!deleteTarget) return
     try {
-      await api.delete(`/tournaments/${t._id}`)
-      toast.success('Turniej usuniety')
+      await api.delete(`/tournaments/${deleteTarget._id}`)
+      toast.success('Turniej usunięty')
       refresh()
-    } catch { toast.error('Nie udalo sie usunac') }
+    } catch { toast.error('Nie udało się usunąć') }
+    setDeleteTarget(null)
   }
 
   const now = new Date()
@@ -149,7 +153,7 @@ export default function Tournaments() {
             upcoming.map((t) => (
               <TournamentCard key={t._id} tournament={t}
                 onEdit={(t) => setEditing(t)}
-                onDelete={handleDelete}
+                onDelete={(t) => setDeleteTarget(t)}
                 onResult={(t) => setResultFor(t)} />
             ))
           )}
@@ -158,17 +162,24 @@ export default function Tournaments() {
         <div className="tn-list">
           <TournamentStats tournaments={history} />
           {history.length === 0 ? (
-            <div className="tn-empty"><p>Brak zakończonych turniejow</p></div>
+            <div className="tn-empty"><p>Brak zakończonych turniejów</p></div>
           ) : (
             history.map((t) => (
               <TournamentCard key={t._id} tournament={t}
                 onEdit={(t) => setEditing(t)}
-                onDelete={handleDelete}
+                onDelete={(t) => setDeleteTarget(t)}
                 onResult={(t) => setResultFor(t)} />
             ))
           )}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        message={`Usunąć turniej "${deleteTarget?.name || ''}"?`}
+      />
     </div>
   )
 }

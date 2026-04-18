@@ -280,7 +280,7 @@ function TabInviteCode() {
                   <div className="settings-request-email">{req.parent?.email}</div>
                   {req.players?.length > 0 && (
                     <div className="settings-request-players">
-                      Dzieci: {req.players.map((p) => `${p.firstName} ${p.lastName}`).join(', ')}
+                      Zawodnicy: {req.players.map((p) => `${p.firstName} ${p.lastName}`).join(', ')}
                     </div>
                   )}
                   {req.message && (
@@ -569,12 +569,28 @@ function TabSecurity() {
 function TabNotifications() {
   const toast = useToast()
   const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(true)
   const [settings, setSettings] = useState({
     weeklyEmail: true,
     pushNotifications: true,
     quietHoursStart: '22:00',
     quietHoursEnd: '07:00',
   })
+
+  useEffect(() => {
+    api.get('/auth/me')
+      .then(({ data }) => {
+        const ns = data.user?.notificationSettings || data.notificationSettings || {}
+        setSettings((prev) => ({
+          weeklyEmail: ns.weeklyEmail ?? prev.weeklyEmail,
+          pushNotifications: ns.pushNotifications ?? prev.pushNotifications,
+          quietHoursStart: ns.quietHoursStart || prev.quietHoursStart,
+          quietHoursEnd: ns.quietHoursEnd || prev.quietHoursEnd,
+        }))
+      })
+      .catch(() => {})
+      .finally(() => setFetching(false))
+  }, [])
 
   const handleToggle = (key) => {
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }))

@@ -249,12 +249,12 @@ export default function Timeline() {
         <div style={emptyStyle}>
           <Users size={40} style={{ opacity: 0.3, marginBottom: 12 }} />
           <div style={{ fontSize: '0.9375rem', fontWeight: 600 }}>
-            {role === 'parent' ? 'Nie znaleziono dzieci' : 'Brak zawodnikow'}
+            {role === 'parent' ? 'Nie znaleziono zawodników' : 'Brak zawodników'}
           </div>
           <div style={{ fontSize: '0.8125rem', marginTop: 4 }}>
             {role === 'parent'
-              ? 'Dodaj dziecko, aby zobaczyć historię'
-              : 'Dodaj zawodnika, aby zobaczyc os czasu'}
+              ? 'Dodaj zawodnika, aby zobaczyć historię'
+              : 'Dodaj zawodnika, aby zobaczyć oś czasu'}
           </div>
         </div>
       </div>

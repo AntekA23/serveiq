@@ -20,7 +20,12 @@ const createGoalSchema = z.object({
   targetDate: z.string().optional(),
   visibleToParent: z.boolean().optional(),
   visibleToPlayer: z.boolean().optional(),
-});
+}).refine((data) => {
+  if (data.startDate && data.targetDate) {
+    return new Date(data.targetDate) >= new Date(data.startDate);
+  }
+  return true;
+}, { message: 'Data docelowa musi być po dacie rozpoczęcia', path: ['targetDate'] });
 
 const updateGoalSchema = z.object({
   title: z.string().min(1, 'Tytuł celu jest wymagany').optional(),
@@ -195,6 +200,27 @@ export const deleteGoal = async (req, res, next) => {
 
     if (!goal) {
       return res.status(404).json({ message: 'Cel nie znaleziony' });
+    }
+
+    // Autoryzacja: tylko twórca celu, coach gracza lub clubAdmin
+    const userId = req.user._id.toString();
+    const isCreator = goal.createdBy?.toString() === userId;
+    const isCoachOfPlayer = req.user.role === 'coach' && goal.player;
+    const isClubAdmin = req.user.role === 'clubAdmin' && req.user.club && goal.club?.toString() === req.user.club.toString();
+
+    if (!isCreator && !isClubAdmin) {
+      if (isCoachOfPlayer) {
+        const player = await Player.findById(goal.player).select('coach coaches').lean();
+        const isPlayerCoach = player && (
+          player.coach?.toString() === userId ||
+          (player.coaches || []).some((c) => c.toString() === userId)
+        );
+        if (!isPlayerCoach) {
+          return res.status(403).json({ message: 'Brak uprawnień do usunięcia tego celu' });
+        }
+      } else {
+        return res.status(403).json({ message: 'Brak uprawnień do usunięcia tego celu' });
+      }
     }
 
     await DevelopmentGoal.findByIdAndDelete(req.params.id);

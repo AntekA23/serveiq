@@ -36,6 +36,7 @@ export default function Dashboard() {
   const [players, setPlayers] = useState([])
   const [alerts, setAlerts] = useState({ payments: 0, drafts: 0, requests: [] })
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,7 +86,9 @@ export default function Dashboard() {
           drafts: 0,
           requests: [],
         })
-      } catch { /* silent */ }
+      } catch {
+        setError(true)
+      }
       setLoading(false)
     }
     fetchData()
@@ -96,6 +99,17 @@ export default function Dashboard() {
 
   if (loading) {
     return <div className="cd-page"><div className="cd-loading"><div className="cd-spinner" /></div></div>
+  }
+
+  if (error) {
+    return (
+      <div className="cd-page">
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--color-text-secondary)' }}>
+          <p style={{ fontSize: 15, marginBottom: 12 }}>Nie udało się załadować danych</p>
+          <Button variant="secondary" size="sm" onClick={() => window.location.reload()}>Odśwież</Button>
+        </div>
+      </div>
+    )
   }
 
   const hasAlerts = alerts.payments > 0

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, User, CalendarDays, CalendarClock, ClipboardList,
@@ -5,6 +6,7 @@ import {
   Newspaper, Dumbbell, Building2, BarChart3, CreditCard, Cog,
   FileText, Trophy,
 } from 'lucide-react'
+import api from '../../../api/axios'
 import useAuthStore from '../../../store/authStore'
 import useUiStore from '../../../store/uiStore'
 import useAuth from '../../../hooks/useAuth'
@@ -21,14 +23,6 @@ const coachNav = [
   { to: '/coach/reviews', label: 'Oceny', icon: FileText },
   { to: '/coach/payments', label: 'Płatności', icon: CreditCard },
   { to: '/coach/tournaments', label: 'Turnieje', icon: Trophy },
-  { to: '/settings', label: 'Ustawienia', icon: Settings },
-]
-
-const parentNav = [
-  { to: '/parent/dashboard', label: 'Panel', icon: LayoutDashboard },
-  { to: '/my-children', label: 'Zawodnicy', icon: Users },
-  { to: '/parent/add-coach', label: 'Dodaj trenera', icon: Link2 },
-  { to: '/messages', label: 'Wiadomości', icon: MessageCircle },
   { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]
 
@@ -51,7 +45,7 @@ const roleLabels = {
 function getNavItems(role) {
   if (role === 'coach') return coachNav
   if (role === 'clubAdmin') return clubAdminNav
-  return parentNav
+  return [] // parent nav is built dynamically
 }
 
 export default function Sidebar() {
@@ -61,7 +55,62 @@ export default function Sidebar() {
   const { logout } = useAuth()
   const navigate = useNavigate()
 
-  const navItems = getNavItems(user?.role)
+  const [children, setChildren] = useState([])
+
+  // Fetch children names for parent sidebar
+  useEffect(() => {
+    if (user?.role !== 'parent') return
+
+    // Try populated data from store first
+    const storeChildren = user.parentProfile?.children || []
+    const alreadyPopulated = storeChildren.length > 0 && typeof storeChildren[0] === 'object' && storeChildren[0].firstName
+    if (alreadyPopulated) {
+      setChildren(storeChildren)
+      return
+    }
+
+    // Otherwise fetch from API
+    if (storeChildren.length > 0) {
+      api.get('/players')
+        .then(({ data }) => {
+          const players = Array.isArray(data) ? data : data.players || []
+          const ids = storeChildren.map((c) => typeof c === 'object' ? c._id : c)
+          const myChildren = players.filter((p) => ids.includes(p._id))
+          setChildren(myChildren)
+        })
+        .catch(() => {})
+    }
+  }, [user])
+
+  // Build parent nav dynamically with children names
+  const buildParentNav = () => {
+    const items = [
+      { to: '/parent/dashboard', label: 'Panel', icon: LayoutDashboard },
+    ]
+
+    if (children.length > 0) {
+      children.forEach((child) => {
+        items.push({
+          to: `/parent/child/${child._id}`,
+          label: child.firstName,
+          icon: User,
+          childPath: true,
+        })
+      })
+    } else {
+      items.push({ to: '/my-children', label: 'Zawodnicy', icon: Users })
+    }
+
+    items.push(
+      { to: '/parent/add-coach', label: 'Dodaj trenera', icon: Link2 },
+      { to: '/messages', label: 'Wiadomości', icon: MessageCircle },
+      { to: '/settings', label: 'Ustawienia', icon: Settings },
+    )
+
+    return items
+  }
+
+  const navItems = user?.role === 'parent' ? buildParentNav() : getNavItems(user?.role)
 
   const handleLogout = async () => {
     await logout()
@@ -100,6 +149,7 @@ export default function Sidebar() {
               <NavLink
                 key={item.to}
                 to={item.to}
+                end={!item.childPath}
                 className={({ isActive }) =>
                   `sidebar-nav-item${isActive ? ' active' : ''}`
                 }

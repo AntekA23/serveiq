@@ -549,6 +549,21 @@ export const deleteActivitySeries = async (req, res, next) => {
   try {
     const { seriesId } = req.params;
 
+    // Najpierw sprawdź czy użytkownik jest właścicielem serii
+    const sample = await Activity.findOne({ 'recurrence.seriesId': seriesId });
+    if (!sample) {
+      return res.status(404).json({ message: 'Seria nie znaleziona' });
+    }
+
+    const userId = req.user._id.toString();
+    const isCreator = sample.createdBy?.toString() === userId;
+    const isCoach = req.user.role === 'coach' && sample.coach?.toString() === userId;
+    const isClubAdmin = req.user.role === 'clubAdmin' && req.user.club && sample.club?.toString() === req.user.club.toString();
+
+    if (!isCreator && !isCoach && !isClubAdmin) {
+      return res.status(403).json({ message: 'Brak uprawnień do usunięcia tej serii' });
+    }
+
     const query = { 'recurrence.seriesId': seriesId };
 
     if (req.user.role === 'coach') {
