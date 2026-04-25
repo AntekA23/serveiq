@@ -1,9 +1,10 @@
 .ps-section {
   margin: 24px 0;
   padding: 20px;
-  background: linear-gradient(135deg, #fff8e1 0%, #fff 100%);
-  border-radius: 16px;
-  border: 1px solid #fde68a;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
 }
 
 .ps-header {
@@ -11,17 +12,19 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 20px;
+  color: var(--color-text);
 }
 .ps-header h2 {
   font-size: 18px;
   margin: 0;
   flex: 1;
+  color: var(--color-text);
 }
 .ps-count {
-  background: #f59e0b;
-  color: white;
+  background: var(--color-amber-bg);
+  color: var(--color-amber);
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   font-size: 13px;
   font-weight: 600;
 }
@@ -29,7 +32,7 @@
 .ps-years { display: flex; flex-direction: column; gap: 16px; }
 .ps-year-label {
   font-weight: 700;
-  color: #92400e;
+  color: var(--color-amber);
   font-size: 15px;
   margin-bottom: 8px;
 }
@@ -40,28 +43,27 @@
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #f3f4f6;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
 }
-.ps-card-gold { border-left: 4px solid #f59e0b; }
-.ps-card-silver { border-left: 4px solid #94a3b8; }
-.ps-card-bronze { border-left: 4px solid #b45309; }
-.ps-card-finalist, .ps-card-semifinal, .ps-card-quarterfinal { border-left: 4px solid #6366f1; }
+.ps-card-gold { border-left: 4px solid #F59E0B; }
+.ps-card-silver { border-left: 4px solid #94A3B8; }
+.ps-card-bronze { border-left: 4px solid #B45309; }
+.ps-card-finalist, .ps-card-semifinal, .ps-card-quarterfinal { border-left: 4px solid var(--color-blue); }
 
-.ps-icon.ps-gold { color: #f59e0b; }
-.ps-icon.ps-silver { color: #94a3b8; }
-.ps-icon.ps-bronze { color: #b45309; }
-.ps-icon.ps-other { color: #6366f1; }
+.ps-icon.ps-gold { color: #F59E0B; }
+.ps-icon.ps-silver { color: #94A3B8; }
+.ps-icon.ps-bronze { color: #B45309; }
+.ps-icon.ps-other { color: var(--color-blue); }
 
 .ps-card-body { flex: 1; min-width: 0; }
-.ps-card-title { font-weight: 600; color: #111827; margin-bottom: 2px; }
-.ps-card-meta { font-size: 12px; color: #6b7280; }
-.ps-card-loc { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+.ps-card-title { font-weight: 600; color: var(--color-text); margin-bottom: 2px; }
+.ps-card-meta { font-size: 12px; color: var(--color-text-secondary); }
+.ps-card-loc { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
 .ps-card-result {
   font-size: 12px;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text);
   white-space: nowrap;
 }

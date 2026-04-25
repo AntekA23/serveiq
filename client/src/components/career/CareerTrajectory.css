@@ -1,32 +1,36 @@
 .ct-section {
   margin: 24px 0; padding: 20px;
-  background: linear-gradient(135deg, #f5f3ff 0%, #fff 100%);
-  border-radius: 16px;
-  border: 1px solid #ddd6fe;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
 }
-.ct-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-.ct-header h2 { font-size: 18px; margin: 0; }
+.ct-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; color: var(--color-text); }
+.ct-header h2 { font-size: 18px; margin: 0; color: var(--color-text); }
 
 .ct-controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 18px; }
-.ct-controls-label { font-size: 12px; color: #6b7280; margin-right: 4px; }
+.ct-controls-label { font-size: 12px; color: var(--color-text-secondary); margin-right: 4px; }
 .ct-chip {
-  padding: 4px 12px; border: 1px solid #d1d5db; background: white;
-  border-radius: 999px; font-size: 12px; cursor: pointer; color: #374151;
+  padding: 4px 12px; border: 1px solid var(--color-border-md); background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full); font-size: 12px; cursor: pointer; color: var(--color-text-secondary);
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
-.ct-chip.active { background: #6366f1; color: white; border-color: #6366f1; }
+.ct-chip:hover { color: var(--color-text); border-color: var(--color-border-md); }
+.ct-chip.active { background: var(--color-accent); color: var(--color-accent-contrast); border-color: var(--color-accent); }
 
 .ct-axis {
   position: relative; height: 18px; margin-bottom: 12px;
-  border-bottom: 1px dashed #d1d5db;
+  border-bottom: 1px dashed var(--color-border-md);
 }
 .ct-axis-mark {
   position: absolute; bottom: -2px; transform: translateX(-50%);
-  font-size: 10px; color: #6b7280;
+  font-size: 10px; color: var(--color-text-secondary);
 }
 .ct-current-age {
   position: absolute; top: -10px; bottom: -200px;
-  width: 2px; background: #6366f1; transform: translateX(-50%);
+  width: 2px; background: var(--color-accent); transform: translateX(-50%);
   z-index: 1;
+  box-shadow: 0 0 8px var(--color-accent-muted);
 }
 
 .ct-lines { display: flex; flex-direction: column; gap: 18px; }
@@ -34,13 +38,14 @@
 .ct-line-label { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
 .ct-line-track {
   position: relative; height: 14px;
-  background: #f3f4f6; border-radius: 7px;
+  background: var(--color-bg-tertiary); border-radius: 7px;
+  border: 1px solid var(--color-border);
 }
 .ct-dot {
   position: absolute; top: 50%; transform: translate(-50%, -50%);
   width: 12px; height: 12px; border-radius: 50%;
-  border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  border: 2px solid var(--color-bg-secondary); box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   cursor: pointer;
 }
 
-.ct-tip { font-size: 11px; color: #9ca3af; margin-top: 12px; }
+.ct-tip { font-size: 11px; color: var(--color-text-tertiary); margin-top: 12px; }
