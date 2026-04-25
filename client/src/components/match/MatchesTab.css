@@ -1,0 +1,21 @@
+.mt-tab { padding: 16px 0; }
+.mt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.mt-header h3 { font-size: 16px; margin: 0; }
+.mt-add {
+  display: flex; align-items: center; gap: 6px;
+  background: #6366f1; color: white;
+  padding: 6px 12px; border: none; border-radius: 8px;
+  cursor: pointer; font-size: 13px; font-weight: 600;
+}
+.mt-list { display: flex; flex-direction: column; gap: 10px; }
+.mt-item { display: flex; gap: 8px; align-items: stretch; }
+.mt-item > .mc-card { flex: 1; }
+.mt-actions { display: flex; flex-direction: column; gap: 4px; }
+.mt-actions button {
+  padding: 6px; border: 1px solid #e5e7eb;
+  background: white; border-radius: 8px; cursor: pointer;
+  color: #4b5563; display: flex; align-items: center;
+}
+.mt-actions button:hover { background: #f3f4f6; }
+.mt-empty { padding: 40px; text-align: center; color: #9ca3af; background: #fafafa; border-radius: 12px; }
+.mt-loading { padding: 20px; text-align: center; color: #6b7280; }
