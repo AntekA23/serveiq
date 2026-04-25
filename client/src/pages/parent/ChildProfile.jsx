@@ -7,6 +7,10 @@ import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import BadgePreview from '../../components/badges/BadgePreview'
 import IdolReadOnly from '../../components/player/IdolReadOnly'
+import PalmaresSection from '../../components/player/PalmaresSection'
+import CoachingTeamSection from '../../components/player/CoachingTeamSection'
+import RankingSummary from '../../components/player/RankingSummary'
+import UpcomingTournaments from '../../components/player/UpcomingTournaments'
 import './ChildProfile.css'
 
 function formatRelDate(dateStr) {
@@ -125,6 +129,16 @@ export default function ChildProfile() {
           </div>
         </div>
       </div>
+
+      {/* ─── 1.5 Performance pathway sections (warunkowo) ─── */}
+      {child.developmentLevel === 'performance' && (
+        <>
+          <PalmaresSection playerId={child._id} />
+          <CoachingTeamSection coaches={child.coaches || []} />
+          <RankingSummary ranking={child.ranking || {}} />
+          <UpcomingTournaments playerId={child._id} />
+        </>
+      )}
 
       {/* ─── 2. Training Plan ─── */}
       {schedule.length > 0 && (
