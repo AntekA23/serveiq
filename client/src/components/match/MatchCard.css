@@ -1,0 +1,36 @@
+.mc-card {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #cbd5e1;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.mc-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.mc-won { border-left-color: #16a34a; }
+.mc-lost { border-left-color: #dc2626; }
+
+.mc-result-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  align-self: flex-start;
+  white-space: nowrap;
+}
+.mc-won .mc-result-badge { background: #dcfce7; color: #16a34a; }
+.mc-lost .mc-result-badge { background: #fee2e2; color: #dc2626; }
+
+.mc-body { flex: 1; min-width: 0; }
+.mc-top { display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; }
+.mc-round { font-weight: 600; }
+.mc-opponent { font-size: 14px; color: #111827; margin: 4px 0; }
+.mc-opp-club { color: #6b7280; font-size: 12px; }
+.mc-score { font-family: 'SF Mono', 'Monaco', monospace; font-weight: 700; color: #111827; font-size: 16px; }
+.mc-loc { font-size: 11px; color: #6b7280; display: flex; align-items: center; gap: 3px; margin-top: 4px; }
