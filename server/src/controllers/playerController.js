@@ -168,6 +168,8 @@ export const getPlayers = async (req, res, next) => {
 
     const players = await Player.find(query)
       .populate('parents', 'firstName lastName email phone')
+      .populate('coach', 'firstName lastName email avatarUrl coachProfile.teamRole coachProfile.specialization')
+      .populate('coaches', 'firstName lastName email avatarUrl coachProfile.teamRole coachProfile.specialization')
       .sort({ lastName: 1, firstName: 1 });
 
     res.json({ players });
@@ -268,6 +270,8 @@ export const getPlayer = async (req, res, next) => {
 
     const player = await Player.findOne(query)
       .populate('parents', 'firstName lastName email phone')
+      .populate('coach', 'firstName lastName email avatarUrl coachProfile.teamRole coachProfile.specialization')
+      .populate('coaches', 'firstName lastName email avatarUrl coachProfile.teamRole coachProfile.specialization')
       .populate('federationProgram.program', 'federationCode federationName countryFlag');
 
     if (!player) {
