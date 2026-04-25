@@ -1,3 +1,39 @@
+# Sprint — 2026-04-26 — Performance Pro Features
+
+## Sprint Goal
+Dla zawodników performance dorzucić 3 features podnoszące wartość pro: Match log + opponent scouting, periodyzację roczną z A/B/C events, oraz career trajectory benchmark vs. wybranych idoli.
+
+## Completed (19 commits + smoke test)
+
+### Backend
+- [x] Model `Match` (mecz w turnieju lub sparing) + indexy + Polish error messages
+- [x] Model `SeasonPlan` (sezon z fazami + target events) + auto-archive previous active
+- [x] `matchController` + `seasonPlanController` (CRUD + role-based access)
+- [x] `/api/matches` + `/api/season-plans` + endpoint `GET /api/matches/h2h`
+
+### Frontend (9 nowych komponentów)
+- [x] **Match:** `MatchCard`, `MatchDetail` (modal), `MatchForm` (modal edycji), `RecentMatchesSection` (widget), `MatchesTab` (CRUD lista coach)
+- [x] **Season:** `SeasonTimeline` (12-miesięczny pasek z fazami)
+- [x] **Career:** `CareerTrajectory` + `careerBenchmarks.json` (Iga, Carlos, Hubi)
+- [x] `ChildProfile` rozszerzony o 3 nowe sekcje warunkowe
+- [x] `CoachPlayerProfile` rozszerzony + nowa sekcja "Mecze" (collapsible Section, nie tab — istniejąca konwencja)
+
+### Seed
+- [x] 8 meczy Sonii (4 oficjalne z palmaresu + 4 sparingi z Julią/Wiktorią/Polą)
+- [x] SeasonPlan 2026 dla Sonii (8 faz: build/peak/taper/recovery/peak/build/peak/offseason + 6 events: MP U16/ITF Bytom/Pardubice/Tennis Europe/halowe/Trnava)
+
+## Quality gates
+- [x] `node --check` na wszystkich nowych/zmienionych plikach
+- [x] `npm run seed` — 4 zawodników, 9 osiągnięć, 8 meczy, 1 sezon, 0 błędów
+- [x] `npm run build` (vite) — 0 errors (~7.6s)
+- [ ] Manual click-through w przeglądarce (parent3 + headCoach)
+
+## Spec & plan
+- Spec: `docs/superpowers/specs/2026-04-26-performance-pro-features-design.md`
+- Plan: `docs/superpowers/plans/2026-04-26-performance-pro-features.md`
+
+---
+
 # Sprint — 2026-04-25 — Performance Pathway (Sonia stress test)
 
 ## Sprint Goal
