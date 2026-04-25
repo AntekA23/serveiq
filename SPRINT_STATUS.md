@@ -1,3 +1,85 @@
+# Sprint — 2026-04-25 — Performance Pathway (Sonia stress test)
+
+## Sprint Goal
+Wprowadzenie pełnego "toru wyczynowego" (Sonia Antczak — U14, 7× MP) jako stress test architektoniczny: nowy model Achievement, pole `teamRole` w User.coachProfile, 4 sekcje warunkowe w ChildProfile/CoachPlayerProfile (`developmentLevel === 'performance'`), pełny seed Sonii z 4-osobowym sztabem trenerskim.
+
+## Completed (16 commits na master)
+
+### Backend
+- [x] `Achievement` model (palmares: 7 MP + 2 międzynarodowe)
+- [x] `User.coachProfile.teamRole` enum: head/assistant/fitness/mental/physio/nutrition
+- [x] `Player.ranking.itf` (ranking ITF Junior)
+- [x] `DevelopmentGoal.category.pathway` (nowa wartość enum)
+- [x] `achievementController` — CRUD z role-based access (Zod walidacja)
+- [x] `/api/achievements` routes (verifyToken + requireRole na POST/PUT/DELETE)
+- [x] `playerController` — populate `coach` + `coaches` z `coachProfile.teamRole`
+
+### Frontend (4 nowe komponenty)
+- [x] `PalmaresSection` — gablota trofeów grupowana po latach (gold/silver/bronze badges)
+- [x] `CoachingTeamSection` — siatka 4-osobowego zespołu z badge'ami ról
+- [x] `RankingSummary` — mini-karty PZT/TE/ITF/WTA/ATP
+- [x] `UpcomingTournaments` — 3 nadchodzące turnieje z osi czasu
+- [x] Integracja warunkowa w `ChildProfile.jsx` i `CoachPlayerProfile.jsx`
+
+### Seed (Demo Record D — Sonia)
+- [x] 4 nowe konta trenerów (head/fitness/mental/physio) z `teamRole`
+- [x] `parent3@serveiq.pl` (Anna Antczak) — rodzic Sonii
+- [x] Sonia Player: U14, 12 sesji/tydz, ranking PZT #3 / TE #180 / ITF #320, idol Świątek
+- [x] 9 osiągnięć: 7 MP (2021-2025, U10/U12/U14, single+deble) + Tennis Europe finalista + ITF J60 ćwierćfinał
+- [x] 3 cele: serwis 170 km/h, wytrzymałość 3-set, ITF Junior tour 2027
+- [x] 6 obserwacji — po jednej od każdego z 4 trenerów + 2 od heada
+- [x] 2 turnieje nadchodzące: MP U16 Sopot + ITF J60 Bytom
+- [x] 5 sesji różnych typów (kort/sparing/kondycja/mental/regeneracja)
+- [x] 1 ReviewSummary kwartalny Q1/2026
+- [x] 18 odznak (16 auto + 2 ręczne od heada)
+- [x] 5 wiadomości parent3 ↔ headCoach
+
+## Konta demo (NOWE)
+- `coach.head@serveiq.pl` / `password123` — Marek Wojciechowski (head)
+- `coach.fitness@serveiq.pl` / `password123` — Agnieszka Lewandowska (fitness)
+- `coach.mental@serveiq.pl` / `password123` — dr Paweł Sokołowski (mental)
+- `coach.physio@serveiq.pl` / `password123` — Karolina Mazur (physio)
+- `parent3@serveiq.pl` / `password123` — Anna Antczak (rodzic Sonii)
+
+## Quality gates
+- [x] `node --check` na wszystkich nowych/zmienionych plikach JS
+- [x] `npm run seed` — 4 zawodników, 9 osiągnięć, 0 błędów
+- [x] `npm run build` (vite) — `✓ built in 7.46s`, 0 errors
+- [ ] Manual click-through w przeglądarce — wymaga `cd server && npm install` (brakuje @anthropic-ai/sdk z pre-existing) i `npm run dev`
+
+## Następny krok — manual smoke test
+1. `cd server && npm install` (brakujące deps)
+2. `npm run dev`
+3. Login `parent3@serveiq.pl` → profil Sonii → 4 sekcje performance widoczne
+4. Login `parent@serveiq.pl` → profil Kacpra → bez nowych sekcji (regresja OK)
+5. Login `coach.head@serveiq.pl` → te same sekcje w widoku trenera
+
+## Spec & plan
+- Spec: `docs/superpowers/specs/2026-04-25-sonia-performance-pathway-design.md`
+- Plan: `docs/superpowers/plans/2026-04-25-sonia-performance-pathway.md`
+
+## Commits
+```
+aab6b86 fix: add 'pathway' to DevelopmentGoal category enum
+59d777e feat: seed Sonia full — goals/observations/tournaments/sessions/review/badges/messages
+e33521f feat: seed Sonia palmares — 7 MP + 2 international achievements
+001fdb6 feat: seed Sonia Antczak — Demo Record D performance pathway
+3751909 feat: seed performance team — 4 coaches with teamRole + parent3
+deba85d feat: CoachPlayerProfile — performance sections (DRY with parent view)
+7110662 feat: ChildProfile — performance sections (palmares/team/ranking/tournaments)
+d0bceb7 feat: Player.ranking.itf — ITF Junior ranking field
+a5ab527 feat: RankingSummary + UpcomingTournaments components
+07ed01c feat: CoachingTeamSection — 4-role team grid with chat CTAs
+7b28a19 feat: PalmaresSection — career trophies grouped by year
+01e4f96 feat: populate coach + coaches with teamRole in player endpoints
+a227a3b feat: /api/achievements routes wired
+b057a33 feat: achievementController — CRUD with role-based access
+c92768d feat: User.coachProfile.teamRole — head/assistant/fitness/mental/physio/nutrition
+2dd1635 feat: Achievement model — career palmares for performance players
+```
+
+---
+
 # Sprint — 2026-03-30
 
 ## Sprint Goal
