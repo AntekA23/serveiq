@@ -38,6 +38,7 @@ import developmentProgramRoutes from './routes/developmentPrograms.js';
 import aiRoutes from './routes/ai.js';
 import achievementRoutes from './routes/achievements.js';
 import matchRoutes from './routes/matches.js';
+import seasonPlanRoutes from './routes/seasonPlans.js';
 
 // ====== Konfiguracja ======
 
@@ -123,6 +124,7 @@ app.use('/api/development-programs', developmentProgramRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/matches', matchRoutes);
+app.use('/api/season-plans', seasonPlanRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
