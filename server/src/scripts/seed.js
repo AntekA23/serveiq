@@ -808,7 +808,35 @@ const seed = async () => {
         visibleToParent: true,
       });
     }
-    console.log(`  ${sessionsData.length} sesji treningowych\n`);
+
+    // Sonia sessions
+    const soniaSessionsData = [
+      { title: 'Trening techniczny — serwis + return', sessionType: 'kort', surface: 'clay', startTime: '15:00', daysAgo: 1, durationMinutes: 90, notes: 'Plaski serwis 60% trafień. Return z bekhendu agresywny.', focusAreas: ['serwis', 'return'], coachId: 0 },
+      { title: 'Sparing meczowy — symulacja MP', sessionType: 'sparing', surface: 'clay', startTime: '14:00', daysAgo: 7, durationMinutes: 120, notes: 'Sparing z Julią Kowalską. Sonia 6:2 6:3.', focusAreas: ['gra', 'taktyka'], coachId: 0 },
+      { title: 'Trening kondycyjny — interwały + siła', sessionType: 'kondycja', startTime: '17:00', daysAgo: 4, durationMinutes: 60, notes: 'Test Coopera 3120m. Core wzmocniony.', focusAreas: ['wydolnosc', 'sila'], coachId: 1 },
+      { title: 'Sesja mentalna — rutyny tie-break', sessionType: 'inne', startTime: '17:30', daysAgo: 1, durationMinutes: 30, notes: 'Praca nad rytuałem między punktami.', focusAreas: ['mentalnosc', 'rutyny'], coachId: 2 },
+      { title: 'Fizjoterapia + regeneracja', sessionType: 'rozciaganie', startTime: '17:30', daysAgo: 3, durationMinutes: 60, notes: 'Masaż m. czworogłowego, rolowanie, mobilizacja stawów.', focusAreas: ['regeneracja', 'kontuzje'], coachId: 3 },
+    ];
+
+    const soniaCoaches = [headCoach, fitnessCoach, mentalCoach, physioCoach];
+    for (const sd of soniaSessionsData) {
+      await Session.create({
+        player: sonia._id,
+        coach: soniaCoaches[sd.coachId]._id,
+        createdBy: soniaCoaches[sd.coachId]._id,
+        source: 'coach',
+        date: daysAgo(sd.daysAgo),
+        sessionType: sd.sessionType,
+        surface: sd.surface || '',
+        startTime: sd.startTime || '',
+        durationMinutes: sd.durationMinutes,
+        title: sd.title,
+        notes: sd.notes,
+        focusAreas: sd.focusAreas,
+        visibleToParent: true,
+      });
+    }
+    console.log(`  ${sessionsData.length + soniaSessionsData.length} sesji treningowych\n`);
 
     // ============================================================
     // 7. DEVELOPMENT GOALS
@@ -923,7 +951,53 @@ const seed = async () => {
       visibleToParent: true,
     });
 
-    console.log(`  7 celow rozwojowych (3 Kacper, 3 Julia, 1 Antoni)\n`);
+    // Sonia — performance goals
+    const goalS1 = await DevelopmentGoal.create({
+      player: sonia._id,
+      club: club._id,
+      createdBy: headCoach._id,
+      title: 'Plaski serwis 170 km/h',
+      description: 'Sonia musi zwiększyć prędkość pierwszego serwisu do 170+ km/h przy 60% trafień.',
+      category: 'serve',
+      timeframe: 'quarterly',
+      startDate: new Date('2026-01-01'),
+      targetDate: new Date('2026-09-30'),
+      status: 'active',
+      progress: 60,
+      visibleToParent: true,
+    });
+
+    const goalS2 = await DevelopmentGoal.create({
+      player: sonia._id,
+      club: club._id,
+      createdBy: fitnessCoach._id,
+      title: 'Wytrzymałość — mecze 3-setowe na pełnej intensywności',
+      description: 'Cel: utrzymać poziom intensywności w 3. secie identyczny jak w 1. (HR avg, prędkość biegu).',
+      category: 'fitness',
+      timeframe: 'quarterly',
+      startDate: new Date('2026-01-01'),
+      targetDate: new Date('2026-06-30'),
+      status: 'active',
+      progress: 70,
+      visibleToParent: true,
+    });
+
+    const goalS3 = await DevelopmentGoal.create({
+      player: sonia._id,
+      club: club._id,
+      createdBy: headCoach._id,
+      title: 'Wejście do ITF Junior tour 2027',
+      description: 'Kwalifikacja do regularnych turniejów ITF Junior. Cel: top 200 ITF Junior do końca 2026.',
+      category: 'pathway',
+      timeframe: 'seasonal',
+      startDate: new Date('2026-01-01'),
+      targetDate: new Date('2026-12-31'),
+      status: 'active',
+      progress: 35,
+      visibleToParent: true,
+    });
+
+    console.log(`  10 celow rozwojowych (3 Kacper, 3 Julia, 1 Antoni, 3 Sonia)\n`);
 
     // ============================================================
     // 8. OBSERVATIONS
@@ -1051,7 +1125,45 @@ const seed = async () => {
       updatedAt: daysAgo(5),
     });
 
-    console.log(`  7 obserwacji (2 Kacper, 4 Julia, 1 Antoni)\n`);
+    // Sonia observations — różne od każdego z 4 trenerów
+    const obsS1 = await Observation.create({
+      player: sonia._id, club: club._id, author: headCoach._id, type: 'progress',
+      text: 'Plaski serwis Sonii notuje 158 km/h średnio (poprzedni miesiąc 152). Pracujemy nad ułożeniem barku — pierwszy ruch.',
+      engagement: 5, effort: 5, mood: 4, focusAreas: ['serwis', 'technika'], goalRef: goalS1._id, visibleToParent: true,
+      createdAt: daysAgo(2), updatedAt: daysAgo(2),
+    });
+    const obsS2 = await Observation.create({
+      player: sonia._id, club: club._id, author: fitnessCoach._id, type: 'progress',
+      text: 'Test Coopera: 3120m (poprzedni 3050m). VO2max stabilny 52 ml/kg/min. Core wyraźnie mocniejszy.',
+      engagement: 4, effort: 5, mood: 4, focusAreas: ['kondycja', 'wytrzymalosc'], goalRef: goalS2._id, visibleToParent: true,
+      createdAt: daysAgo(4), updatedAt: daysAgo(4),
+    });
+    const obsS3 = await Observation.create({
+      player: sonia._id, club: club._id, author: mentalCoach._id, type: 'highlight',
+      text: 'Sesja 30min — rutyny tie-break. Sonia bardzo świadoma swoich emocji, sama identyfikuje moment „spadku" w 2. secie. Doskonała refleksja.',
+      engagement: 5, effort: 5, mood: 5, focusAreas: ['mentalnosc', 'rutyny'], visibleToParent: true,
+      createdAt: daysAgo(1), updatedAt: daysAgo(1),
+    });
+    const obsS4 = await Observation.create({
+      player: sonia._id, club: club._id, author: physioCoach._id, type: 'concern',
+      text: 'Drobne napięcie m. czworogłowego prawego po sparingu. Obserwacja, masaż + rolowanie. Nie ograniczać obciążeń, ale monitorować przez tydzień.',
+      engagement: 3, effort: 4, mood: 3, focusAreas: ['regeneracja', 'kontuzje'], visibleToParent: true, pinned: true,
+      createdAt: daysAgo(3), updatedAt: daysAgo(3),
+    });
+    const obsS5 = await Observation.create({
+      player: sonia._id, club: club._id, author: headCoach._id, type: 'highlight',
+      text: 'Sparing z Julią Kowalską (Junior Advanced). Sonia wygrywa 6:2 6:3 — agresywne returny, świetny serwis+1. Widać dystans poziomu.',
+      engagement: 5, effort: 5, mood: 5, focusAreas: ['gra', 'serwis-1', 'taktyka'], visibleToParent: true,
+      createdAt: daysAgo(7), updatedAt: daysAgo(7),
+    });
+    const obsS6 = await Observation.create({
+      player: sonia._id, club: club._id, author: headCoach._id, type: 'progress',
+      text: 'Tygodniowe podsumowanie: 12 sesji, 14h pracy. Plan zrealizowany w 100%. Forma rośnie przed MP U16.',
+      engagement: 5, effort: 5, mood: 4, focusAreas: ['plan', 'dyscyplina'], visibleToParent: true,
+      createdAt: daysAgo(0), updatedAt: daysAgo(0),
+    });
+
+    console.log(`  13 obserwacji (2 Kacper, 4 Julia, 1 Antoni, 6 Sonia)\n`);
 
     // Legacy Review model — pomijamy, API uzywa wylacznie ReviewSummary
 
@@ -1100,7 +1212,25 @@ const seed = async () => {
       visibleToParent: true,
     });
 
-    console.log(`  2 przeglady (Kacper marzec, Julia marzec)\n`);
+    const reviewSumS = await ReviewSummary.create({
+      player: sonia._id, club: club._id, author: headCoach._id,
+      title: 'Przegląd kwartalny Q1/2026 — Sonia',
+      periodType: 'quarterly',
+      periodStart: new Date('2026-01-01'),
+      periodEnd: new Date('2026-03-31'),
+      whatHappened: 'Sonia zrealizowała 156h treningów (plan 168h, 93%). 4 sparingi turniejowe, sesje fizjo regularnie. Brak kontuzji.',
+      whatWentWell: 'Plaski serwis: progres 152→158 km/h. Test Coopera +70m. Stabilność emocji w sparingach — widać efekt pracy z dr Sokołowskim.',
+      whatNeedsFocus: 'Tie-breaki — wciąż obszar do pracy. Return z prawej strony wymaga większej agresji. Drobne napięcie m. czworogłowego — monitoring.',
+      nextSteps: 'Przygotowanie do MP U16 (czerwiec). Intensyfikacja serwis+1, kontynuacja sesji mentalnych 2x/tydz, regularne wizyty u fizjoterapeuty.',
+      activitiesCount: 156,
+      goalsReviewed: [goalS1._id, goalS2._id, goalS3._id],
+      observations: [obsS1._id, obsS2._id, obsS3._id, obsS4._id, obsS5._id, obsS6._id],
+      status: 'published',
+      publishedAt: daysAgo(5),
+      visibleToParent: true,
+    });
+
+    console.log(`  3 przeglady (Kacper marzec, Julia marzec, Sonia Q1)\n`);
 
     // ============================================================
     // 11. RECOMMENDATIONS
@@ -1229,7 +1359,33 @@ const seed = async () => {
       notes: 'Pierwszy turniej Kacpra!',
     });
 
-    console.log(`  3 turnieje (2 Julia, 1 Kacper)\n`);
+    await Tournament.create({
+      player: sonia._id, coach: headCoach._id, createdBy: headCoach._id, source: 'coach',
+      name: 'Mistrzostwa Polski U16',
+      location: 'Sopot, KT Arka',
+      surface: 'clay',
+      startDate: new Date('2026-06-12'),
+      endDate: new Date('2026-06-15'),
+      category: 'U16',
+      drawSize: 32,
+      status: 'planned',
+      notes: 'Cel: półfinał. Sonia rozstawiona z 3.',
+    });
+
+    await Tournament.create({
+      player: sonia._id, coach: headCoach._id, createdBy: headCoach._id, source: 'coach',
+      name: 'ITF J60 Bytom',
+      location: 'Bytom, KT Górnik',
+      surface: 'hard',
+      startDate: new Date('2026-07-08'),
+      endDate: new Date('2026-07-13'),
+      category: 'ITF Junior J60',
+      drawSize: 64,
+      status: 'planned',
+      notes: 'Drugi start ITF. Cel: ćwierćfinał + punkty rankingowe.',
+    });
+
+    console.log(`  5 turniejow (2 Julia, 1 Kacper, 2 Sonia)\n`);
 
     // ============================================================
     // 12.5 ACHIEVEMENTS — palmares Sonii
@@ -1317,6 +1473,11 @@ const seed = async () => {
       { from: coach._id, to: parent2._id, text: 'Dzien dobry! Julia robi postepy w serwisie. Przed turniejem w Krakowie skupimy sie na rutynach meczowych.', daysAgo: 3 },
       { from: parent2._id, to: coach._id, text: 'Swietnie. Julia jest troche zestresowana turniejem. Moze jakies wskazowki jak ja wspierac?', daysAgo: 2 },
       { from: coach._id, to: parent2._id, text: 'Najwazniejsze — nie komentowac gry w trakcie meczu. Wspierac niezaleznie od wyniku. Julia sama najlepiej wie co robi na korcie.', daysAgo: 1 },
+      { from: headCoach._id, to: parent3._id, text: 'Pani Anno, Sonia świetnie pracowała w tym tygodniu. Plan przed MP U16 idzie zgodnie z założeniami.', daysAgo: 4 },
+      { from: parent3._id, to: headCoach._id, text: 'Dziękuję! Jak Pan ocenia jej formę? Czy myśli Pan o dodatkowych startach przed MP?', daysAgo: 3 },
+      { from: headCoach._id, to: parent3._id, text: 'Forma rosnąca. Sugeruję jeszcze ITF J60 Bytom (lipiec) i ewentualnie sparing wyjazdowy z KT Legia. Na MP U16 jesteśmy dobrze przygotowani.', daysAgo: 2 },
+      { from: parent3._id, to: headCoach._id, text: 'Świetnie. A co z lekkim napięciem w nodze, o którym pisała Karolina?', daysAgo: 1 },
+      { from: headCoach._id, to: parent3._id, text: 'Pod kontrolą. Karolina zaleciła monitoring + masaż 2x/tydz. Bez ograniczeń obciążeń.', daysAgo: 1 },
     ];
 
     for (const mData of messagesData) {
@@ -1424,6 +1585,29 @@ const seed = async () => {
     ]);
     console.log('  Antoni: 1 odznaka');
 
+    // Sonia — najwięcej odznak (performance pathway)
+    await PlayerBadge.insertMany([
+      { player: sonia._id, badgeSlug: 'first-session', earnedAt: new Date('2018-09-15') },
+      { player: sonia._id, badgeSlug: 'regular-player', earnedAt: new Date('2019-01-10') },
+      { player: sonia._id, badgeSlug: 'session-25', earnedAt: new Date('2019-06-01') },
+      { player: sonia._id, badgeSlug: 'training-machine', earnedAt: new Date('2020-09-15') },
+      { player: sonia._id, badgeSlug: 'hours-10', earnedAt: new Date('2019-04-01') },
+      { player: sonia._id, badgeSlug: 'hours-50', earnedAt: new Date('2020-01-01') },
+      { player: sonia._id, badgeSlug: 'weekly-streak', earnedAt: new Date('2019-09-01') },
+      { player: sonia._id, badgeSlug: 'streak-master', earnedAt: new Date('2020-06-01') },
+      { player: sonia._id, badgeSlug: 'tournament-debut', earnedAt: new Date('2020-05-01') },
+      { player: sonia._id, badgeSlug: 'winner', earnedAt: new Date('2021-08-15') },
+      { player: sonia._id, badgeSlug: 'tournament-5', earnedAt: new Date('2022-04-01') },
+      { player: sonia._id, badgeSlug: 'finalist', earnedAt: new Date('2024-10-12') },
+      { player: sonia._id, badgeSlug: 'court-traveler', earnedAt: new Date('2021-09-01') },
+      { player: sonia._id, badgeSlug: 'goal-achieved', earnedAt: new Date('2021-08-15') },
+      { player: sonia._id, badgeSlug: 'three-goals', earnedAt: new Date('2022-12-01') },
+      { player: sonia._id, badgeSlug: 'pathway-advance', earnedAt: new Date('2024-09-01') },
+      { player: sonia._id, badgeSlug: 'coach-mvp', earnedAt: new Date('2025-08-17'), type: 'manual', awardedBy: headCoach._id, awardedNote: '7. tytuł mistrzowski — niesamowita konsekwencja!' },
+      { player: sonia._id, badgeSlug: 'coach-sportsmanship', earnedAt: new Date('2024-12-08'), type: 'manual', awardedBy: headCoach._id, awardedNote: 'Wzór fair play w trudnym finale.' },
+    ]);
+    console.log('  Sonia: 18 odznak (w tym 2 ręczne)');
+
     // ============================================================
     // PODSUMOWANIE
     // ============================================================
@@ -1443,12 +1627,13 @@ const seed = async () => {
       Message.countDocuments(),
       PlayerBadge.countDocuments(),
       DevelopmentProgram.countDocuments(),
+      Achievement.countDocuments(),
     ]);
 
     console.log('==========================================');
     console.log('Podsumowanie:');
     console.log(`  Użytkownicy:      ${counts[0]} (coach, parent, parent2, admin)`);
-    console.log(`  Zawodnicy:        ${counts[1]} (Kacper, Julia, Antoni)`);
+    console.log(`  Zawodnicy:        ${counts[1]} (Kacper, Julia, Antoni, Sonia)`);
     console.log(`  Klub:             ${counts[2]}`);
     console.log(`  Grupy:            ${counts[3]}`);
     console.log(`  Aktywnosci:       ${counts[4]}`);
@@ -1462,6 +1647,7 @@ const seed = async () => {
     console.log(`  Wiadomosci:       ${counts[12]}`);
     console.log(`  Odznaki:          ${counts[13]}`);
     console.log(`  Programy rozwoju: ${counts[14]}`);
+    console.log(`  Osiągnięcia:      ${counts[15]}`);
     console.log('==========================================\n');
 
     console.log('Konta demo:');
@@ -1473,7 +1659,8 @@ const seed = async () => {
     console.log('Demo Records:');
     console.log('  A) Kacper Nowak  — Tennis 10 Red (beginner)');
     console.log('  B) Julia Kowalska — Junior Advanced (Sonia-light)');
-    console.log('  C) Antoni Wisniewski — Tennis 10 Red (nowy)\n');
+    console.log('  C) Antoni Wisniewski — Tennis 10 Red (nowy)');
+    console.log('  D) Sonia Antczak — Performance (Sonia full / stress test)\n');
 
     console.log('Seed zakonczony pomyslnie! 🎾');
 
