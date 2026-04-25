@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, User, CalendarDays, CalendarClock, ClipboardList,
-  MessageCircle, Settings, LogOut, Baby, Link2,
+  MessageCircle, Settings, LogOut, Baby,
   Newspaper, Dumbbell, Building2, BarChart3, CreditCard, Cog,
   FileText, Trophy,
 } from 'lucide-react'
@@ -102,7 +102,7 @@ export default function Sidebar() {
     }
 
     items.push(
-      { to: '/parent/add-coach', label: 'Dodaj trenera', icon: Link2 },
+      { to: '/parent/team', label: 'Zespół', icon: Users },
       { to: '/messages', label: 'Wiadomości', icon: MessageCircle },
       { to: '/settings', label: 'Ustawienia', icon: Settings },
     )

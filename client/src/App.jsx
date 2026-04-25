@@ -43,6 +43,7 @@ import Onboarding from './pages/parent/Onboarding'
 import ParentSettings from './pages/parent/Settings'
 import Pricing from './pages/parent/Pricing'
 import AddCoach from './pages/parent/AddCoach'
+import Team from './pages/parent/Team'
 
 // Club pages
 import ClubDashboard from './pages/club/ClubDashboard'
@@ -361,6 +362,14 @@ export default function App() {
           element={
             <ProtectedRoute role="parent">
               <AppShell><AddCoach /></AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/team"
+          element={
+            <ProtectedRoute role="parent">
+              <AppShell><Team /></AppShell>
             </ProtectedRoute>
           }
         />
