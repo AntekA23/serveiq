@@ -12,6 +12,10 @@ import BadgeGrid from '../../components/badges/BadgeGrid'
 import BadgeAwardModal from '../../components/badges/BadgeAwardModal'
 import IdolCard from '../../components/player/IdolCard'
 import useToast from '../../hooks/useToast'
+import PalmaresSection from '../../components/player/PalmaresSection'
+import CoachingTeamSection from '../../components/player/CoachingTeamSection'
+import RankingSummary from '../../components/player/RankingSummary'
+import UpcomingTournaments from '../../components/player/UpcomingTournaments'
 import './CoachPlayerProfile.css'
 
 const DAY_NAMES = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sb', 'Nd']
@@ -308,6 +312,16 @@ export default function CoachPlayerProfile() {
           </Button>
         </div>
       </div>
+
+      {/* ─── Performance pathway sections (warunkowo) ─── */}
+      {player?.developmentLevel === 'performance' && (
+        <>
+          <PalmaresSection playerId={player._id} />
+          <CoachingTeamSection coaches={player.coaches || []} />
+          <RankingSummary ranking={player.ranking || {}} />
+          <UpcomingTournaments playerId={player._id} />
+        </>
+      )}
 
       {/* AI Recommendations (if generated) */}
       {aiRecs && (
