@@ -1,0 +1,41 @@
+{
+  "iga-swiatek": {
+    "displayName": "Iga Świątek",
+    "country": "🇵🇱",
+    "born": "2001-05-31",
+    "milestones": [
+      { "age": 12, "label": "Pierwsze MP U12 — singel", "year": 2013, "type": "national" },
+      { "age": 14, "label": "Pierwszy ITF Junior", "year": 2015, "type": "international" },
+      { "age": 16, "label": "Półfinał Wimbledonu juniorek", "year": 2017, "type": "junior-major" },
+      { "age": 17, "label": "Wimbledon Juniorki — tytuł", "year": 2018, "type": "junior-major" },
+      { "age": 19, "label": "Roland Garros — tytuł", "year": 2020, "type": "grand-slam" },
+      { "age": 21, "label": "WTA #1", "year": 2022, "type": "ranking" }
+    ]
+  },
+  "carlos-alcaraz": {
+    "displayName": "Carlos Alcaraz",
+    "country": "🇪🇸",
+    "born": "2003-05-05",
+    "milestones": [
+      { "age": 13, "label": "Mistrz Hiszpanii U14", "year": 2016, "type": "national" },
+      { "age": 15, "label": "Pierwszy ITF Junior", "year": 2018, "type": "international" },
+      { "age": 17, "label": "Pierwsze ATP — kwalifikacje Wimbledon", "year": 2020, "type": "pro" },
+      { "age": 18, "label": "Pokonanie Nadala (Madryt)", "year": 2021, "type": "milestone" },
+      { "age": 19, "label": "US Open — tytuł + ATP #1", "year": 2022, "type": "grand-slam" },
+      { "age": 21, "label": "Wimbledon — drugi tytuł GS", "year": 2024, "type": "grand-slam" }
+    ]
+  },
+  "hubert-hurkacz": {
+    "displayName": "Hubert Hurkacz",
+    "country": "🇵🇱",
+    "born": "1997-02-11",
+    "milestones": [
+      { "age": 13, "label": "MP U14 — finał", "year": 2010, "type": "national" },
+      { "age": 16, "label": "Pierwszy ITF Junior", "year": 2013, "type": "international" },
+      { "age": 19, "label": "ATP debut", "year": 2016, "type": "pro" },
+      { "age": 22, "label": "Pierwszy tytuł ATP (Winston-Salem)", "year": 2019, "type": "pro" },
+      { "age": 24, "label": "Półfinał Wimbledonu", "year": 2021, "type": "grand-slam" },
+      { "age": 26, "label": "ATP #6 — kariery najwyżej", "year": 2023, "type": "ranking" }
+    ]
+  }
+}
