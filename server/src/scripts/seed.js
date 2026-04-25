@@ -19,6 +19,7 @@ import PlayerBadge from '../models/PlayerBadge.js';
 import DevelopmentProgram from '../models/DevelopmentProgram.js';
 import Achievement from '../models/Achievement.js';
 import Match from '../models/Match.js';
+import SeasonPlan from '../models/SeasonPlan.js';
 import { seedDevelopmentPrograms } from './seedDevelopmentPrograms.js';
 
 /**
@@ -65,6 +66,7 @@ const seed = async () => {
       DevelopmentProgram.deleteMany({}),
       Achievement.deleteMany({}),
       Match.deleteMany({}),
+      SeasonPlan.deleteMany({}),
     ]);
     console.log('Kolekcje wyczyszczone.\n');
 
@@ -1510,6 +1512,41 @@ const seed = async () => {
     console.log(`  8 meczy Sonii (4 oficjalne + 4 sparingi)\n`);
 
     // ============================================================
+    // 12.7 SEASON PLAN — sezon 2026 Sonii
+    // ============================================================
+    console.log('Tworzenie planu sezonu Sonii...');
+
+    await SeasonPlan.create({
+      player: sonia._id, club: club._id,
+      season: '2026',
+      status: 'active',
+      startDate: new Date('2026-01-01'),
+      endDate: new Date('2026-12-31'),
+      weeklyHoursTarget: 14,
+      phases: [
+        { type: 'build',     startDate: new Date('2026-01-01'), endDate: new Date('2026-02-28'), intensity: 4, targetEvent: 'MP U16',           notes: 'Bazowe budowanie kondycji + technika serwisu' },
+        { type: 'peak',      startDate: new Date('2026-03-01'), endDate: new Date('2026-05-31'), intensity: 5, targetEvent: 'MP U16',           notes: 'Szczyt formy przed głównym celem sezonu' },
+        { type: 'taper',     startDate: new Date('2026-06-01'), endDate: new Date('2026-06-15'), intensity: 3, targetEvent: 'MP U16 (12-15.06)', notes: 'Redukcja objętości, świeżość' },
+        { type: 'recovery',  startDate: new Date('2026-06-16'), endDate: new Date('2026-07-05'), intensity: 2, notes: 'Aktywna regeneracja po MP' },
+        { type: 'peak',      startDate: new Date('2026-07-06'), endDate: new Date('2026-08-31'), intensity: 5, targetEvent: 'ITF J60 Bytom + Pardubice', notes: 'Drugi peak — wyjazdy ITF' },
+        { type: 'build',     startDate: new Date('2026-09-01'), endDate: new Date('2026-10-31'), intensity: 4, notes: 'Powrót do bazy + nowe techniki' },
+        { type: 'peak',      startDate: new Date('2026-11-01'), endDate: new Date('2026-12-15'), intensity: 4, targetEvent: 'Halowe MP U16',     notes: 'Szczyt na halowe' },
+        { type: 'offseason', startDate: new Date('2026-12-16'), endDate: new Date('2026-12-31'), intensity: 1, notes: 'Wakacje + odpoczynek' },
+      ],
+      targetEvents: [
+        { name: 'MP U16',          date: new Date('2026-06-13'), priority: 'A' },
+        { name: 'ITF J60 Bytom',   date: new Date('2026-07-10'), priority: 'A' },
+        { name: 'ITF J60 Pardubice', date: new Date('2026-08-14'), priority: 'B' },
+        { name: 'Tennis Europe U16', date: new Date('2026-09-20'), priority: 'B' },
+        { name: 'Halowe MP U16',   date: new Date('2026-12-05'), priority: 'B' },
+        { name: 'ITF J30 Trnava',  date: new Date('2026-04-04'), priority: 'C' },
+      ],
+      createdBy: headCoach._id,
+    });
+
+    console.log('  Sezon 2026 Sonii (8 faz, 6 target events)\n');
+
+    // ============================================================
     // 13. PAYMENTS
     // ============================================================
     console.log('Tworzenie platnosci...');
@@ -1731,6 +1768,8 @@ const seed = async () => {
       PlayerBadge.countDocuments(),
       DevelopmentProgram.countDocuments(),
       Achievement.countDocuments(),
+      Match.countDocuments(),
+      SeasonPlan.countDocuments(),
     ]);
 
     console.log('==========================================');
@@ -1751,6 +1790,8 @@ const seed = async () => {
     console.log(`  Odznaki:          ${counts[13]}`);
     console.log(`  Programy rozwoju: ${counts[14]}`);
     console.log(`  Osiągnięcia:      ${counts[15]}`);
+    console.log(`  Mecze:            ${counts[16]}`);
+    console.log(`  Plany sezonu:     ${counts[17]}`);
     console.log('==========================================\n');
 
     console.log('Konta demo:');
