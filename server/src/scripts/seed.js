@@ -17,6 +17,7 @@ import Recommendation from '../models/Recommendation.js';
 import ReviewSummary from '../models/ReviewSummary.js';
 import PlayerBadge from '../models/PlayerBadge.js';
 import DevelopmentProgram from '../models/DevelopmentProgram.js';
+import Achievement from '../models/Achievement.js';
 import { seedDevelopmentPrograms } from './seedDevelopmentPrograms.js';
 
 /**
@@ -61,6 +62,7 @@ const seed = async () => {
       ReviewSummary.deleteMany({}),
       PlayerBadge.deleteMany({}),
       DevelopmentProgram.deleteMany({}),
+      Achievement.deleteMany({}),
     ]);
     console.log('Kolekcje wyczyszczone.\n');
 
@@ -425,6 +427,69 @@ const seed = async () => {
         notes: 'Antoni dopiero zaczal. Cel: polubic tenis i nauczyc sie podstaw.',
       },
     });
+
+    // Demo Record D — Sonia (Performance pathway — stress test)
+    const sonia = await Player.create({
+      firstName: 'Sonia',
+      lastName: 'Antczak',
+      dateOfBirth: new Date('2012-06-14'),
+      gender: 'F',
+      coach: headCoach._id,
+      coaches: [headCoach._id, fitnessCoach._id, mentalCoach._id, physioCoach._id],
+      parents: [parent3._id],
+      club: club._id,
+      pathwayStage: 'performance',
+      pathwayHistory: [
+        { stage: 'tennis10_red', startDate: new Date('2018-09-01'), endDate: new Date('2019-08-31') },
+        { stage: 'tennis10_orange', startDate: new Date('2019-09-01'), endDate: new Date('2020-08-31') },
+        { stage: 'tennis10_green', startDate: new Date('2020-09-01'), endDate: new Date('2021-08-31') },
+        { stage: 'committed', startDate: new Date('2021-09-01'), endDate: new Date('2023-08-31') },
+        { stage: 'advanced', startDate: new Date('2023-09-01'), endDate: new Date('2024-08-31') },
+        { stage: 'performance', startDate: new Date('2024-09-01'), notes: 'Przejście na ścieżkę wyczynową — sponsoring klubowy + program PZT' },
+      ],
+      developmentLevel: 'performance',
+      ranking: { pzt: 3, te: 180, itf: 320 },
+      trainingPlan: {
+        weeklySchedule: [
+          { day: 1, sessionType: 'kort', durationMinutes: 90, startTime: '15:00', notes: 'Technika + serwis+1' },
+          { day: 1, sessionType: 'kondycja', durationMinutes: 60, startTime: '17:30', notes: 'Siła + szybkość' },
+          { day: 2, sessionType: 'kort', durationMinutes: 120, startTime: '15:00', notes: 'Taktyka' },
+          { day: 2, sessionType: 'inne', durationMinutes: 30, startTime: '18:00', notes: 'Sesja mentalna' },
+          { day: 3, sessionType: 'kort', durationMinutes: 90, startTime: '15:00', notes: 'Return + gra zaczepna' },
+          { day: 3, sessionType: 'rozciaganie', durationMinutes: 60, startTime: '17:30', notes: 'Fizjo + regeneracja' },
+          { day: 4, sessionType: 'sparing', durationMinutes: 120, startTime: '14:00', notes: 'Sparing meczowy' },
+          { day: 4, sessionType: 'kondycja', durationMinutes: 45, startTime: '17:00', notes: 'Interwały' },
+          { day: 5, sessionType: 'kort', durationMinutes: 90, startTime: '15:00', notes: 'Specjalistyka — gra' },
+          { day: 5, sessionType: 'inne', durationMinutes: 30, startTime: '17:30', notes: 'Rutyny meczowe' },
+          { day: 6, sessionType: 'sparing', durationMinutes: 180, startTime: '10:00', notes: 'Turniej / sparing dlugi' },
+          { day: 7, sessionType: 'rozciaganie', durationMinutes: 45, startTime: '11:00', notes: 'Regeneracja' },
+        ],
+        weeklyGoal: { sessionsPerWeek: 12, hoursPerWeek: 14 },
+        focus: ['Plaski serwis', 'Taktyka serwis+1', 'Wytrzymałość 3-setowa', 'Rutyny meczowe', 'Mentalność turniejowa'],
+        notes: 'Sponsoring klubowy KT Smecz + program PZT pokrywa koszty treningów i wyjazdów. Cel sezonu 2026: kwalifikacja do ITF Junior tour.',
+      },
+      nextStep: {
+        text: 'MP U16 (czerwiec 2026), potem ITF J60 Pardubice. Cel: wejście do top 200 ITF Junior.',
+        updatedAt: new Date(),
+        updatedBy: headCoach._id,
+      },
+      idol: {
+        name: 'Iga Świątek',
+        facts: [
+          'Iga Świątek była pierwszą Polką, która zdobyła numer 1 w rankingu WTA, i utrzymała tę pozycję przez ponad rok.',
+          'Iga zaczęła grać w tenisa mając zaledwie 5 lat, inspirowana przez ojca — wioślarza olimpijskiego.',
+          'Iga pracuje z psychologiem sportowym od 16. roku życia — uważa, że siła mentalna jest równie ważna jak technika.',
+          'W 2020 roku Iga wygrała Roland Garros nie tracąc ani jednego seta w całym turnieju — miała wtedy 19 lat.',
+        ],
+        generatedAt: new Date(),
+      },
+    });
+
+    // Linkuj Sonię do parent3
+    parent3.parentProfile = { children: [sonia._id] };
+    await parent3.save();
+
+    console.log(`  Sonia Antczak — Performance (Demo Record D — Sonia full / stress test)\n`);
 
     // Link parents
     parent.parentProfile = { children: [kacper._id, antoni._id] };
