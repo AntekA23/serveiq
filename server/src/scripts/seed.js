@@ -1232,6 +1232,25 @@ const seed = async () => {
     console.log(`  3 turnieje (2 Julia, 1 Kacper)\n`);
 
     // ============================================================
+    // 12.5 ACHIEVEMENTS — palmares Sonii
+    // ============================================================
+    console.log('Tworzenie palmaresu Sonii...');
+
+    await Achievement.insertMany([
+      { player: sonia._id, club: club._id, category: 'mp', title: 'Mistrzostwa Polski U10 — singel', ageCategory: 'U10', discipline: 'singel', year: 2021, date: new Date('2021-08-15'), location: 'Bydgoszcz', result: 'gold', description: 'Pierwszy tytuł mistrzowski. Finał wygrany 6:2 6:1.', visibleToParent: true, createdBy: headCoach._id },
+      { player: sonia._id, club: club._id, category: 'mp', title: 'Mistrzostwa Polski U10 — debel', ageCategory: 'U10', discipline: 'debel', year: 2022, date: new Date('2022-04-20'), location: 'Sopot', result: 'gold', description: 'Mistrzostwo w deblu z partnerką z KT Mera.', visibleToParent: true, createdBy: headCoach._id },
+      { player: sonia._id, club: club._id, category: 'mp', title: 'Mistrzostwa Polski U12 — singel', ageCategory: 'U12', discipline: 'singel', year: 2022, date: new Date('2022-08-12'), location: 'Wrocław', result: 'gold', description: 'Drugi tytuł singlowy w wieku zaledwie 10 lat.', visibleToParent: true, createdBy: headCoach._id },
+      { player: sonia._id, club: club._id, category: 'mp', title: 'Mistrzostwa Polski U12 — debel', ageCategory: 'U12', discipline: 'debel', year: 2023, date: new Date('2023-04-18'), location: 'Łódź', result: 'gold', visibleToParent: true, createdBy: headCoach._id },
+      { player: sonia._id, club: club._id, category: 'mp', title: 'Halowe Mistrzostwa Polski U12', ageCategory: 'U12', discipline: 'singel', year: 2023, date: new Date('2023-12-09'), location: 'Poznań', result: 'gold', description: 'Bez straty seta w całym turnieju.', visibleToParent: true, createdBy: headCoach._id },
+      { player: sonia._id, club: club._id, category: 'mp', title: 'Halowe Mistrzostwa Polski U14', ageCategory: 'U14', discipline: 'singel', year: 2024, date: new Date('2024-12-08'), location: 'Warszawa', result: 'gold', description: 'Najmłodsza mistrzyni U14 halowych w historii klubu.', visibleToParent: true, createdBy: headCoach._id },
+      { player: sonia._id, club: club._id, category: 'mp', title: 'Mistrzostwa Polski U14 — singel', ageCategory: 'U14', discipline: 'singel', year: 2025, date: new Date('2025-08-17'), location: 'Kraków', result: 'gold', description: 'Siódmy tytuł mistrzowski. Finał 7:5 6:3.', visibleToParent: true, createdBy: headCoach._id },
+      { player: sonia._id, club: club._id, category: 'international', title: 'Tennis Europe U14 — Bratislava', ageCategory: 'U14', discipline: 'singel', year: 2024, date: new Date('2024-10-12'), location: 'Bratysława', result: 'finalist', description: 'Pierwszy międzynarodowy finał. Porażka w 3 setach.', visibleToParent: true, createdBy: headCoach._id },
+      { player: sonia._id, club: club._id, category: 'international', title: 'ITF J60 Pardubice', ageCategory: 'U18', discipline: 'singel', year: 2025, date: new Date('2025-10-19'), location: 'Pardubice', result: 'quarterfinal', description: 'Pierwszy turniej ITF Junior — ćwierćfinał na poziomie J60.', visibleToParent: true, createdBy: headCoach._id },
+    ]);
+
+    console.log(`  9 osiągnięć Sonii (7 MP + 2 międzynarodowe)\n`);
+
+    // ============================================================
     // 13. PAYMENTS
     // ============================================================
     console.log('Tworzenie platnosci...');
