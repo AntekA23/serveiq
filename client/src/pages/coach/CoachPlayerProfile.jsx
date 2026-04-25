@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, ChevronDown, ChevronUp, Plus, Save, Trash2, Target,
-  Calendar, FileText, Eye, EyeOff, Clock, Sparkles, Award, Star,
+  Calendar, FileText, Eye, EyeOff, Clock, Sparkles, Award, Star, Swords,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -16,6 +16,10 @@ import PalmaresSection from '../../components/player/PalmaresSection'
 import CoachingTeamSection from '../../components/player/CoachingTeamSection'
 import RankingSummary from '../../components/player/RankingSummary'
 import UpcomingTournaments from '../../components/player/UpcomingTournaments'
+import RecentMatchesSection from '../../components/match/RecentMatchesSection'
+import SeasonTimeline from '../../components/season/SeasonTimeline'
+import CareerTrajectory from '../../components/career/CareerTrajectory'
+import MatchesTab from '../../components/match/MatchesTab'
 import './CoachPlayerProfile.css'
 
 const DAY_NAMES = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sb', 'Nd']
@@ -79,6 +83,7 @@ export default function CoachPlayerProfile() {
   const [reviews, setReviews] = useState([])
   const [goals, setGoals] = useState([])
   const [observations, setObservations] = useState([])
+  const [achievements, setAchievements] = useState([])
   const [loading, setLoading] = useState(true)
 
   // Observation form
@@ -116,12 +121,13 @@ export default function CoachPlayerProfile() {
 
   const fetchData = async () => {
     try {
-      const [playerRes, sessionsRes, reviewsRes, goalsRes, obsRes] = await Promise.all([
+      const [playerRes, sessionsRes, reviewsRes, goalsRes, obsRes, achRes] = await Promise.all([
         api.get(`/players/${id}`),
         api.get(`/sessions?player=${id}`),
         api.get(`/reviews?player=${id}`).catch(() => ({ data: { reviews: [] } })),
         api.get(`/goals?player=${id}`).catch(() => ({ data: { goals: [] } })),
         api.get(`/observations?player=${id}`).catch(() => ({ data: { observations: [] } })),
+        api.get(`/achievements?player=${id}`).catch(() => ({ data: { achievements: [] } })),
       ])
       const p = playerRes.data.player || playerRes.data
       setPlayer(p)
@@ -131,6 +137,7 @@ export default function CoachPlayerProfile() {
       setReviews((reviewsRes.data.reviews || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)))
       setGoals(goalsRes.data.goals || [])
       setObservations(obsRes.data.observations || [])
+      setAchievements(achRes.data.achievements || [])
     } catch { /* silent */ }
     setLoading(false)
   }
@@ -319,7 +326,10 @@ export default function CoachPlayerProfile() {
           <PalmaresSection playerId={player._id} />
           <CoachingTeamSection coaches={player.coaches || []} />
           <RankingSummary ranking={player.ranking || {}} />
+          <SeasonTimeline playerId={player._id} />
           <UpcomingTournaments playerId={player._id} />
+          <RecentMatchesSection playerId={player._id} />
+          <CareerTrajectory player={player} achievements={achievements} />
         </>
       )}
 
@@ -455,6 +465,13 @@ export default function CoachPlayerProfile() {
           <div className="cpp-goals-done-count">{completedGoals.length} ukończonych celów</div>
         )}
       </Section>
+
+      {/* ─── Mecze (tylko performance) ─── */}
+      {player?.developmentLevel === 'performance' && (
+        <Section title="Mecze" icon={Swords}>
+          <MatchesTab playerId={player._id} />
+        </Section>
+      )}
 
       {/* ─── Observations ─── */}
       <Section title="Obserwacje" icon={FileText} badge={observations.length > 0 ? observations.length : null}>
