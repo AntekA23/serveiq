@@ -18,6 +18,7 @@ import ReviewSummary from '../models/ReviewSummary.js';
 import PlayerBadge from '../models/PlayerBadge.js';
 import DevelopmentProgram from '../models/DevelopmentProgram.js';
 import Achievement from '../models/Achievement.js';
+import Match from '../models/Match.js';
 import { seedDevelopmentPrograms } from './seedDevelopmentPrograms.js';
 
 /**
@@ -63,6 +64,7 @@ const seed = async () => {
       PlayerBadge.deleteMany({}),
       DevelopmentProgram.deleteMany({}),
       Achievement.deleteMany({}),
+      Match.deleteMany({}),
     ]);
     console.log('Kolekcje wyczyszczone.\n');
 
@@ -1405,6 +1407,107 @@ const seed = async () => {
     ]);
 
     console.log(`  9 osiągnięć Sonii (7 MP + 2 międzynarodowe)\n`);
+
+    // ============================================================
+    // 12.6 MATCHES — mecze Sonii (z palmaresu + sparingi)
+    // ============================================================
+    console.log('Tworzenie meczy Sonii...');
+
+    await Match.insertMany([
+      {
+        player: sonia._id, club: club._id,
+        date: new Date('2025-08-17'),
+        round: 'F', surface: 'clay', durationMinutes: 95,
+        opponent: { name: 'Maja Wiśniewska', club: 'KT Mera Warszawa', ranking: { pzt: 5 } },
+        scoutingNotes: 'Lewa zaczynająca. Słabszy bekhend pod presją. Mocny serwis na deuce side.',
+        result: { won: true, sets: [{ playerScore: 7, opponentScore: 5 }, { playerScore: 6, opponentScore: 3 }] },
+        stats: { firstServePct: 68, aces: 4, doubleFaults: 2, winners: 18, unforcedErrors: 14, breakPointsConverted: 4, breakPointsFaced: 6 },
+        keyMoments: ['Break w 11. gemie 1. seta — kluczowy', 'Po przegranym 2:5 w 1. secie comeback do 7:5', 'W 2. secie pełna kontrola od początku'],
+        coachDebrief: '7. tytuł mistrzowski. Świetna gra mentalna w 1. secie po stracie 2:5. Plan na MP U16 idzie zgodnie z założeniami.',
+        mentalState: 5, visibleToParent: true, createdBy: headCoach._id,
+      },
+      {
+        player: sonia._id, club: club._id,
+        date: new Date('2024-12-08'),
+        round: 'F', surface: 'indoor-hard', durationMinutes: 78,
+        opponent: { name: 'Zuzanna Krawczyk', club: 'KT Górnik Bytom' },
+        scoutingNotes: 'Płaska gra z głębi. Słabsza przy zmianie rytmu — kroty.',
+        result: { won: true, sets: [{ playerScore: 6, opponentScore: 4 }, { playerScore: 6, opponentScore: 2 }] },
+        keyMoments: ['Skuteczny dropshot 7/9 razy', 'Break-back w 4. gemie 1. seta'],
+        coachDebrief: 'Najmłodsza mistrzyni halowych U14. Kroty zadziałały świetnie — kontynuować trening tej zagrywki.',
+        mentalState: 5, visibleToParent: true, createdBy: headCoach._id,
+      },
+      {
+        player: sonia._id, club: club._id,
+        date: new Date('2024-10-12'),
+        round: 'F', surface: 'clay', durationMinutes: 142,
+        opponent: { name: 'Sofia Costa', club: 'CT Lisboa', ranking: { itf: 280 } },
+        scoutingNotes: 'Zawodniczka z ITF top 300. Mocna gra defensywna — bardzo szybka. Trzeba grać agresywnie i krócej.',
+        result: { won: false, sets: [{ playerScore: 6, opponentScore: 4 }, { playerScore: 5, opponentScore: 7, tiebreak: 5 }, { playerScore: 4, opponentScore: 6 }] },
+        stats: { firstServePct: 61, doubleFaults: 6, winners: 22, unforcedErrors: 31, breakPointsConverted: 5, breakPointsFaced: 12 },
+        keyMoments: ['Świetne 1. set — kontrolowała tempo', 'Tie-break 2. seta — błąd na BP', 'W 3. secie zmęczenie fizyczne — straciła pierwszy serwis'],
+        coachDebrief: 'Pierwszy międzynarodowy finał. Porażka w 3 setach z bardziej doświadczoną przeciwniczką. Lekcja: wytrzymałość 3-setowa to teraz priorytet.',
+        mentalState: 4, visibleToParent: true, createdBy: headCoach._id,
+      },
+      {
+        player: sonia._id, club: club._id,
+        date: new Date('2025-10-19'),
+        round: 'QF', surface: 'hard', durationMinutes: 105,
+        opponent: { name: 'Klara Novak', club: 'TK Sparta Praha', ranking: { itf: 215 } },
+        scoutingNotes: 'Czeszka, 16 lat. Mocny return, słabszy serwis w wietrze.',
+        result: { won: false, sets: [{ playerScore: 6, opponentScore: 7, tiebreak: 4 }, { playerScore: 4, opponentScore: 6 }] },
+        stats: { firstServePct: 58, aces: 2, doubleFaults: 5, winners: 14, unforcedErrors: 22 },
+        keyMoments: ['Tie-break 1. seta — przegrany 4:7 po prowadzeniu 4:1', 'Break w 7. gemie 2. seta zakończył mecz'],
+        coachDebrief: 'Pierwsza ćwierćfinałowa porażka na ITF. Walka mentalna w tie-breaku — temat na sesje z dr Sokołowskim.',
+        mentalState: 3, visibleToParent: true, createdBy: headCoach._id,
+      },
+      {
+        player: sonia._id, club: club._id,
+        date: daysAgo(7),
+        round: 'sparing', surface: 'clay', durationMinutes: 95,
+        opponent: { name: 'Julia Kowalska', club: 'KT Smecz Warszawa', isInternal: true, playerRef: julia._id, ranking: { pzt: 28 } },
+        result: { won: true, sets: [{ playerScore: 6, opponentScore: 2 }, { playerScore: 6, opponentScore: 3 }] },
+        stats: { firstServePct: 72, aces: 5, winners: 24, unforcedErrors: 11 },
+        keyMoments: ['Bardzo agresywne returny — 70% punktów na returnie', 'Świetny serwis+1 — Julia nie miała czasu na ułożenie pozycji'],
+        coachDebrief: 'Sparing pokazuje wyraźny dystans poziomu. Sonia konsekwentnie agresywna — zgodnie z planem przed MP U16.',
+        mentalState: 5, visibleToParent: true, createdBy: headCoach._id,
+      },
+      {
+        player: sonia._id, club: club._id,
+        date: daysAgo(21),
+        round: 'sparing', surface: 'clay', durationMinutes: 110,
+        opponent: { name: 'Julia Kowalska', club: 'KT Smecz Warszawa', isInternal: true, playerRef: julia._id, ranking: { pzt: 28 } },
+        result: { won: true, sets: [{ playerScore: 6, opponentScore: 4 }, { playerScore: 7, opponentScore: 5 }] },
+        keyMoments: ['Tie-break-style 7:5 w 2. secie — Julia bliżej', 'Forhend długi line — dziś zadziałał kilkukrotnie'],
+        coachDebrief: 'Bliższy mecz niż 2 tygodnie temu — Julia rośnie. Dobra praktyka pod presją.',
+        mentalState: 4, visibleToParent: true, createdBy: headCoach._id,
+      },
+      {
+        player: sonia._id, club: club._id,
+        date: daysAgo(35),
+        round: 'sparing', surface: 'indoor-hard', durationMinutes: 90,
+        opponent: { name: 'Wiktoria Lis', club: 'KT Legia Warszawa', ranking: { pzt: 12 } },
+        scoutingNotes: 'Lis była 4. na MP U16 w 2024. Bardzo szybka. Słabsza po długich wymianach.',
+        result: { won: true, sets: [{ playerScore: 6, opponentScore: 3 }, { playerScore: 4, opponentScore: 6 }, { playerScore: 6, opponentScore: 4 }] },
+        keyMoments: ['Pewny 1. set', 'W 2. secie Sonia za bardzo defensywna', 'W 3. secie powrót do agresji = odwrót wyniku'],
+        coachDebrief: 'Mecz testowy z mocniejszą rywalką. 2-set "edukacyjny" — zbyt defensywnie. 3-set perfekcyjna reakcja.',
+        mentalState: 4, visibleToParent: true, createdBy: headCoach._id,
+      },
+      {
+        player: sonia._id, club: club._id,
+        date: daysAgo(60),
+        round: 'SF', surface: 'clay', durationMinutes: 100,
+        opponent: { name: 'Pola Hejnar', club: 'KT Górnik Wrocław', ranking: { pzt: 8 } },
+        scoutingNotes: 'Top-10 PZT, mocna lewa. Praworęczna z dwuręcznym bekhendem.',
+        result: { won: true, sets: [{ playerScore: 6, opponentScore: 3 }, { playerScore: 7, opponentScore: 6, tiebreak: 5 }] },
+        stats: { firstServePct: 65, aces: 3, doubleFaults: 3, winners: 19, unforcedErrors: 16 },
+        keyMoments: ['Skuteczność 1. serwisu kluczowa', 'Tie-break 7:5 — opanowanie pod presją'],
+        coachDebrief: 'Półfinał wygrany — drogi do 7. tytułu MP. Tie-break to dowód postępu mentalnego.',
+        mentalState: 5, visibleToParent: true, createdBy: headCoach._id,
+      },
+    ]);
+
+    console.log(`  8 meczy Sonii (4 oficjalne + 4 sparingi)\n`);
 
     // ============================================================
     // 13. PAYMENTS
