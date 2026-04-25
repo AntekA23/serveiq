@@ -38,6 +38,7 @@ const developmentGoalSchema = new mongoose.Schema(
         'fitness',
         'tactics',
         'serve',
+        'pathway',
         'other',
       ],
       default: 'fundamentals',
