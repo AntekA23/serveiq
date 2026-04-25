@@ -91,6 +91,7 @@ const seed = async () => {
       isActive: true,
       onboardingCompleted: true,
       coachProfile: {
+        teamRole: 'head',
         specialization: 'Praca z mlodzieża',
         itfLevel: 'ITF Level 2',
         bio: 'Trener tenisa z 15-letnim doswiadczeniem. Specjalizacja: praca z mlodzieża.',
@@ -133,9 +134,94 @@ const seed = async () => {
       },
     });
 
+    // Performance team — 4 trenerzy Sonii
+    const headCoach = await User.create({
+      email: 'coach.head@serveiq.pl',
+      password: 'password123',
+      role: 'coach',
+      firstName: 'Marek',
+      lastName: 'Wojciechowski',
+      phone: '+48 604 500 600',
+      isActive: true,
+      onboardingCompleted: true,
+      coachProfile: {
+        teamRole: 'head',
+        specialization: 'Trener główny — sztab Sonii Antczak',
+        itfLevel: 'ITF Level 3',
+        bio: '22 lata doświadczenia. Były trener kadry juniorskiej PZT. Specjalizacja: zawodnicy wyczynowi.',
+      },
+    });
+
+    const fitnessCoach = await User.create({
+      email: 'coach.fitness@serveiq.pl',
+      password: 'password123',
+      role: 'coach',
+      firstName: 'Agnieszka',
+      lastName: 'Lewandowska',
+      phone: '+48 605 600 700',
+      isActive: true,
+      onboardingCompleted: true,
+      coachProfile: {
+        teamRole: 'fitness',
+        specialization: 'Przygotowanie motoryczne',
+        itfLevel: 'NSCA-CSCS',
+        bio: 'Mgr AWF. Specjalistka od przygotowania kondycyjnego juniorek tenisowych.',
+      },
+    });
+
+    const mentalCoach = await User.create({
+      email: 'coach.mental@serveiq.pl',
+      password: 'password123',
+      role: 'coach',
+      firstName: 'Paweł',
+      lastName: 'Sokołowski',
+      phone: '+48 606 700 800',
+      isActive: true,
+      onboardingCompleted: true,
+      coachProfile: {
+        teamRole: 'mental',
+        specialization: 'Psychologia sportowa',
+        itfLevel: 'Dr nauk',
+        bio: 'Dr psychologii sportowej. Pracował z reprezentacją Polski w tenisie.',
+      },
+    });
+
+    const physioCoach = await User.create({
+      email: 'coach.physio@serveiq.pl',
+      password: 'password123',
+      role: 'coach',
+      firstName: 'Karolina',
+      lastName: 'Mazur',
+      phone: '+48 607 800 900',
+      isActive: true,
+      onboardingCompleted: true,
+      coachProfile: {
+        teamRole: 'physio',
+        specialization: 'Fizjoterapia sportowa',
+        itfLevel: 'Mgr fizjoterapii',
+        bio: 'Specjalistka McKenzie/FMS. 10 lat z młodymi tenisistami.',
+      },
+    });
+
+    const parent3 = await User.create({
+      email: 'parent3@serveiq.pl',
+      password: 'password123',
+      role: 'parent',
+      firstName: 'Anna',
+      lastName: 'Antczak',
+      phone: '+48 608 900 100',
+      isActive: true,
+      onboardingCompleted: true,
+    });
+
     console.log(`  Trener:  coach@serveiq.pl   (password123)`);
+    console.log(`  Head:    coach.head@serveiq.pl    (password123) — Marek (sztab Sonii)`);
+    console.log(`  Fitness: coach.fitness@serveiq.pl (password123) — Agnieszka`);
+    console.log(`  Mental:  coach.mental@serveiq.pl  (password123) — dr Paweł`);
+    console.log(`  Physio:  coach.physio@serveiq.pl  (password123) — Karolina`);
     console.log(`  Rodzic:  parent@serveiq.pl  (password123) — rodzic Kacpra`);
     console.log(`  Rodzic2: parent2@serveiq.pl (password123) — rodzic Julii`);
+    console.log(`  Rodzic3: parent3@serveiq.pl (password123) — Anna Antczak (rodzic Sonii)`);
     console.log(`  Admin:   admin@serveiq.pl   (password123) — koordynator klubu\n`);
 
     // ============================================================
@@ -192,13 +278,21 @@ const seed = async () => {
       ],
       owner: admin._id,
       admins: [admin._id],
-      coaches: [coach._id],
+      coaches: [coach._id, headCoach._id, fitnessCoach._id, mentalCoach._id, physioCoach._id],
     });
 
     // Link users to club
     admin.club = club._id;
     coach.club = club._id;
     await Promise.all([admin.save(), coach.save()]);
+
+    headCoach.club = club._id;
+    fitnessCoach.club = club._id;
+    mentalCoach.club = club._id;
+    physioCoach.club = club._id;
+    await Promise.all([
+      headCoach.save(), fitnessCoach.save(), mentalCoach.save(), physioCoach.save(),
+    ]);
 
     console.log(`  ${club.name} (${club.city}) — ${club.courtsCount} kortow, ${club.pathwayStages.length} etapow\n`);
 
