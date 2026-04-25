@@ -1,0 +1,35 @@
+.ut-section { margin: 24px 0; padding: 20px; background: white; border-radius: 16px; border: 1px solid #e5e7eb; }
+.ut-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.ut-header h2 { font-size: 18px; margin: 0; }
+.ut-list { display: flex; flex-direction: column; gap: 10px; }
+.ut-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: #fafafa;
+  border-radius: 12px;
+  border-left: 4px solid #6366f1;
+}
+.ut-date {
+  text-align: center;
+  min-width: 56px;
+  padding: 6px 8px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+.ut-day { font-weight: 800; font-size: 22px; line-height: 1; color: #111827; }
+.ut-month { font-size: 11px; color: #6b7280; text-transform: uppercase; margin-top: 2px; }
+.ut-body { flex: 1; min-width: 0; }
+.ut-name { font-weight: 600; color: #111827; }
+.ut-meta { font-size: 12px; color: #6b7280; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+.ut-status {
+  padding: 4px 10px;
+  background: #eef2ff;
+  color: #4338ca;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
