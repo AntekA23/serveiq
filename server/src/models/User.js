@@ -46,6 +46,11 @@ const userSchema = new mongoose.Schema(
       specialization: String,
       itfLevel: String,
       bio: String,
+      teamRole: {
+        type: String,
+        enum: ['head', 'assistant', 'fitness', 'mental', 'physio', 'nutrition'],
+        default: 'head',
+      },
       assignedGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
       inviteCode: {
         type: String,
