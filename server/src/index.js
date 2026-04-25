@@ -37,6 +37,7 @@ import badgeRoutes from './routes/badges.js';
 import developmentProgramRoutes from './routes/developmentPrograms.js';
 import aiRoutes from './routes/ai.js';
 import achievementRoutes from './routes/achievements.js';
+import matchRoutes from './routes/matches.js';
 
 // ====== Konfiguracja ======
 
@@ -121,6 +122,7 @@ app.use('/api/badges', badgeRoutes);
 app.use('/api/development-programs', developmentProgramRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/achievements', achievementRoutes);
+app.use('/api/matches', matchRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
