@@ -11,6 +11,9 @@ import PalmaresSection from '../../components/player/PalmaresSection'
 import CoachingTeamSection from '../../components/player/CoachingTeamSection'
 import RankingSummary from '../../components/player/RankingSummary'
 import UpcomingTournaments from '../../components/player/UpcomingTournaments'
+import RecentMatchesSection from '../../components/match/RecentMatchesSection'
+import SeasonTimeline from '../../components/season/SeasonTimeline'
+import CareerTrajectory from '../../components/career/CareerTrajectory'
 import './ChildProfile.css'
 
 function formatRelDate(dateStr) {
@@ -29,20 +32,23 @@ export default function ChildProfile() {
   const [child, setChild] = useState(null)
   const [activities, setActivities] = useState([])
   const [reviews, setReviews] = useState([])
+  const [achievements, setAchievements] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [playerRes, actRes, revRes] = await Promise.all([
+        const [playerRes, actRes, revRes, achRes] = await Promise.all([
           api.get(`/players/${id}`),
           api.get('/activities?status=planned&limit=3').catch(() => ({ data: { activities: [] } })),
           api.get(`/reviews?player=${id}&status=published&limit=1`).catch(() => ({ data: { reviews: [] } })),
+          api.get(`/achievements?player=${id}`).catch(() => ({ data: { achievements: [] } })),
         ])
         setChild(playerRes.data.player || playerRes.data)
         const now = new Date()
         setActivities((actRes.data.activities || []).filter((a) => new Date(a.date) >= now).slice(0, 3))
         setReviews(revRes.data.reviews || [])
+        setAchievements(achRes.data.achievements || [])
       } catch { /* silent */ }
       setLoading(false)
     }
@@ -136,7 +142,10 @@ export default function ChildProfile() {
           <PalmaresSection playerId={child._id} />
           <CoachingTeamSection coaches={child.coaches || []} />
           <RankingSummary ranking={child.ranking || {}} />
+          <SeasonTimeline playerId={child._id} />
           <UpcomingTournaments playerId={child._id} />
+          <RecentMatchesSection playerId={child._id} />
+          <CareerTrajectory player={child} achievements={achievements} />
         </>
       )}
 
