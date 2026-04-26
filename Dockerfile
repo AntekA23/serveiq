@@ -1,31 +1,20 @@
-FROM node:20-alpine AS client-builder
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+COPY . .
 
 WORKDIR /app/client
-
-COPY client/package.json client/package-lock.json* ./
-RUN npm ci
-
-COPY client/ ./
-RUN npm run build
-
-
-FROM node:20-alpine AS server-deps
+RUN npm ci && npm run build
 
 WORKDIR /app/server
-
-COPY server/package.json server/package-lock.json* ./
 RUN npm ci --omit=dev
 
 
 FROM node:20-alpine
 
 WORKDIR /app
-
-COPY server/package.json server/package-lock.json* ./server/
-COPY --from=server-deps /app/server/node_modules ./server/node_modules
-COPY server/ ./server/
-
-COPY --from=client-builder /app/client/dist ./client/dist
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/client/dist ./client/dist
 
 ENV NODE_ENV=production
 ENV PORT=5000
