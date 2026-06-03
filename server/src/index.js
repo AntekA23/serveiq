@@ -152,24 +152,34 @@ app.use(errorHandler);
 
 // ====== Start serwera ======
 
-const startServer = async () => {
-  try {
-    // Połącz z MongoDB
-    await connectDB();
-
-    httpServer.listen(PORT, () => {
-      console.log(`\n[ServeIQ] Serwer uruchomiony na porcie ${PORT}`);
-      console.log(`[ServeIQ] Środowisko: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`[ServeIQ] API: http://localhost:${PORT}/api`);
-      console.log(`[ServeIQ] Klient: ${CLIENT_URL}`);
-
-      // Uruchom wszystkie zadania cykliczne
+// Connect to MongoDB in the background, retrying with backoff. The HTTP server
+// stays up regardless, so the platform sees a responding app (and /api/health
+// works) instead of a crash-loop when the database is briefly unreachable.
+let jobsStarted = false;
+const connectWithRetry = async (attempt = 1) => {
+  const ok = await connectDB();
+  if (ok) {
+    if (!jobsStarted) {
       startJobs();
-    });
-  } catch (error) {
-    console.error('[ServeIQ] Błąd uruchamiania serwera:', error.message);
-    process.exit(1);
+      jobsStarted = true;
+    }
+    return;
   }
+  const delay = Math.min(30000, attempt * 5000);
+  console.warn(`[MongoDB] Ponawiam próbę połączenia za ${delay / 1000}s (próba ${attempt})...`);
+  setTimeout(() => connectWithRetry(attempt + 1), delay);
+};
+
+const startServer = () => {
+  httpServer.listen(PORT, () => {
+    console.log(`\n[ServeIQ] Serwer uruchomiony na porcie ${PORT}`);
+    console.log(`[ServeIQ] Środowisko: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`[ServeIQ] API: http://localhost:${PORT}/api`);
+    console.log(`[ServeIQ] Klient: ${CLIENT_URL}`);
+  });
+
+  // Database connects in the background (with retry) — server is already listening.
+  connectWithRetry();
 };
 
 startServer();
