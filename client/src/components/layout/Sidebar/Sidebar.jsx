@@ -99,6 +99,7 @@ export default function Sidebar() {
     }
 
     items.push(
+      { to: '/parent/payments', label: 'Płatności', icon: CreditCard },
       { to: '/parent/team', label: 'Zespół', icon: Users },
       { to: '/messages', label: 'Wiadomości', icon: MessageCircle },
       { to: '/settings', label: 'Ustawienia', icon: Settings },

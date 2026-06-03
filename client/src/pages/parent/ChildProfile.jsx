@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, ChevronRight, Target, Star, Calendar, Clock, Award, Dumbbell,
+  ArrowLeft, Target, Star, Calendar, Clock, Award, Dumbbell, Trophy,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -136,6 +136,28 @@ export default function ChildProfile() {
         </div>
       </div>
 
+      {/* ─── Hub: jedno czyste menu wszystkiego o dziecku ─── */}
+      <div className="cp-hub">
+        <button className="cp-hub-link" onClick={() => navigate(`/parent/training-plan?child=${id}`)}>
+          <Dumbbell size={15} /> Plan
+        </button>
+        <button className="cp-hub-link" onClick={() => navigate('/calendar')}>
+          <Calendar size={15} /> Kalendarz
+        </button>
+        <button className="cp-hub-link" onClick={() => navigate(`/parent/tournaments?child=${id}`)}>
+          <Trophy size={15} /> Turnieje
+        </button>
+        <button className="cp-hub-link" onClick={() => navigate(`/reviews?child=${id}`)}>
+          <Star size={15} /> Oceny
+        </button>
+        <button className="cp-hub-link" onClick={() => navigate(`/parent/child/${id}/timeline`)}>
+          <Clock size={15} /> Historia
+        </button>
+        <button className="cp-hub-link" onClick={() => navigate(`/parent/child/${id}/badges`)}>
+          <Award size={15} /> Odznaki
+        </button>
+      </div>
+
       {/* ─── 1.5 Performance pathway sections (warunkowo) ─── */}
       {child.developmentLevel === 'performance' && (
         <>
@@ -154,9 +176,6 @@ export default function ChildProfile() {
         <section className="cp-section">
           <div className="cp-section-head">
             <h2 className="cp-section-title"><Dumbbell size={14} /> Plan treningowy</h2>
-            <button className="cp-section-link" onClick={() => navigate('/parent/training-plan')}>
-              Pełny plan <ChevronRight size={14} />
-            </button>
           </div>
 
           {/* Stats ribbon */}
@@ -233,9 +252,6 @@ export default function ChildProfile() {
         <section className="cp-section">
           <div className="cp-section-head">
             <h2 className="cp-section-title"><Calendar size={14} /> Nadchodzące</h2>
-            <button className="cp-section-link" onClick={() => navigate('/calendar')}>
-              Kalendarz <ChevronRight size={14} />
-            </button>
           </div>
           <div className="cp-upcoming">
             {activities.map((a, i) => (
@@ -259,11 +275,8 @@ export default function ChildProfile() {
         <section className="cp-section">
           <div className="cp-section-head">
             <h2 className="cp-section-title"><Star size={14} /> Ostatnia ocena</h2>
-            <button className="cp-section-link" onClick={() => navigate('/reviews')}>
-              Wszystkie <ChevronRight size={14} />
-            </button>
           </div>
-          <div className="cp-review" onClick={() => navigate('/reviews')}>
+          <div className="cp-review">
             {latestReview.rating && (
               <div className="cp-review-stars">
                 {[1, 2, 3, 4, 5].map((s) => (
@@ -324,28 +337,9 @@ export default function ChildProfile() {
       <section className="cp-section">
         <div className="cp-section-head">
           <h2 className="cp-section-title"><Award size={14} /> Odznaki</h2>
-          <button className="cp-section-link" onClick={() => navigate(`/parent/child/${id}/badges`)}>
-            Wszystkie <ChevronRight size={14} />
-          </button>
         </div>
         <BadgePreview playerId={id} />
       </section>
-
-      {/* ─── Quick links ─── */}
-      <div className="cp-quick-links">
-        <button className="cp-quick-link" onClick={() => navigate(`/parent/child/${id}/timeline`)}>
-          <Clock size={14} /> Historia
-        </button>
-        <button className="cp-quick-link" onClick={() => navigate(`/parent/child/${id}/badges`)}>
-          <Award size={14} /> Odznaki
-        </button>
-        <button className="cp-quick-link" onClick={() => navigate('/reviews')}>
-          <Star size={14} /> Oceny
-        </button>
-        <button className="cp-quick-link" onClick={() => navigate('/parent/training-plan')}>
-          <Calendar size={14} /> Plan
-        </button>
-      </div>
     </div>
   )
 }

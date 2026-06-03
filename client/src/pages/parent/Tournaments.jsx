@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Plus, Trophy } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -14,6 +15,7 @@ import './Tournaments.css'
 export default function Tournaments() {
   const user = useAuthStore((s) => s.user)
   const toast = useToast()
+  const [searchParams] = useSearchParams()
   const [children, setChildren] = useState([])
   const [selectedChild, setSelectedChild] = useState(null)
   const [tournaments, setTournaments] = useState([])
@@ -46,13 +48,15 @@ export default function Tournaments() {
       const kids = await fetchChildren()
       setChildren(kids)
       if (kids.length > 0) {
-        setSelectedChild(kids[0])
-        await fetchTournaments(kids[0]._id)
+        const wanted = searchParams.get('child')
+        const initial = kids.find((k) => k._id === wanted) || kids[0]
+        setSelectedChild(initial)
+        await fetchTournaments(initial._id)
       }
       setLoading(false)
     }
     init()
-  }, [user, fetchChildren, fetchTournaments])
+  }, [user, fetchChildren, fetchTournaments, searchParams])
 
   useEffect(() => {
     if (selectedChild) fetchTournaments(selectedChild._id)

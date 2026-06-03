@@ -251,6 +251,23 @@ Płatności · Ustawienia.
 - **Pending parent requests** (`/coach/requests`, previously reachable only by typing the URL)
   now surface as an alert chip on the coach dashboard.
 
-### Parent / Club — TODO
+### Parent — DONE (first pass)
+The parent model is now **child-centric**: the child profile is the single hub for everything
+about one child, and parent-level concerns live in the sidebar.
+- **Płatności** added to the parent sidebar (it was previously unreachable — no nav entry and
+  no button anywhere; same for Turnieje).
+- **Child hub:** `ChildProfile` gained one clean link row under the hero —
+  Plan · Kalendarz · Turnieje · Oceny · Historia · Odznaki — replacing the old bottom
+  quick-links and the duplicated per-section "Wszystkie"/"Pełny plan" buttons (Reviews had 4
+  entry points, Badges 3; now one each).
+- **Child context carries over:** hub links pass `?child=<id>`; TrainingPlan, Tournaments and
+  the shared Reviews page now preselect that child instead of always defaulting to the first.
+
+### Club — TODO
 Same treatment: map the current nav + overlaps, propose a simpler information architecture,
 implement nav-only changes. Not started yet.
+
+### Known follow-ups (deferred)
+- Dashboard vs ChildProfile still overlap (both show plan/upcoming/latest-review teasers) —
+  acceptable for now (glance vs detail); revisit if it still reads as duplication.
+- No global "selected child" store yet; preselection is via `?child=` query only.

@@ -143,6 +143,38 @@
 }
 .cp-section-link:hover { color: var(--color-accent); }
 
+/* ─── Child hub (one clear menu under the hero) ─── */
+.cp-hub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 2px 0 22px;
+}
+.cp-hub-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 15px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.cp-hub-link svg { color: var(--color-accent); flex-shrink: 0; }
+.cp-hub-link:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+  transform: translateY(-1px);
+}
+@media (max-width: 640px) {
+  .cp-hub { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .cp-hub-link { flex-shrink: 0; }
+}
+
 /* ─── Training Plan ─── */
 
 .cp-plan-stats {

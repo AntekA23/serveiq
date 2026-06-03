@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Plus,
   FileText,
@@ -266,8 +266,9 @@ export default function Reviews() {
   const [error, setError] = useState('')
   const [expandedId, setExpandedId] = useState(null)
 
-  // Filters
-  const [filterPlayer, setFilterPlayer] = useState('')
+  // Filters — preselect a child when arriving from a child's hub (?child=<id>)
+  const [searchParams] = useSearchParams()
+  const [filterPlayer, setFilterPlayer] = useState(() => searchParams.get('child') || '')
   const [filterStatus, setFilterStatus] = useState('')
 
   // Fetch children for parent's child selector

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -8,6 +9,7 @@ import './TrainingPlan.css'
 
 export default function TrainingPlan() {
   const user = useAuthStore((s) => s.user)
+  const [searchParams] = useSearchParams()
   const [children, setChildren] = useState([])
   const [selectedChild, setSelectedChild] = useState(null)
   const [tab, setTab] = useState('calendar')
@@ -27,11 +29,14 @@ export default function TrainingPlan() {
       setLoading(true)
       const kids = await fetchChildren()
       setChildren(kids)
-      if (kids.length > 0) setSelectedChild(kids[0])
+      if (kids.length > 0) {
+        const wanted = searchParams.get('child')
+        setSelectedChild(kids.find((k) => k._id === wanted) || kids[0])
+      }
       setLoading(false)
     }
     init()
-  }, [user, fetchChildren])
+  }, [user, fetchChildren, searchParams])
 
   const refreshChild = async () => {
     const kids = await fetchChildren()
