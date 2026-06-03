@@ -6,6 +6,7 @@ import useAuthStore, { ensureHydrated } from './store/authStore'
 ensureHydrated()
 import AppShell from './components/layout/AppShell'
 import ToastContainer from './components/ui/Toast'
+import DevAccountSwitcher from './components/dev/DevAccountSwitcher'
 
 // Auth pages
 import Login from './pages/auth/Login'
@@ -542,6 +543,7 @@ export default function App() {
       </Routes>
 
       <ToastContainer />
+      {import.meta.env.DEV && <DevAccountSwitcher />}
     </>
   )
 }

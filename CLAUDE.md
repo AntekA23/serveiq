@@ -189,6 +189,13 @@ npm run dev              # server (:3001) + client (:5173) concurrently
 | `coach.mental@serveiq.pl` | coach | dr Paweł — mental |
 | `coach.physio@serveiq.pl` | coach | Karolina — physio |
 
+**Dev account switcher:** in `npm run dev` only, a floating "⚡ DEV" widget (bottom-left,
+`components/dev/DevAccountSwitcher`) one-click logs in as any seed account via the real auth
+flow and routes to that role's dashboard — so you can jump between coach/parent/club without
+manually logging out. Gated by `import.meta.env.DEV`, so it never renders in production.
+(Tokens already live 7 days / refresh 30 days, so a session itself persists across restarts —
+the switcher is purely for hopping between roles.)
+
 ---
 
 ## 7. Known tech debt / cleanup backlog

@@ -1,0 +1,103 @@
+.dev-switcher {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 9999;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+.dev-switcher-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  opacity: 0.85;
+  transition: opacity 0.15s ease;
+}
+.dev-switcher-toggle:hover { opacity: 1; }
+
+.dev-switcher-panel {
+  position: absolute;
+  bottom: 44px;
+  left: 0;
+  width: 232px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-accent-muted);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.dev-switcher-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.dev-switcher-x {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.dev-switcher-current {
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  margin-bottom: 8px;
+  word-break: break-all;
+}
+.dev-switcher-current strong { color: var(--color-text); }
+
+.dev-switcher-error {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.dev-switcher-group { margin-bottom: 8px; }
+.dev-switcher-group-label {
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 10px;
+  margin: 4px 0;
+}
+
+.dev-switcher-acc {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 7px 10px;
+  margin-bottom: 4px;
+  background: var(--color-bg-tertiary);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--color-text);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+.dev-switcher-acc:hover { border-color: var(--color-accent-muted); }
+.dev-switcher-acc.active { border-color: var(--color-accent); color: var(--color-accent); }
+.dev-switcher-acc:disabled { opacity: 0.5; cursor: default; }
