@@ -1,284 +1,232 @@
-# ServeIQ — Lead Engineer System Prompt
+# ServeIQ — Single Source of Truth
 
-You are acting as the lead software engineer for ServeIQ MVP.
+> **This file is the ONLY project document.** It describes what ServeIQ *actually is* today,
+> not what it was once planned to be. If reality and this file ever disagree, fix this file.
+> Verified against the codebase on **2026-06-03**.
+>
+> All previous docs (STRATEGY.md, REAL_FEATURES_PLAN.md, SPRINT_STATUS.md, STAN_APLIKACJI.txt,
+> docs/roadmap.md, docs/superpowers/**) were stale or contradictory and have been removed.
+> Their still-valid essence is folded into this file.
 
-## Mission
+---
 
-Build the agreed ServeIQ MVP end-to-end with maximum autonomy. Do not stop after partial progress. Continue working until the full scope for the current sprint is completed, all quality checks pass, and the repo is left in a clean, reviewable state.
+## 1. What ServeIQ is
 
-## Operating Context
+ServeIQ is a **junior tennis development operating system for clubs**.
 
-- **Product:** ServeIQ — junior tennis development platform
-- **Goal:** MVP for junior tennis coaching workflow
-- **Core workflow:** Plan → Communicate → Monitor → Review → Recommend
-- **Commercial entry point:** Tennis 10 / junior club growth and pathway continuity
-- **Architectural stress test:** Advanced player pathway (Sonia scenario)
-- **Delivery model:** One lead engineer leveraging agentic execution
-- **Priority:** Speed with discipline, not perfectionism
+- **Core loop:** `Plan → Communicate → Monitor → Review → Recommend next step`
+- **Commercial wedge:** Tennis 10 / junior club growth and pathway continuity (kids 8–16).
+- **Architectural moat:** the same workflow scales up to an advanced-player support team
+  (the "Sonia" scenario — head coach + fitness + mental + physio around one player).
+- **Guiding principle:** *Sell the simple story (Tennis 10). Build the stronger spine (full pathway).*
 
-## Tech Stack (established — do not change without strong reason)
+### Strategic pivot (already reflected in the code)
+The project pivoted from a *parent-first wearable-health app* to a *club-first development OS*.
+The codebase has followed: it now has `clubAdmin` role, Clubs, Groups, generic Activities,
+Observations, Development Goals, Review Summaries, Recommendations, Season Plans, Matches,
+Badges and Development Programs. Wearables/health-monitoring still exist in code but are **no
+longer the product centre** — treat them as a secondary/legacy feature.
+
+### Two demo scenarios (both seeded, both must keep working)
+- **Scenario A — Tennis 10 / Junior club:** club coordinator + coach + parents managing
+  ordinary junior players (Kacper, Julia, Antoni).
+- **Scenario B — Sonia / Advanced pathway:** one player (Sonia) with a full support team and
+  richer planning, proving the model stretches to high performance.
+
+### Commercial frame (for product decisions)
+- Buyers, in priority: **club owner → premium family → independent coach**.
+- The person who suffers most from chaos is the **club admin / junior coordinator** — saving
+  them time is the fastest way to demonstrate value.
+- Pricing direction: Academy Pilot (one-off, clubs) · Club Subscription (monthly) ·
+  Family Premium (monthly). Stripe exists but billing is **not** the validation priority.
+- **Feature gate:** every feature must either (A) make a club owner immediately see Tennis 10 /
+  pathway value, or (B) be essential to the shared spine the Sonia pathway needs later.
+  If neither → it waits.
+
+---
+
+## 2. Tech stack
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Express.js 4.x + Node.js |
+| Backend | Express.js 4.x on Node.js (ESM, `"type": "module"`) |
 | Database | MongoDB + Mongoose 8.x |
-| Authentication | JWT (access + refresh tokens) + bcryptjs + httpOnly cookies + localStorage |
+| Auth | JWT (access + refresh) + bcryptjs + httpOnly cookies + localStorage |
 | Real-time | Socket.io 4.x |
 | Frontend | React 18.x + Vite 5.x |
 | Routing | React Router 6.x |
 | State | Zustand |
-| HTTP Client | Axios (with interceptors for token refresh) |
+| HTTP client | Axios (interceptors for token refresh) |
 | Validation | Zod (client + server) |
-| File Upload | Multer (local /uploads/avatars) |
-| Payments | Stripe (scaffolded, needs API keys) |
+| File upload | Multer → local `/server/uploads` (Cloudinary scaffolded, unused) |
+| Payments | Stripe (scaffolded, needs keys) |
 | Email | Resend (scaffolded, logs to console in dev) |
-| AI | Claude API (@anthropic-ai/sdk) — coaching recommendations, review generation |
+| AI | Claude API (`@anthropic-ai/sdk`) — coaching recs + review drafts |
 | Security | Helmet, CORS, rate limiting |
-| Deploy target | Railway |
+| Deploy | Railway via Dockerfile |
+| UI language | **Polish** (all user-facing text) |
 
-## Project Structure
+---
 
+## 3. Roles
+
+The `User.role` enum is: **`coach` · `parent` · `clubAdmin` · `player`**.
+
+| Role | Panel | Notes |
+|------|-------|-------|
+| `parent` | `/parent/*` | Manages their child's journey, plan, tournaments, payments, chat |
+| `coach` | `/coach/*` | Manages players, sessions, reviews, payments; chats with parents |
+| `clubAdmin` | `/club/*` | Club dashboard, players, payments, reports, coaches, facility setup |
+| `player` | (light) | Exists in the model; minimal dedicated UI in MVP |
+
+---
+
+## 4. Real architecture (verified 2026-06-03)
+
+### Backend — `server/src/`
+Everything below is **wired up and mounted** in `server/src/index.js` unless flagged.
+
+**Mounted API routes (24):**
 ```
-server/
-  src/
-    controllers/    # Route handlers (11 controllers)
-    models/         # Mongoose schemas (10 models)
-    routes/         # Express routers (10 route files)
-    middleware/     # auth, subscription, errorHandler, rateLimiter
-    services/      # alertEngine, emailService, subscriptionService, wearableMockService
-    jobs/          # Background: syncWearables, alertRunner, weeklyRunner, trialChecker
-    socket/        # chatHandler.js — Socket.io messaging
-    scripts/       # seed.js — demo data
-  index.js
+/api/auth          /api/players       /api/sessions      /api/payments
+/api/tournaments   /api/messages      /api/subscriptions /api/notifications
+/api/beta          /api/clubs         /api/groups        /api/activities
+/api/goals         /api/observations  /api/reviews       /api/recommendations
+/api/timeline      /api/coach-links   /api/badges        /api/development-programs
+/api/ai            /api/achievements  /api/matches       /api/season-plans
+```
+Plus an inline `GET /api/health`.
 
-client/
-  src/
-    pages/          # 37 page components
-    components/     # Layout (AppShell, Sidebar, Topbar) + shared UI
-    store/          # Zustand auth store
-    api/            # axios.js — HTTP client with interceptors
-    App.jsx         # Route definitions
+**Controllers (25):** auth, player, session, payment, tournament, message, subscription,
+notification, beta, club, group, activity, goal, observation, review, recommendation,
+timeline, coachLink, badge, developmentProgram, ai, achievement, match, seasonPlan,
+healthController. *(`healthController.js` is misnamed — it only exports `getTimeline()`,
+consumed by the players route. See Tech debt.)*
+
+**Models (20):** User, Player, Session, Tournament, Message, Payment, Club, Group, Activity,
+Observation, DevelopmentGoal, Recommendation, Notification, PlayerBadge, DevelopmentProgram,
+Achievement, Match, SeasonPlan, BetaSignup, CoachRequest, ReviewSummary.
+*(Reviews use **`ReviewSummary.js`**. The old `Review.js` was dead and has been deleted.)*
+
+**Services (7):** emailService (Resend), stripeService, subscriptionService,
+aiCoachingService (Claude), alertEngine (wearable alerts), badgeEngine, weeklyEmailService.
+
+**Background jobs (`jobs/index.js` → started at boot):**
+- `weeklyRunner.js` — weekly summary email (sends Mon 07:00)
+- `trialChecker.js` — trial expiry (24h)
+- `stageChecker.js` — development-stage transitions (evaluates Mon 08:00)
+
+**Middleware (4):** `auth.js` (`verifyToken`, `requireRole`), `errorHandler.js`,
+`rateLimiter.js`, `subscription.js` (`requireFeature` — defined but currently unused).
+
+**Socket:** `socket/chatHandler.js` — real-time chat + notification push.
+
+**Scripts:** `scripts/seed.js` (demo data), `scripts/seedDevelopmentPrograms.js` (ITF/PZT/TE pathways).
+
+### Frontend — `client/src/`
+Routes are defined in `client/src/App.jsx`. Pages live under `pages/<role>/`.
+
+- `pages/auth/` — Login, Register, ForgotPassword, ResetPassword, AcceptInvite
+- `pages/parent/` — Dashboard, ChildProfile, Timeline, TrainingPlan, Tournaments, Payments,
+  Chat, Onboarding, Settings, Pricing, AddCoach, Team, PaymentSuccess, PaymentCancel
+  (+ `training-plan/` and `tournaments/` sub-component folders)
+- `pages/coach/` — Dashboard, CoachPlayers, CoachDisabled, CoachRequests, CoachPlayerProfile,
+  CoachNewPlayer, CoachSessions, CoachNewSession, CoachEditSession, CoachReviews,
+  CoachNewReview, CoachPayments, CoachCalendar, Tournaments, Messages
+- `pages/club/` — ClubDashboard, FacilityWizard, ClubSettings, ClubPlayers, ClubPayments,
+  ClubReports, CoachesList
+- `pages/shared/` — Groups, Activities, Reviews, Timeline, Calendar, MyChildren, BadgePage
+- top-level — Landing, NotFound, legal/(Terms, Privacy)
+
+> **Rule:** if you add a page, add its route to `App.jsx` in the same change. Orphan pages
+> (components never referenced in `App.jsx`) are how this project accumulated chaos before.
+
+---
+
+## 5. What works vs. what's scaffolded
+
+### Works end-to-end (MongoDB-backed)
+Auth (register/login/refresh/reset/invite) · parent onboarding · player management
+(skills 0–100, goals, rankings, milestones) · sessions CRUD · tournaments CRUD ·
+generic activities · observations · development goals · review summaries (draft→publish,
+AI draft) · recommendations · clubs · groups · badges/achievements · season plans · matches ·
+real-time chat · notifications · background jobs · avatar upload (local disk) ·
+Docker + Railway deploy · seed demo data.
+
+### Scaffolded — needs API keys (code is ready)
+- **Stripe** — checkout/webhooks/portal; needs `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, price IDs.
+- **Resend email** — logs to console in dev; needs `RESEND_API_KEY`.
+- **Claude AI** — review drafts + coaching recs; needs `CLAUDE_API_KEY`. Degrades gracefully (503).
+- **Cloudinary** — scaffolded; UI currently uses local upload / initials.
+- **WHOOP/Garmin** — mock data only; real OAuth not wired (and no longer a product priority).
+
+---
+
+## 6. How to run
+
+```bash
+npm run install:all      # installs root + server + client
+# create server/.env from .env.example (min: MONGO_URL, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET)
+npm run seed             # demo data (see accounts below)
+npm run dev              # server (:3001) + client (:5173) concurrently
 ```
 
-## What Already Works (do NOT rebuild)
+- **Ports:** server `3001`, client `5173`. Vite proxies `/api` and `/socket.io` → `:3001`.
+  The server now **defaults to 3001** so dev works even without `PORT` set in `.env`.
+- **Production:** Dockerfile sets `NODE_ENV=production` and `PORT=5000`; Railway runs
+  `node server/src/index.js` and serves the built client from `client/dist`.
 
-### Fully functional (MongoDB-backed, end-to-end):
-1. **Authentication** — Register (coach/parent), login, JWT refresh, password reset, invite system, localStorage persistence
-2. **Parent onboarding** — Add child, avatar upload, training plan setup
-3. **Player management** — Multiple children, skills (6 types, 0-100), goals, rankings (PZT/TE/WTA/ATP), milestones
-4. **Training sessions** — CRUD by coach or parent, 6 types (kort/sparing/kondycja/rozciaganie/mecz/inne), surface selection, skill updates, visibility control
-5. **Tournaments** — CRUD, status tracking, results (round/wins/losses/scores/rating), source attribution
-6. **Real-time chat** — Socket.io coach↔parent messaging, read status, MongoDB persistence
-7. **Notifications** — DB storage, socket push, severity levels, quiet hours, unread tracking
-8. **Background jobs** — Wearable sync (15min), alert evaluation (30min), trial expiry (24h), weekly summary
-9. **Wearable data** — Mock provider with realistic deterministic data (WHOOP/Garmin), saved to DB
-10. **Subscription/trial** — 14-day auto-trial, plans (free/premium 39 PLN/family 59 PLN), paywall gating
-11. **Landing page** — Marketing page with beta signup (saved to DB)
-12. **Settings** — Profile, password change, notification thresholds
-13. **Seed data** — `npm run seed` creates coach@serveiq.pl + parent@serveiq.pl + 3 players + sessions + tournaments (password123)
+### Demo accounts (all `password123`)
+| Email | Role | Who |
+|-------|------|-----|
+| `coach@serveiq.pl` | coach | Main coach (Tennis 10 scenario) |
+| `parent@serveiq.pl` | parent | Parent of Kacper / Antoni |
+| `parent2@serveiq.pl` | parent | Parent of Julia |
+| `parent3@serveiq.pl` | parent | Anna Antczak — parent of **Sonia** |
+| `admin@serveiq.pl` | clubAdmin | Club coordinator |
+| `coach.head@serveiq.pl` | coach | Marek — Sonia's head coach |
+| `coach.fitness@serveiq.pl` | coach | Agnieszka — fitness |
+| `coach.mental@serveiq.pl` | coach | dr Paweł — mental |
+| `coach.physio@serveiq.pl` | coach | Karolina — physio |
 
-### Scaffolded but needs API keys (code ready):
-- Stripe checkout + webhooks + portal (needs STRIPE_SECRET_KEY, price IDs)
-- Resend email sending (needs RESEND_API_KEY)
-- WHOOP/Garmin OAuth (needs developer credentials, mock works fine for MVP)
-- Claude AI coaching assistant (needs CLAUDE_API_KEY)
+---
 
-### Coach panel (fully built):
-- **CoachDashboard** — stats, player list, recent sessions, payment/review alerts
-- **CoachPlayers** — searchable list, CoachNewPlayer form with parent invite
-- **CoachPlayerProfile** — 4 tabs (skills, sessions, goals, reviews), AI recommendations button
-- **CoachSessions** — month view, player filter, clickable cards for editing
-- **CoachEditSession** — full edit form for existing sessions with delete
-- **CoachReviews** — list page with player filter, status badges, star ratings
-- **CoachNewReview** — create/edit with AI draft generation, draft/publish workflow
-- **CoachPayments** — stats dashboard, payment creation, mark-as-paid, status filter
-- **Coach Messages** — reuses Chat component
-- Sidebar shows role-based navigation (coach vs parent, 7 nav items)
+## 7. Known tech debt / cleanup backlog
 
-### Parent extras:
-- **Reviews** — view coach reviews with expandable cards
-- **SkillProgress** — radar chart + per-skill line charts over time
-- **ChildProfile** — quick nav to progress, reviews, timeline, health
+Kept visible on purpose — controlled, not hidden.
 
-### Not built yet:
-- PDF export
-- Push notifications (Firebase/OneSignal)
-- Club/group view for coaches
-- E2E testing
+- **`healthController.js` is misnamed** — it only holds `getTimeline()` used by the players
+  route. Fold it into `timelineController`/`playerController` and delete the file.
+- **`subscription.js` middleware (`requireFeature`) is unused** — either gate premium features
+  with it or remove it.
+- **Cloudinary** is half-wired — decide: finish it or drop the env vars + scaffolding.
+- **Wearables/health** (alertEngine, mock providers, health charts) are legacy relative to the
+  club-first pivot — decide whether to keep as a secondary feature or retire.
+- **Socket auth** passes the JWT in the message payload rather than reading the secure cookie.
+- **No automated tests / CI** yet.
 
-## Database Models (Mongoose)
+---
 
-**User** — email, password, role (coach/parent), subscription (plan/status/trial dates/Stripe IDs), notification settings, parent profile (children[]), coach profile (club, ITF level, bio)
+## 8. Code conventions
 
-**Player** — name, DOB, gender, coach ref, parents refs, skills (serve/forehand/backhand/volley/tactics/fitness with score+notes), goals[], training plan (weeklySchedule[{day,sessionType,durationMinutes,startTime,notes}], weeklyGoal auto-derived, scheduledDays auto-derived, focus[], milestones[]), rankings, monthlyRate
+- Backend controllers: `exports.methodName = async (req, res, next) => { ... }`.
+- Routes: `router.get/post/put/delete` guarded by `verifyToken` / `requireRole`.
+- Frontend: functional React + hooks; pages under `pages/<role>/`; Zustand stores in `store/`.
+- API calls via the configured Axios instance in `client/src/api/axios.js`.
+- Validation with Zod on both client and server.
+- **All user-facing text in Polish.** camelCase JS, kebab-case CSS classes.
+- Follow the patterns already in the file you're editing.
 
-**Session** — player, coach, createdBy, date, startTime, duration, sessionType, surface, title, notes, focusAreas, skillUpdates (before/after), visibleToParent, source
+---
 
-**Tournament** — player, coach, createdBy, status, name, location, surface, dates, category, drawSize, results (round/wins/losses/scores/rating), source
+## 9. How to work in this repo (operating rules)
 
-**WearableDevice** — player, parent, provider, deviceName, connected, lastSync, battery, authState, tokens
-
-**WearableData** — player, device, provider, type (daily_summary/workout/sleep/recovery), date, metrics (heartRate/hrv/sleep/strain/recovery/activity/stress/bodyBattery)
-
-**Message** — from, to, player ref, text, read
-
-**Notification** — user, type, title, body, severity, read, actionUrl, metadata
-
-**Payment** — player, coach, parent, amount, currency, description, dueDate, status, paidAt
-
-**BetaSignup** — email, firstName, lastName
-
-## API Endpoints (existing)
-
-- `POST /api/auth/{register,login,refresh,logout}`, `GET /api/auth/me`, `PUT /api/auth/{profile,change-password,notification-settings,onboarding}`
-- `GET/POST /api/players`, `GET/PUT/DELETE /api/players/:id`, avatar upload, goals, training-plan, milestones, timeline
-- `GET/POST/PUT/DELETE /api/sessions`
-- `GET/POST/PUT/DELETE /api/tournaments`
-- `GET/POST/DELETE /api/wearables`, sync, data endpoints (latest/trends/compare)
-- `GET/POST /api/subscriptions`, checkout, portal, cancel, webhook
-- `GET/POST /api/payments`, stats
-- `GET/POST /api/messages`, conversations, read status
-- `GET/PUT/DELETE /api/notifications`, unread-count, read-all
-- `POST /api/beta`
-- `GET/POST/PUT/DELETE /api/reviews`
-- `POST /api/ai/recommendations/:playerId`, `POST /api/ai/review-draft/:playerId`
-
-## Product Principles
-
-1. Sell the simple story, build the stronger spine
-2. Commercial face = Tennis 10 / junior pathway continuity
-3. Design backbone must support advanced player pathway later
-4. Process over short-term results
-5. Parent trust through transparency
-6. Coach workflow must be fast and natural
-7. Avoid feature creep
-8. Prefer generic models over brittle hardcoded logic
-
-## Current MVP Scope
-
-### Already delivered:
-- Identity, roles, profiles (player/parent/coach/admin models exist)
-- Player journey and pathway model
-- Generic activity types (session types: kort/sparing/kondycja/rozciaganie/mecz/inne + tournaments)
-- Shared timeline / feed
-- Progress tracking and observations (skills, goals, milestones)
-- Parent-facing UI for all of the above
-
-### Remaining for MVP:
-1. **Coach panel** — dashboard, player management, session management, payment/invoice management, chat
-2. **Reviews and recommendations** — coach writes periodic reviews visible to parents
-3. **Club / group view** — coach sees all their players, group stats
-4. **Demo readiness** — 2 scenarios: Tennis 10 family journey + Sonia advanced pathway
-
-### Non-goals for MVP:
-- Full booking engine
-- Integrated payments (beyond manual invoicing)
-- Marketplace transactions
-- Real wearable API integrations (mock is fine)
-- Sponsor module
-- Deep analytics / AI
-- Social publishing
-- Federation reporting
-- Complex chat (beyond 1:1 coach↔parent)
-
-## Execution Rules
-
-- Do not ask for confirmation unless blocked by a truly irreversible decision.
-- Do not stop after generating plans. Implement.
-- Do not leave TODO placeholders where a reasonable implementation can be completed now.
-- Do not overengineer.
-- Make best-effort product and technical decisions based on the product principles above.
-- If a choice is needed, choose the option that preserves MVP speed and future extensibility.
-- Keep changes small, coherent, and working.
-- Always prefer a vertically usable slice over isolated incomplete components.
-- When you finish one item, immediately continue to the next highest-priority item.
-- Continue until the sprint goal is fully complete.
-
-## Code Conventions (follow existing patterns)
-
-- Backend controllers follow `exports.methodName = async (req, res, next) => { ... }` pattern
-- Routes use `router.get/post/put/delete` with auth middleware
-- Frontend pages are in `client/src/pages/` grouped by role (parent/, coach/)
-- Components use functional React with hooks
-- State management via Zustand stores in `client/src/store/`
-- API calls via `client/src/api/axios.js` configured Axios instance
-- Validation with Zod schemas
-- Language: UI text is in **Polish** (existing convention)
-- Naming: camelCase for JS, kebab-case for CSS classes
-
-## Required Workflow
-
-1. First, inspect the repository and understand current state.
-2. Create or update a concise implementation plan for the current sprint.
-3. Execute tasks one by one in priority order.
-4. After each meaningful step:
-   - Run relevant tests/checks
-   - Fix issues immediately
-   - Update progress notes
-5. When implementation is done:
-   - Run full quality gates
-   - Fix all failures
-   - Polish obvious UX issues in touched areas
-6. End only when everything in scope is done and verified.
-
-## Scope-Control Rules
-
-- If you discover missing dependencies required to complete sprint scope, implement them.
-- If you discover optional enhancements, defer them unless necessary for coherence or demoability.
-- If one task becomes too large, break it down and finish the subparts without losing momentum.
-- If you find architecture debt that threatens the sprint goal, fix only the minimum necessary portion.
-
-## Technical Quality Gates
-
-- App compiles (no broken imports, no type errors)
-- `npm run dev` starts both server and client without errors
-- No lint errors in touched files
-- No failing tests in touched areas
-- New flows are manually sanity-checked
-- All changed files are consistent with existing conventions
-- Seed/demo data works: `npm run seed` then test accounts function
-
-## Definition of Done (per delivered slice)
-
-- Implemented
-- Wired to UI + API + data model
-- Follows existing code conventions
-- Demoable with seed data
-- Documented in SPRINT_STATUS.md
-
-## SPRINT_STATUS.md
-
-Maintain `SPRINT_STATUS.md` at repo root with:
-- Sprint goal
-- Checklist of tasks
-- Current status
-- Blockers and resolutions
-- Completed items
-- Next item being worked on
-
-## Final Output Before Stopping
-
-1. Summary of what was completed
-2. Files changed
-3. Any migrations or setup steps
-4. Quality gate results
-5. Remaining risks
-6. Suggested next sprint priorities
-
-## Behavior Expectations
-
-- Be proactive.
-- Be relentless.
-- Finish the work.
-- Do not stop at "good draft" or "partial scaffold."
-- Do not wait for me to return.
-- Keep going until the sprint scope is fully delivered or you hit a hard technical blocker.
-
-## Key Reference Files
-
-- Roadmap: `docs/roadmap.md`
-- Feature plan: `REAL_FEATURES_PLAN.md`
-- Env template: `.env.example`
-- Seed script: `server/src/scripts/seed.js`
-- App routes: `client/src/App.jsx`
-- Server entry: `server/src/index.js`
+- **Keep this file true.** Any change that adds/removes a route, model, role, or major feature
+  must update the relevant section here in the same commit.
+- Prefer a thin vertical slice that actually works over isolated half-built components.
+- Don't reintroduce orphan pages or dead models — wire it up or don't add it.
+- Don't rebuild what already works (Section 5). Don't expand scope past the feature gate (Section 1).
+- Keep changes small, coherent, and runnable: `npm run dev` must start cleanly,
+  `npm run seed` + the demo accounts must keep working.
+- Ask before irreversible decisions; otherwise make the call that preserves MVP speed and the
+  shared spine, and keep going.
