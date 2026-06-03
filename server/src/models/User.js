@@ -193,7 +193,8 @@ userSchema.methods.toJSON = function () {
   return obj;
 };
 
-userSchema.index({ email: 1 });
+// email already gets a unique index from `unique: true` on the field above —
+// declaring it again here caused a Mongoose "duplicate schema index" warning.
 userSchema.index({ club: 1, role: 1 });
 
 const User = mongoose.model('User', userSchema);
