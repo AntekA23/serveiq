@@ -8,6 +8,7 @@ import listPlugin from '@fullcalendar/list'
 import interactionPlugin from '@fullcalendar/interaction'
 import api from '../../api/axios'
 import useToast from '../../hooks/useToast'
+import TimeTabs from '../../components/coach/TimeTabs'
 import './CoachCalendar.css'
 
 const TYPE_COLORS = {
@@ -564,6 +565,7 @@ export default function CoachCalendar() {
 
   return (
     <div className="coach-calendar-page">
+      <TimeTabs />
       <div className="ccal-top-bar">
         <button className="ccal-add-btn" onClick={handleNewSession}>
           <Plus size={16} /> Nowy trening

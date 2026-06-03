@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Plus, ChevronRight, CreditCard, Clock, Users,
+  Plus, ChevronRight, CreditCard, Clock, Users, UserPlus,
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -41,10 +41,11 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [playersRes, sessionsRes, paymentsRes] = await Promise.all([
+        const [playersRes, sessionsRes, paymentsRes, requestsRes] = await Promise.all([
           api.get('/players'),
           api.get('/sessions'),
           api.get('/payments').catch(() => ({ data: { payments: [] } })),
+          api.get('/coach-links/requests?status=pending').catch(() => ({ data: { requests: [] } })),
         ])
 
         const p = playersRes.data.players || playersRes.data || []
@@ -81,10 +82,12 @@ export default function Dashboard() {
         const allPayments = paymentsRes.data.payments || []
         const pendingPayments = allPayments.filter((py) => py.status === 'pending' || py.status === 'overdue').length
 
+        const pendingRequests = requestsRes.data.requests || requestsRes.data || []
+
         setAlerts({
           payments: pendingPayments,
           drafts: 0,
-          requests: [],
+          requests: Array.isArray(pendingRequests) ? pendingRequests : [],
         })
       } catch {
         setError(true)
@@ -112,7 +115,7 @@ export default function Dashboard() {
     )
   }
 
-  const hasAlerts = alerts.payments > 0
+  const hasAlerts = alerts.payments > 0 || alerts.requests.length > 0
 
   return (
     <div className="cd-page">
@@ -128,12 +131,20 @@ export default function Dashboard() {
       </div>
 
       {/* ─── Alerts bar ─── */}
-      {alerts.payments > 0 && (
+      {hasAlerts && (
         <div className="cd-alerts-bar">
-          <button className="cd-alert-chip cd-alert-payments" onClick={() => navigate('/coach/payments')}>
-            <CreditCard size={14} />
-            <span>{alerts.payments} {alerts.payments === 1 ? 'płatność' : 'płatności'}</span>
-          </button>
+          {alerts.requests.length > 0 && (
+            <button className="cd-alert-chip cd-alert-requests" onClick={() => navigate('/coach/requests')}>
+              <UserPlus size={14} />
+              <span>{alerts.requests.length} {alerts.requests.length === 1 ? 'prośba' : 'prośby'} od rodziców</span>
+            </button>
+          )}
+          {alerts.payments > 0 && (
+            <button className="cd-alert-chip cd-alert-payments" onClick={() => navigate('/coach/payments')}>
+              <CreditCard size={14} />
+              <span>{alerts.payments} {alerts.payments === 1 ? 'płatność' : 'płatności'}</span>
+            </button>
+          )}
         </div>
       )}
 

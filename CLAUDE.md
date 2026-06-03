@@ -230,3 +230,27 @@ Kept visible on purpose — controlled, not hidden.
   `npm run seed` + the demo accounts must keep working.
 - Ask before irreversible decisions; otherwise make the call that preserves MVP speed and the
   shared spine, and keep going.
+
+---
+
+## 10. Clarity simplification (in progress)
+
+The product had grown too complex for its users (parents, coaches, club) — too many top-level
+nav entries and the same data shown across many overlapping screens. We are simplifying **one
+role at a time**, reorganising navigation only (no backend/model changes), reversible.
+
+### Coach — DONE (first pass)
+Coach sidebar reduced from **9 → 6** entries: Panel · Kalendarz · Zawodnicy · Wiadomości ·
+Płatności · Ustawienia.
+- **Kalendarz is the single "time" home.** The three date-based views — Calendar
+  (`/coach/calendar`), session list (`/coach/sessions`), tournaments (`/coach/tournaments`) —
+  now share a tab strip (`components/coach/TimeTabs`) and only "Kalendarz" appears in the
+  sidebar. The three pages are otherwise unchanged.
+- **Reviews** (`/coach/reviews`) removed from the sidebar; reached from the player profile
+  (the `+ Ocena` button and the per-player review link).
+- **Pending parent requests** (`/coach/requests`, previously reachable only by typing the URL)
+  now surface as an alert chip on the coach dashboard.
+
+### Parent / Club — TODO
+Same treatment: map the current nav + overlaps, propose a simpler information architecture,
+implement nav-only changes. Not started yet.

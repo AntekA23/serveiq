@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Plus, ChevronLeft, ChevronRight, Edit3, Clock, Users, Target } from 'lucide-react'
 import api from '../../api/axios'
 import Button from '../../components/ui/Button/Button'
+import TimeTabs from '../../components/coach/TimeTabs'
 import './Coach.css'
 
 const TYPE_LABELS = {
@@ -72,6 +73,7 @@ export default function CoachSessions() {
 
   return (
     <div className="coach-page">
+      <TimeTabs />
       <div className="coach-header">
         <h1 className="page-title">Sesje treningowe</h1>
         <Button variant="primary" size="sm" onClick={() => navigate('/coach/sessions/new')}>

@@ -1,0 +1,40 @@
+.time-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.time-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.time-tab:hover {
+  color: var(--color-text);
+  background: var(--color-bg-tertiary);
+}
+
+.time-tab.active {
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
+.time-tab-icon {
+  flex-shrink: 0;
+}

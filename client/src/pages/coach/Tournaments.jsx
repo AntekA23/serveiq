@@ -9,6 +9,7 @@ import Input from '../../components/ui/Input/Input'
 import Modal from '../../components/ui/Modal/Modal'
 import Badge from '../../components/ui/Badge/Badge'
 import useUiStore from '../../store/uiStore'
+import TimeTabs from '../../components/coach/TimeTabs'
 import './Tournaments.css'
 
 const tournamentSchema = z.object({
@@ -188,6 +189,7 @@ export default function Tournaments() {
 
   return (
     <div className="page-enter">
+      <TimeTabs />
       <div className="tournaments-header">
         <h1 className="page-title">Turnieje</h1>
         <Button variant="primary" size="sm" icon={Plus} onClick={() => setAddModalOpen(true)}>

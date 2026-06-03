@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, Users, User, CalendarDays, CalendarClock, ClipboardList,
-  MessageCircle, Settings, LogOut, Baby,
-  Newspaper, Dumbbell, Building2, BarChart3, CreditCard, Cog,
-  FileText, Trophy,
+  LayoutDashboard, Users, User, CalendarClock,
+  MessageCircle, Settings, LogOut, Dumbbell, Building2, CreditCard,
 } from 'lucide-react'
 import api from '../../../api/axios'
 import useAuthStore from '../../../store/authStore'
@@ -13,16 +11,15 @@ import useAuth from '../../../hooks/useAuth'
 import Avatar from '../../ui/Avatar'
 import './Sidebar.css'
 
+// Coach navigation — 6 clear entries. "Kalendarz" is the home for everything
+// on a date (calendar / sessions / tournaments switch via tabs inside that page).
+// Reviews live inside each player's profile; pending parent requests surface on the dashboard.
 const coachNav = [
   { to: '/coach/dashboard', label: 'Panel', icon: LayoutDashboard },
   { to: '/coach/calendar', label: 'Kalendarz', icon: CalendarClock },
   { to: '/players', label: 'Zawodnicy', icon: User },
   { to: '/messages', label: 'Wiadomości', icon: MessageCircle },
-  { section: 'Zarządzanie' },
-  { to: '/coach/sessions', label: 'Treningi', icon: ClipboardList },
-  { to: '/coach/reviews', label: 'Oceny', icon: FileText },
   { to: '/coach/payments', label: 'Płatności', icon: CreditCard },
-  { to: '/coach/tournaments', label: 'Turnieje', icon: Trophy },
   { to: '/settings', label: 'Ustawienia', icon: Settings },
 ]
 
