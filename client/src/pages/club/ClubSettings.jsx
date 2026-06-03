@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Loader2, Save, Upload, RefreshCw, Copy, Check,
-  ChevronDown, ChevronUp, Plus, Trash2, ArrowUp, ArrowDown,
+  ChevronDown, ChevronUp, Plus, Trash2, ArrowUp, ArrowDown, Building2,
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
@@ -11,6 +12,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 export default function ClubSettings() {
   const user = useAuthStore((s) => s.user)
   const clubId = user?.club && typeof user.club === 'object' ? user.club._id : user?.club
+  const navigate = useNavigate()
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -405,6 +407,21 @@ export default function ClubSettings() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* === INFRASTRUKTURA (kreator kortów — link, nie stała pozycja w menu) === */}
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="card-body" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <div>
+            <h3 className="card-title" style={{ marginBottom: 4 }}>Infrastruktura</h3>
+            <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: 0 }}>
+              Korty, nawierzchnie i udogodnienia klubu.
+            </p>
+          </div>
+          <button className="btn btn-ghost" onClick={() => navigate('/club/facility')}>
+            <Building2 size={16} /> Konfiguruj
+          </button>
+        </div>
       </div>
     </div>
   )

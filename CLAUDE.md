@@ -263,9 +263,19 @@ about one child, and parent-level concerns live in the sidebar.
 - **Child context carries over:** hub links pass `?child=<id>`; TrainingPlan, Tournaments and
   the shared Reviews page now preselect that child instead of always defaulting to the first.
 
-### Club — TODO
-Same treatment: map the current nav + overlaps, propose a simpler information architecture,
-implement nav-only changes. Not started yet.
+### Club — DONE (first pass)
+The club panel's problem was discoverability, not size: two fully-working pages were
+reachable only by typing the URL, and a one-time wizard sat in the daily nav.
+- **Raporty** (`/club/reports` — retention, attendance, coach activity, pathway distribution)
+  added to the sidebar (was URL-only).
+- **Ustawienia klubu** (`/club/settings` — PZT licence, pathway stages, logo, invite code)
+  added to the sidebar (was URL-only). Distinct from "Ustawienia" (`/settings`, the admin's
+  personal account, which already works and has a Club tab).
+- **Infrastruktura** (`FacilityWizard`, a one-time court-setup wizard) removed from the
+  permanent nav and linked instead from inside Ustawienia klubu.
+
+All three role panels (coach, parent, club) have now had a first clarity pass. Next natural
+step: walk each panel live with seed data and refine wording/ordering from real use.
 
 ### Known follow-ups (deferred)
 - Dashboard vs ChildProfile still overlap (both show plan/upcoming/latest-review teasers) —
