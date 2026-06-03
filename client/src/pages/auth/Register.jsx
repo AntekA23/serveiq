@@ -3,10 +3,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate } from 'react-router-dom'
-import { User, Mail, Lock, Play } from 'lucide-react'
+import { User, Mail, Lock } from 'lucide-react'
 import useAuth from '../../hooks/useAuth'
-import useAuthStore from '../../store/authStore'
-import { getDemoUser, DEMO_TOKEN } from '../../services/demoData'
 import useToast from '../../hooks/useToast'
 import Button from '../../components/ui/Button/Button'
 import Input from '../../components/ui/Input/Input'
@@ -56,12 +54,6 @@ export default function Register() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleDemo = () => {
-    const demoUser = getDemoUser()
-    useAuthStore.getState().setAuth(demoUser, DEMO_TOKEN)
-    navigate('/parent/dashboard')
   }
 
   return (
@@ -132,15 +124,6 @@ export default function Register() {
             Zarejestruj sie
           </Button>
         </form>
-
-        <div className="register-divider">
-          <span>lub</span>
-        </div>
-
-        <button className="register-demo-btn" onClick={handleDemo}>
-          <Play size={16} />
-          Tryb demo — zobacz dashboard
-        </button>
 
         <div className="register-links">
           <Link to="/login">Masz juz konto? Zaloguj sie</Link>

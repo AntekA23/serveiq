@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import api from '../api/axios'
 import useAuthStore from '../store/authStore'
-import { DEMO_TOKEN } from '../services/demoData'
 
 export default function useAuth() {
   const { setAuth, setUser, logout: clearStore } = useAuthStore()
@@ -20,13 +19,10 @@ export default function useAuth() {
   }, [])
 
   const logout = useCallback(async () => {
-    const currentToken = useAuthStore.getState().accessToken
-    if (currentToken !== DEMO_TOKEN) {
-      try {
-        await api.post('/auth/logout', {}, { withCredentials: true })
-      } catch {
-        // ignore logout errors
-      }
+    try {
+      await api.post('/auth/logout', {}, { withCredentials: true })
+    } catch {
+      // ignore logout errors
     }
     clearStore()
   }, [clearStore])
@@ -47,9 +43,6 @@ export default function useAuth() {
 
     // No token — not logged in
     if (!currentToken) return
-
-    // Demo mode — already set
-    if (currentToken === DEMO_TOKEN) return
 
     // We have both token AND user in localStorage — just use them.
     // Don't call /auth/me at all. The token will be validated

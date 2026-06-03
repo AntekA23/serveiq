@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   Moon, Zap, TrendingUp, UserPlus, Watch, BarChart3,
   Activity, Bell, LineChart, Calendar, FileText, Mail,
-  ChevronDown, ArrowRight, Play, Check, X, Star, Crown, Menu, XIcon,
+  ChevronDown, ArrowRight, Check, X, Star, Crown, Menu, XIcon,
 } from 'lucide-react'
-import useAuthStore from '../store/authStore'
-import { getDemoUser, DEMO_TOKEN } from '../services/demoData'
 import './Landing.css'
 
 // ── Intersection Observer hook for scroll animations ──
@@ -211,14 +209,7 @@ const FAQ_DATA = [
 // ── Main Component ──
 
 export default function Landing() {
-  const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
-  const handleDemo = useCallback(() => {
-    const demoUser = getDemoUser()
-    useAuthStore.getState().setAuth(demoUser, DEMO_TOKEN)
-    navigate('/parent/dashboard')
-  }, [navigate])
 
   const scrollTo = useCallback((id) => {
     setMobileMenuOpen(false)
@@ -284,10 +275,6 @@ export default function Landing() {
               Rozpocznij za darmo
               <ArrowRight size={18} />
             </Link>
-            <button className="landing-btn-secondary" onClick={handleDemo}>
-              <Play size={16} />
-              Zobacz demo
-            </button>
           </div>
         </div>
 

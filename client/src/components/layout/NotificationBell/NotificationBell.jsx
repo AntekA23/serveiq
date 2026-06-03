@@ -45,7 +45,7 @@ export default function NotificationBell() {
       const { data } = await api.get('/notifications/unread-count')
       setUnreadCount(data.count ?? 0)
     } catch {
-      // Ignoruj bledy (np. demo mode)
+      // Ignoruj bledy
     }
   }, [])
 
