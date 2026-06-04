@@ -813,6 +813,66 @@ const seed = async () => {
       });
     }
 
+    // ── Realistic, full weekly schedule for the main coach ──
+    console.log('Tworzenie realistycznego grafiku trenera glownego...');
+
+    // Monday 00:00 of the current week
+    const mondayThisWeek = () => {
+      const d = new Date(now);
+      const wd = d.getDay(); // 0=Sun..6=Sat
+      d.setDate(d.getDate() + (wd === 0 ? -6 : 1 - wd));
+      d.setHours(0, 0, 0, 0);
+      return d;
+    };
+    // weekday: 1=Mon..7=Sun ; weekOffset: -1 last week, 0 this, +1 next
+    const dateForSlot = (weekday, weekOffset) => {
+      const base = mondayThisWeek();
+      const d = new Date(base);
+      d.setDate(base.getDate() + (weekday - 1) + weekOffset * 7);
+      return d;
+    };
+
+    // A junior coach's typical week — weekday afternoons + Saturday mornings
+    const coachWeekSlots = [
+      { day: 1, player: julia._id,  type: 'kort',     time: '15:30', dur: 90, title: 'Technika — forhand i praca nog', surface: 'clay', focus: ['forehand', 'praca nog'] },
+      { day: 1, player: antoni._id, type: 'kort',     time: '17:00', dur: 60, title: 'Tennis 10 — koordynacja',         surface: 'clay', focus: ['koordynacja'] },
+      { day: 2, player: kacper._id, type: 'kort',     time: '16:00', dur: 60, title: 'Tennis 10 Red — zajecia grupowe', surface: 'clay', focus: ['podstawy', 'zabawa'] },
+      { day: 2, player: julia._id,  type: 'kondycja', time: '17:30', dur: 45, title: 'Kondycja — interwaly + core',     focus: ['kondycja', 'szybkosc'] },
+      { day: 3, player: julia._id,  type: 'kort',     time: '15:30', dur: 90, title: 'Taktyka i gra na punkty',         surface: 'clay', focus: ['taktyka'] },
+      { day: 3, player: kacper._id, type: 'kort',     time: '17:00', dur: 60, title: 'Tennis 10 — forhand z dolu',      surface: 'clay', focus: ['forehand'] },
+      { day: 4, player: antoni._id, type: 'kort',     time: '16:00', dur: 60, title: 'Tennis 10 — bekhend i wolej',     surface: 'clay', focus: ['bekhend', 'wolej'] },
+      { day: 4, player: julia._id,  type: 'sparing',  time: '17:30', dur: 90, title: 'Sparing meczowy',                 surface: 'clay', focus: ['gra', 'taktyka'] },
+      { day: 5, player: julia._id,  type: 'kort',     time: '15:30', dur: 90, title: 'Serwis + return',                 surface: 'clay', focus: ['serwis', 'return'] },
+      { day: 5, player: kacper._id, type: 'kondycja', time: '17:00', dur: 45, title: 'Koordynacja i zwinnosc',          focus: ['koordynacja'] },
+      { day: 6, player: kacper._id, type: 'kort',     time: '09:00', dur: 60, title: 'Tennis 10 Red — sobota grupowa',  surface: 'clay', focus: ['podstawy'] },
+      { day: 6, player: antoni._id, type: 'kort',     time: '10:00', dur: 60, title: 'Tennis 10 — sobota grupowa',      surface: 'clay', focus: ['podstawy'] },
+      { day: 6, player: julia._id,  type: 'kort',     time: '11:00', dur: 90, title: 'Gra i sytuacje meczowe',          surface: 'clay', focus: ['gra'] },
+    ];
+
+    let coachSessionCount = 0;
+    for (const weekOffset of [-1, 0, 1]) {
+      for (const slot of coachWeekSlots) {
+        const date = dateForSlot(slot.day, weekOffset);
+        await Session.create({
+          player: slot.player,
+          coach: coach._id,
+          createdBy: coach._id,
+          source: 'coach',
+          date,
+          sessionType: slot.type,
+          surface: slot.surface || '',
+          startTime: slot.time,
+          durationMinutes: slot.dur,
+          title: slot.title,
+          notes: date < now ? 'Zrealizowane zgodnie z planem.' : '',
+          focusAreas: slot.focus || [],
+          visibleToParent: true,
+        });
+        coachSessionCount++;
+      }
+    }
+    console.log(`  Dodano ${coachSessionCount} sesji do grafiku trenera glownego`);
+
     // Sonia sessions
     const soniaSessionsData = [
       { title: 'Trening techniczny — serwis + return', sessionType: 'kort', surface: 'clay', startTime: '15:00', daysAgo: 1, durationMinutes: 90, notes: 'Plaski serwis 60% trafień. Return z bekhendu agresywny.', focusAreas: ['serwis', 'return'], coachId: 0 },
