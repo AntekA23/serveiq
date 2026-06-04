@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, User, CalendarClock,
-  MessageCircle, Settings, LogOut, Dumbbell, Building2, CreditCard, BarChart3,
+  MessageCircle, Settings, LogOut, Dumbbell, Building2, CreditCard,
 } from 'lucide-react'
 import api from '../../../api/axios'
 import useAuthStore from '../../../store/authStore'
@@ -31,7 +31,6 @@ const clubAdminNav = [
   { to: '/club/players', label: 'Zawodnicy', icon: User },
   { to: '/coaches', label: 'Trenerzy', icon: Dumbbell },
   { to: '/club/payments', label: 'Płatności', icon: CreditCard },
-  { to: '/club/reports', label: 'Raporty', icon: BarChart3 },
   { to: '/club/settings', label: 'Ustawienia klubu', icon: Building2 },
   { to: '/messages', label: 'Wiadomości', icon: MessageCircle },
   { to: '/settings', label: 'Ustawienia', icon: Settings },

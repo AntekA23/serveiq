@@ -4,10 +4,13 @@ import {
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
+import { stageLabel } from '../../utils/stageLabels'
 
 const MONTH_NAMES = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paz', 'Lis', 'Gru']
 
-export default function ClubReports() {
+// `embedded` renders just the report body (no page wrapper/title) so it can be
+// folded into the club dashboard — there is no separate "Raporty" screen now.
+export default function ClubReports({ embedded = false }) {
   const user = useAuthStore((s) => s.user)
   const clubId = user?.club && typeof user.club === 'object' ? user.club._id : user?.club
 
@@ -30,6 +33,7 @@ export default function ClubReports() {
   }, [clubId])
 
   if (loading) {
+    if (embedded) return null
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
         <Loader2 size={32} className="spin" />
@@ -38,17 +42,13 @@ export default function ClubReports() {
   }
 
   if (!reports) {
-    return <div className="page-empty">Brak danych raportowych</div>
+    return embedded ? null : <div className="page-empty">Brak danych raportowych</div>
   }
 
   const { attendance, coachActivity, pathwayDistribution, retention } = reports
 
-  return (
-    <div className="page-container">
-      <div className="page-header">
-        <h1 className="page-title">Statystyki klubu</h1>
-      </div>
-
+  const body = (
+    <>
       {/* RETENCJA */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 24 }}>
         <MetricCard label="Lacznie graczy" value={retention.total} icon={<Users size={18} />} color="var(--color-accent)" />
@@ -168,7 +168,7 @@ export default function ClubReports() {
               return (
                 <div key={stage._id || 'none'} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{ width: 200, fontSize: 13, fontWeight: 500 }}>
-                    {stage._id || 'Brak etapu'}
+                    {stage._id ? stageLabel(stage._id) : 'Brak etapu'}
                   </span>
                   <div style={{ flex: 1, height: 20, background: 'var(--color-bg-tertiary)', borderRadius: 6, overflow: 'hidden' }}>
                     <div
@@ -191,6 +191,24 @@ export default function ClubReports() {
           </div>
         )}
       </div>
+    </>
+  )
+
+  if (embedded) {
+    return (
+      <div className="cld-reports-embed">
+        <h2 className="cld-reports-title">Statystyki klubu</h2>
+        {body}
+      </div>
+    )
+  }
+
+  return (
+    <div className="page-container">
+      <div className="page-header">
+        <h1 className="page-title">Statystyki klubu</h1>
+      </div>
+      {body}
     </div>
   )
 }

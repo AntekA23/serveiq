@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
+import ClubReports from './ClubReports'
 import './ClubDashboard.css'
 
 const REASON_LABELS = {
@@ -197,6 +198,9 @@ export default function ClubDashboard() {
           <CreditCard size={16} /> Płatności
         </button>
       </div>
+
+      {/* ─── Statystyki (scalone z dawnych „Raportów") ─── */}
+      <ClubReports embedded />
     </div>
   )
 }

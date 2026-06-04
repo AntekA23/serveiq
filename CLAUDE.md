@@ -283,7 +283,9 @@ about one child, and parent-level concerns live in the sidebar.
 The club panel's problem was discoverability, not size: two fully-working pages were
 reachable only by typing the URL, and a one-time wizard sat in the daily nav.
 - **Raporty** (`/club/reports` — retention, attendance, coach activity, pathway distribution)
-  added to the sidebar (was URL-only).
+  **merged into the Panel (2026-06-04):** `ClubReports` gained an `embedded` mode and now
+  renders as a "Statystyki klubu" section at the bottom of `ClubDashboard`, so the club has one
+  "health" screen. "Raporty" removed from the sidebar (the `/club/reports` route still resolves).
 - **Ustawienia klubu** (`/club/settings` — PZT licence, pathway stages, logo, invite code)
   added to the sidebar (was URL-only). Distinct from "Ustawienia" (`/settings`, the admin's
   personal account, which already works and has a Club tab).

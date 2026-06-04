@@ -8,6 +8,17 @@
   margin: 0 auto;
 }
 
+/* Embedded reports (merged from the old Raporty screen) */
+.cld-reports-embed { margin-top: 32px; }
+.cld-reports-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-secondary);
+  margin-bottom: 14px;
+}
+
 /* Loading */
 .cld-loading {
   display: flex;
