@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Moon, Zap, TrendingUp, UserPlus, Watch, BarChart3,
-  Activity, Bell, LineChart, Calendar, FileText, Mail,
+  Sparkles, Zap, TrendingUp, UserPlus, Users, BarChart3,
+  MessageCircle, LineChart, Calendar, FileText, Trophy, Target,
   ChevronDown, ArrowRight, Check, X, Star, Crown, Menu, XIcon,
 } from 'lucide-react'
 import './Landing.css'
@@ -59,70 +59,70 @@ function FaqItem({ question, answer }) {
 
 const PROBLEMS = [
   {
-    icon: Moon,
-    title: 'Brak wgladu w regeneracje',
-    desc: 'Nie wiesz, czy Twoje dziecko odpowiednio sie regeneruje po treningach i turniejach.',
-  },
-  {
-    icon: Zap,
-    title: 'Nie wiesz czy trening jest za intensywny',
-    desc: 'Brak danych o obciazeniu treningowym moze prowadzic do przetrenowania.',
+    icon: MessageCircle,
+    title: 'Chaos w komunikacji',
+    desc: 'Plan, terminy i ustalenia giną w WhatsAppie, SMS-ach i mailach.',
   },
   {
     icon: TrendingUp,
-    title: 'Brakuje pelnego obrazu rozwoju',
-    desc: 'Fragmentaryczne informacje nie pozwalaja podejmowac dobrych decyzji.',
+    title: 'Nie widać postępu',
+    desc: 'Wyniki meczów to nie wszystko — brakuje obrazu rozwoju i tego, nad czym dziecko pracuje.',
+  },
+  {
+    icon: Target,
+    title: 'Brak jasnej ścieżki',
+    desc: 'Co po Tennis 10? Trudno zobaczyć, jaki jest następny krok dziecka.',
   },
 ]
 
 const STEPS = [
   {
     icon: UserPlus,
-    title: 'Zaloz konto',
-    desc: 'Zarejestruj sie w 30 sekund. Bez karty kredytowej.',
+    title: 'Załóż konto',
+    desc: 'Rejestracja w 30 sekund. Bez karty kredytowej.',
   },
   {
-    icon: Watch,
-    title: 'Polacz urzadzenie',
-    desc: 'WHOOP, Garmin i wiecej. Dane synchronizuja sie automatycznie.',
+    icon: Users,
+    title: 'Połącz się z trenerem',
+    desc: 'Trener prowadzi plan, oceny i postępy — Ty masz wszystko w telefonie.',
   },
   {
     icon: BarChart3,
-    title: 'Monitoruj rozwoj',
-    desc: 'Dane zdrowotne, alerty, raporty - wszystko w jednym miejscu.',
+    title: 'Śledź rozwój',
+    desc: 'Plan, postępy, oceny i kolejny krok ścieżki — wszystko w jednym miejscu.',
   },
 ]
 
 const FEATURES = [
   {
-    icon: Activity,
-    title: 'Dashboard zdrowia',
-    desc: 'HR, HRV, sen, regeneracja w jednym miejscu. Kompletny obraz zdrowia dziecka.',
+    icon: Calendar,
+    title: 'Plan treningowy',
+    desc: 'Tygodniowy plan, cele i kalendarz. Wiesz, co i kiedy trenuje dziecko.',
   },
   {
-    icon: Bell,
-    title: 'Inteligentne alerty',
-    desc: 'Powiadomienia gdy regeneracja jest niska lub sen niewystarczajacy.',
+    icon: MessageCircle,
+    title: 'Kontakt z trenerem',
+    desc: 'Wiadomości i ustalenia w jednym miejscu, nie w pięciu czatach.',
   },
   {
     icon: LineChart,
-    title: 'Historia postepu',
-    desc: 'Wykresy i trendy w czasie. Porownuj okresy i sledz postepy.',
-  },
-  {
-    icon: Calendar,
-    title: 'Plan treningowy',
-    desc: 'Kalendarz, cele, kamienie milowe. Organizuj trening dziecka.',
+    title: 'Postępy i umiejętności',
+    desc: 'Rozwój umiejętności w czasie — nie tylko wyniki meczów.',
   },
   {
     icon: FileText,
-    title: 'Raporty PDF',
-    desc: 'Eksportuj raport dla trenera lub lekarza jednym kliknieciem.',
+    title: 'Oceny trenera',
+    desc: 'Okresowe oceny: co poszło dobrze, nad czym pracować i co dalej.',
   },
   {
-    icon: Mail,
-    title: 'Tygodniowe podsumowanie',
-    desc: 'Email z podsumowaniem tygodnia. Badz na biezaco bez logowania.',
+    icon: TrendingUp,
+    title: 'Ścieżka rozwoju',
+    desc: 'Od Tennis 10 po zawodnika — widoczny następny krok dziecka.',
+  },
+  {
+    icon: Trophy,
+    title: 'Turnieje i odznaki',
+    desc: 'Kalendarz turniejów, wyniki i motywujące odznaki dla dziecka.',
   },
 ]
 
@@ -135,12 +135,12 @@ const PRICING = [
     icon: Zap,
     features: [
       { text: '1 dziecko', included: true },
-      { text: 'Dashboard zdrowia', included: true },
-      { text: 'Historia 7 dni', included: true },
-      { text: 'Podstawowe alerty', included: true },
-      { text: 'Wykresy i porownania', included: false },
-      { text: 'Email tygodniowy', included: false },
-      { text: 'Eksport PDF', included: false },
+      { text: 'Plan treningowy i kalendarz', included: true },
+      { text: 'Postępy i umiejętności', included: true },
+      { text: 'Kontakt z trenerem', included: true },
+      { text: 'Oceny trenera', included: false },
+      { text: 'Turnieje i odznaki', included: false },
+      { text: 'Tygodniowe podsumowanie', included: false },
     ],
   },
   {
@@ -153,12 +153,12 @@ const PRICING = [
     trial: '14 dni za darmo',
     features: [
       { text: 'Do 3 dzieci', included: true },
-      { text: 'Dashboard zdrowia', included: true },
-      { text: 'Pelna historia', included: true },
-      { text: 'Pelne alerty', included: true },
-      { text: 'Wykresy i porownania', included: true },
-      { text: 'Email tygodniowy', included: true },
-      { text: 'Eksport PDF', included: true },
+      { text: 'Plan, postępy, kalendarz', included: true },
+      { text: 'Pełna historia rozwoju', included: true },
+      { text: 'Oceny trenera', included: true },
+      { text: 'Turnieje i odznaki', included: true },
+      { text: 'Tygodniowe podsumowanie', included: true },
+      { text: 'Ścieżka rozwoju', included: true },
     ],
   },
   {
@@ -170,39 +170,39 @@ const PRICING = [
     features: [
       { text: 'Do 5 dzieci', included: true },
       { text: 'Wszystko z Premium', included: true },
-      { text: 'Pelna historia', included: true },
-      { text: 'Pelne alerty', included: true },
-      { text: 'Push notifications', included: true },
+      { text: 'Profil rodzinny', included: true },
+      { text: 'Pełna historia rozwoju', included: true },
+      { text: 'Powiadomienia', included: true },
       { text: 'Priorytetowy support', included: true },
-      { text: 'Eksport PDF', included: true },
+      { text: 'Ścieżka rozwoju', included: true },
     ],
   },
 ]
 
 const FAQ_DATA = [
   {
-    q: 'Czy moje dziecko musi miec WHOOP lub Garmin?',
-    a: 'Nie, aplikacja dziala rowniez bez urzadzenia wearable. Mozesz recznie sledzic postepy i cele treningowe. Urzadzenie dodaje automatyczne dane zdrowotne takie jak tetno, HRV, sen i regeneracje.',
+    q: 'Czy ServeIQ działa dla małych dzieci (Tennis 10)?',
+    a: 'Tak — od pierwszych zajęć Tennis 10. Rodzic widzi plan, postępy i oceny, a dziecko zbiera motywujące odznaki. Ten sam system rośnie z dzieckiem aż po poważną ścieżkę zawodniczą.',
   },
   {
-    q: 'Jak dziala darmowy trial?',
-    a: '14 dni Premium za darmo dla kazdego nowego uzytkownika. Nie wymagamy karty kredytowej. Po zakonczeniu trialu Twoje konto automatycznie przejdzie na plan Free.',
+    q: 'Jak działa darmowy trial?',
+    a: '14 dni Premium za darmo dla każdego nowego użytkownika. Nie wymagamy karty kredytowej. Po zakończeniu trialu konto automatycznie przejdzie na plan Free.',
   },
   {
-    q: 'Czy moje dane sa bezpieczne?',
-    a: 'Tak. Wszystkie dane sa szyfrowane. Dzialamy zgodnie z RODO/GDPR. Dane zdrowotne dzieci sa szczegolnie chronione. Nigdy nie udostepniamy danych osobom trzecim.',
+    q: 'Czy muszę mieć trenera w ServeIQ?',
+    a: 'Najwięcej zyskujesz, gdy trener prowadzi plan i oceny — ale możesz też samodzielnie śledzić plan, turnieje i postępy dziecka. Trenera dodasz kodem zaproszenia w dowolnym momencie.',
   },
   {
-    q: 'Czy moge monitorowac wiecej niz jedno dziecko?',
-    a: 'Tak. Plan Free pozwala na 1 dziecko, Premium do 3, a Family do 5 dzieci w jednym koncie.',
+    q: 'Czy moje dane są bezpieczne?',
+    a: 'Tak. Wszystkie dane są szyfrowane. Działamy zgodnie z RODO/GDPR. Dane dzieci są szczególnie chronione i nigdy nie udostępniamy ich osobom trzecim.',
   },
   {
-    q: 'Jak anulowac subskrypcje?',
-    a: 'W dowolnym momencie w ustawieniach konta. Twoja subskrypcja bedzie aktywna do konca oplaconego okresu. Bez ukrytych oplat.',
+    q: 'Czy mogę prowadzić więcej niż jedno dziecko?',
+    a: 'Tak. Plan Free obejmuje 1 dziecko, Premium do 3, a Family do 5 dzieci na jednym koncie.',
   },
   {
-    q: 'Jakie dane zdrowotne beda widoczne?',
-    a: 'Tetno spoczynkowe, zmiennosc tetna (HRV), jakosc i dlugosc snu, wynik regeneracji, obciazenie treningowe (strain) oraz trendy w czasie.',
+    q: 'Jak anulować subskrypcję?',
+    a: 'W dowolnym momencie w ustawieniach konta. Subskrypcja pozostaje aktywna do końca opłaconego okresu. Bez ukrytych opłat.',
   },
 ]
 
@@ -257,17 +257,18 @@ export default function Landing() {
       <div className="landing-hero landing-section visible">
         <div className="landing-hero-content">
           <div className="landing-hero-badge">
-            <Activity size={14} />
-            Platforma dla rodzicow mlodych tenisistow
+            <Sparkles size={14} />
+            Rozwój juniora tenisa — od Tennis 10 wzwyż
           </div>
 
           <h1>
-            MONITORUJ ROZWOJ<br />
-            <span className="accent">MLODEGO TENISISTY</span>
+            CAŁY ROZWÓJ DZIECKA<br />
+            <span className="accent">W JEDNYM MIEJSCU</span>
           </h1>
 
           <p className="landing-hero-sub">
-            Polacz WHOOP lub Garmin i sledz zdrowie, regeneracje i postepy dziecka w jednym miejscu.
+            Plan treningowy, postępy, oceny trenera i kontakt — bez chaosu w WhatsAppie.
+            Od pierwszych zajęć Tennis 10 po poważną ścieżkę zawodniczą.
           </p>
 
           <div className="landing-hero-actions">
@@ -280,16 +281,16 @@ export default function Landing() {
 
         <div className="landing-hero-stats">
           <div className="landing-hero-stat">
-            <div className="landing-hero-stat-value">24/7</div>
-            <div className="landing-hero-stat-label">Monitoring</div>
+            <div className="landing-hero-stat-value">1</div>
+            <div className="landing-hero-stat-label">miejsce na wszystko</div>
           </div>
           <div className="landing-hero-stat">
-            <div className="landing-hero-stat-value">2+</div>
-            <div className="landing-hero-stat-label">Integracje</div>
+            <div className="landing-hero-stat-value">0</div>
+            <div className="landing-hero-stat-label">chaosu w WhatsAppie</div>
           </div>
           <div className="landing-hero-stat">
             <div className="landing-hero-stat-value">100%</div>
-            <div className="landing-hero-stat-label">Bezpieczenstwo</div>
+            <div className="landing-hero-stat-label">jasności dla rodzica</div>
           </div>
         </div>
       </div>
@@ -298,10 +299,10 @@ export default function Landing() {
       <Section className="landing-problem" id="problem">
         <div className="landing-section-label">Problem</div>
         <h2 className="landing-section-title">
-          Nie wiesz co dzieje sie z Twoim dzieckiem na treningu?
+          Rozwój dziecka rozsypany po pięciu aplikacjach?
         </h2>
         <p className="landing-section-subtitle" style={{ margin: '0 auto' }}>
-          Wiekszosci rodzicow brakuje narzedzi do monitorowania zdrowia i rozwoju mlodych sportowcow.
+          Plan w głowie trenera, ustalenia w WhatsAppie, wyniki w zeszycie. Trudno o spokój i jasność.
         </p>
 
         <div className="landing-problem-grid">
@@ -320,7 +321,7 @@ export default function Landing() {
       {/* ── How it works ── */}
       <Section className="landing-steps" id="how-it-works">
         <div className="landing-section-label">Jak to dziala</div>
-        <h2 className="landing-section-title">3 kroki do pelnej kontroli</h2>
+        <h2 className="landing-section-title">3 kroki do jasności</h2>
 
         <div className="landing-steps-grid">
           {STEPS.map((step, i) => (
@@ -341,7 +342,7 @@ export default function Landing() {
         <div className="landing-section-label">Funkcje</div>
         <h2 className="landing-section-title">Wszystko czego potrzebujesz</h2>
         <p className="landing-section-subtitle" style={{ margin: '0 auto' }}>
-          Kompletna platforma do monitorowania zdrowia i rozwoju mlodego tenisisty.
+          Jeden system na całą drogę: plan, komunikacja, postępy, oceny i kolejny krok.
         </p>
 
         <div className="landing-features-grid">
@@ -355,29 +356,6 @@ export default function Landing() {
             </div>
           ))}
         </div>
-      </Section>
-
-      {/* ── Integrations ── */}
-      <Section className="landing-integrations" id="integrations">
-        <div className="landing-section-label">Integracje</div>
-        <h2 className="landing-section-title">Integrujemy sie z</h2>
-
-        <div className="landing-integrations-list">
-          <div className="landing-integration">
-            <div className="landing-integration-icon whoop">W</div>
-            <div className="landing-integration-name">WHOOP</div>
-            <div className="landing-integration-status">Dostepne</div>
-          </div>
-          <div className="landing-integration">
-            <div className="landing-integration-icon garmin">G</div>
-            <div className="landing-integration-name">Garmin</div>
-            <div className="landing-integration-status">Dostepne</div>
-          </div>
-        </div>
-
-        <p className="landing-integrations-coming">
-          Wkrotce: <span>Apple Health, Polar, Suunto</span>
-        </p>
       </Section>
 
       {/* ── Pricing ── */}
@@ -448,8 +426,8 @@ export default function Landing() {
       {/* ── Final CTA ── */}
       <div className="landing-cta-section landing-section visible">
         <div className="landing-cta-content">
-          <h2>Zacznij monitorowac rozwoj dziecka juz dzis</h2>
-          <p>Dolacz do ServeIQ i zyskaj pelny obraz zdrowia i postepu Twojego mlodego tenisisty.</p>
+          <h2>Zobacz rozwój dziecka jaśniej — już dziś</h2>
+          <p>Dołącz do ServeIQ i miej cały rozwój dziecka — plan, postępy i kontakt z trenerem — w jednym miejscu.</p>
           <Link to="/register" className="landing-btn-primary">
             Rozpocznij za darmo
             <ArrowRight size={18} />
