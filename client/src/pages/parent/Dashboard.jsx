@@ -7,6 +7,7 @@ import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
 import Avatar from '../../components/ui/Avatar/Avatar'
 import Button from '../../components/ui/Button/Button'
+import { stageLabel } from '../../utils/stageLabels'
 import './Dashboard.css'
 
 const TYPE_LABELS = {
@@ -170,12 +171,12 @@ export default function Dashboard() {
         <div className="pd-hero-info">
           <h1 className="pd-hero-name">{selectedChild.firstName} {selectedChild.lastName}</h1>
           <div className="pd-hero-meta">
-            {childAge && <span>{childAge} lat</span>}
-            {selectedChild.pathwayStage && <span>{selectedChild.pathwayStage}</span>}
-            {selectedChild.ranking?.pzt && <span>PZT #{selectedChild.ranking.pzt}</span>}
+            {childAge > 0 && <span>{childAge} lat</span>}
+            {selectedChild.pathwayStage && <span>{stageLabel(selectedChild.pathwayStage)}</span>}
+            {selectedChild.ranking?.pzt > 0 && <span>PZT #{selectedChild.ranking.pzt}</span>}
           </div>
         </div>
-        {avgSkill !== null && (
+        {avgSkill > 0 && (
           <div className="pd-hero-score">
             <span className="pd-hero-score-val">{avgSkill}</span>
             <span className="pd-hero-score-label">średnia</span>

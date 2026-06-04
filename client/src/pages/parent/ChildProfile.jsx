@@ -14,6 +14,7 @@ import UpcomingTournaments from '../../components/player/UpcomingTournaments'
 import RecentMatchesSection from '../../components/match/RecentMatchesSection'
 import SeasonTimeline from '../../components/season/SeasonTimeline'
 import CareerTrajectory from '../../components/career/CareerTrajectory'
+import { stageLabel } from '../../utils/stageLabels'
 import './ChildProfile.css'
 
 function formatRelDate(dateStr) {
@@ -128,7 +129,7 @@ export default function ChildProfile() {
           <h1 className="cp-hero-name">{child.firstName} {child.lastName}</h1>
           <div className="cp-hero-tags">
             {age && <span className="cp-tag">{age} lat</span>}
-            {child.pathwayStage && <span className="cp-tag cp-tag-accent">{child.pathwayStage}</span>}
+            {child.pathwayStage && <span className="cp-tag cp-tag-accent">{stageLabel(child.pathwayStage)}</span>}
             {rankings.map((r) => (
               <span key={r.label} className="cp-tag cp-tag-rank">{r.label} #{r.val}</span>
             ))}

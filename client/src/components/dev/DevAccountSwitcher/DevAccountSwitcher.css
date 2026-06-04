@@ -1,6 +1,6 @@
 .dev-switcher {
   position: fixed;
-  left: 16px;
+  right: 16px;
   bottom: 16px;
   z-index: 9999;
   font-family: ui-monospace, 'SF Mono', Menlo, monospace;
@@ -28,7 +28,7 @@
 .dev-switcher-panel {
   position: absolute;
   bottom: 44px;
-  left: 0;
+  right: 0;
   width: 232px;
   max-height: 70vh;
   overflow-y: auto;
