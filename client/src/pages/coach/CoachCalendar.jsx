@@ -563,6 +563,8 @@ export default function CoachCalendar() {
     })
   }
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+
   return (
     <div className="coach-calendar-page">
       <TimeTabs />
@@ -576,8 +578,12 @@ export default function CoachCalendar() {
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-          initialView="timeGridWeek"
-          headerToolbar={{
+          initialView={isMobile ? 'listWeek' : 'timeGridWeek'}
+          headerToolbar={isMobile ? {
+            left: 'prev,next',
+            center: 'title',
+            right: 'listWeek,timeGridWeek',
+          } : {
             left: 'prev,next today',
             center: 'title',
             right: 'timeGridWeek,dayGridMonth,listWeek',
