@@ -257,6 +257,11 @@ Płatności · Ustawienia.
   (the `+ Ocena` button and the per-player review link).
 - **Pending parent requests** (`/coach/requests`, previously reachable only by typing the URL)
   now surface as an alert chip on the coach dashboard.
+- **Player profile tabbed (2026-06-04):** `CoachPlayerProfile` went from an 11-section scroll to
+  four tabs — Przegląd · Plan · Postępy · Oceny — with the dense performance-only sections
+  (palmares, coaching team, season, matches, career) tucked under a fifth **Kariera** tab shown
+  only for `developmentLevel === 'performance'`. The header (stage selector, +Cel/+AI/+Ocena)
+  stays fixed above the tabs.
 
 ### Parent — DONE (first pass)
 The parent model is now **child-centric**: the child profile is the single hub for everything

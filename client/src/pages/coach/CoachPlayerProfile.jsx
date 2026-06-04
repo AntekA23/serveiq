@@ -58,7 +58,7 @@ const GOAL_CATEGORIES = [
 const GOAL_CAT_MAP = Object.fromEntries(GOAL_CATEGORIES.map((c) => [c.value, c]))
 
 /* ── Collapsible Section ── */
-function Section({ title, icon: Icon, defaultOpen = false, badge, children }) {
+function Section({ title, icon: Icon, defaultOpen = true, badge, children }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
     <section className="cpp-section">
@@ -85,6 +85,7 @@ export default function CoachPlayerProfile() {
   const [observations, setObservations] = useState([])
   const [achievements, setAchievements] = useState([])
   const [loading, setLoading] = useState(true)
+  const [tab, setTab] = useState('overview')
 
   // Observation form
   const [obsText, setObsText] = useState('')
@@ -276,6 +277,15 @@ export default function CoachPlayerProfile() {
 
   const totalHours = Math.round(schedule.reduce((s, i) => s + (i.durationMinutes || 0), 0) / 60 * 10) / 10
 
+  const isPerf = player?.developmentLevel === 'performance'
+  const TABS = [
+    { key: 'overview', label: 'Przegląd' },
+    { key: 'plan', label: 'Plan' },
+    { key: 'progress', label: 'Postępy' },
+    { key: 'reviews', label: 'Oceny' },
+    ...(isPerf ? [{ key: 'career', label: 'Kariera' }] : []),
+  ]
+
   return (
     <div className="cpp-page">
       {/* Back */}
@@ -289,8 +299,8 @@ export default function CoachPlayerProfile() {
         <div className="cpp-header-info">
           <h1 className="cpp-name">{player.firstName} {player.lastName}</h1>
           <div className="cpp-tags">
-            {age && <span className="cpp-tag">{age} lat</span>}
-            {player.ranking?.pzt && <span className="cpp-tag cpp-tag-rank">PZT #{player.ranking.pzt}</span>}
+            {age > 0 && <span className="cpp-tag">{age} lat</span>}
+            {player.ranking?.pzt > 0 && <span className="cpp-tag cpp-tag-rank">PZT #{player.ranking.pzt}</span>}
           </div>
           {/* Pathway stage selector */}
           <div className="cpp-pathway">
@@ -308,10 +318,10 @@ export default function CoachPlayerProfile() {
           </div>
         </div>
         <div className="cpp-header-actions">
-          <Button size="sm" onClick={() => setShowGoalForm(true)}>
+          <Button size="sm" onClick={() => { setTab('progress'); setShowGoalForm(true) }}>
             <Target size={13} /> Cel
           </Button>
-          <Button size="sm" onClick={handleAiRecommendations} loading={aiLoading}>
+          <Button size="sm" onClick={() => { setTab('overview'); handleAiRecommendations() }} loading={aiLoading}>
             <Sparkles size={13} /> AI
           </Button>
           <Button size="sm" onClick={() => navigate(`/coach/reviews/new?player=${id}`)}>
@@ -320,8 +330,21 @@ export default function CoachPlayerProfile() {
         </div>
       </div>
 
-      {/* ─── Performance pathway sections (warunkowo) ─── */}
-      {player?.developmentLevel === 'performance' && (
+      {/* ─── Tabs ─── */}
+      <div className="cpp-tabs">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            className={`cpp-tab${tab === t.key ? ' active' : ''}`}
+            onClick={() => setTab(t.key)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ─── Kariera (tylko performance) ─── */}
+      {tab === 'career' && isPerf && (
         <>
           <PalmaresSection playerId={player._id} />
           <CoachingTeamSection coaches={player.coaches || []} />
@@ -333,8 +356,8 @@ export default function CoachPlayerProfile() {
         </>
       )}
 
-      {/* AI Recommendations (if generated) */}
-      {aiRecs && (
+      {/* AI Recommendations (if generated) — overview tab */}
+      {tab === 'overview' && aiRecs && (
         <div className="cpp-ai-result">
           <div className="cpp-ai-header">
             <Sparkles size={14} /> <span>Rekomendacje AI</span>
@@ -357,6 +380,7 @@ export default function CoachPlayerProfile() {
       )}
 
       {/* ─── Plan ─── */}
+      {tab === 'plan' && (
       <Section title="Plan treningowy" icon={Calendar} badge={schedule.length > 0 ? `${schedule.length} treningów · ${totalHours}h/tyg` : null}>
         <div className="cpp-plan">
           {planDirty && (
@@ -394,8 +418,10 @@ export default function CoachPlayerProfile() {
           </div>
         </div>
       </Section>
+      )}
 
       {/* ─── Recent sessions ─── */}
+      {tab === 'overview' && (
       <Section title="Ostatnie sesje" icon={Clock} badge={sessions.length > 0 ? sessions.length : null}>
         {sessions.length === 0 ? (
           <div className="cpp-empty">Brak treningów</div>
@@ -419,8 +445,10 @@ export default function CoachPlayerProfile() {
           </div>
         )}
       </Section>
+      )}
 
       {/* ─── Goals ─── */}
+      {tab === 'progress' && (
       <Section title="Cele" icon={Target} defaultOpen badge={activeGoals.length > 0 ? `${activeGoals.length} aktywnych` : null}>
         {/* Add goal */}
         {!showGoalForm ? (
@@ -465,15 +493,17 @@ export default function CoachPlayerProfile() {
           <div className="cpp-goals-done-count">{completedGoals.length} ukończonych celów</div>
         )}
       </Section>
+      )}
 
       {/* ─── Mecze (tylko performance) ─── */}
-      {player?.developmentLevel === 'performance' && (
+      {tab === 'career' && isPerf && (
         <Section title="Mecze" icon={Swords}>
           <MatchesTab playerId={player._id} />
         </Section>
       )}
 
       {/* ─── Observations ─── */}
+      {tab === 'progress' && (
       <Section title="Obserwacje" icon={FileText} badge={observations.length > 0 ? observations.length : null}>
         {/* Quick add form */}
         <div className="cpp-obs-form">
@@ -522,8 +552,10 @@ export default function CoachPlayerProfile() {
           </div>
         )}
       </Section>
+      )}
 
       {/* ─── Idol ─── */}
+      {tab === 'overview' && (
       <Section title="Idol zawodnika" icon={Star}>
         <IdolCard
           playerId={id}
@@ -531,8 +563,10 @@ export default function CoachPlayerProfile() {
           onUpdate={(newIdol) => setPlayer((prev) => ({ ...prev, idol: newIdol }))}
         />
       </Section>
+      )}
 
       {/* ─── Badges ─── */}
+      {tab === 'overview' && (
       <Section title="Odznaki" icon={Award} badge={badgeEarnedCount > 0 ? `${badgeEarnedCount} zdobytych` : null}>
         <BadgeGrid
           key={badgeRefreshKey}
@@ -545,6 +579,7 @@ export default function CoachPlayerProfile() {
           </Button>
         </div>
       </Section>
+      )}
 
       {showAwardModal && (
         <BadgeAwardModal
@@ -554,13 +589,17 @@ export default function CoachPlayerProfile() {
         />
       )}
 
-      {/* ─── Reviews quick link ─── */}
-      {reviews.length > 0 && (
-        <div className="cpp-reviews-link" onClick={() => navigate('/coach/reviews')}>
-          <FileText size={15} />
-          <span>{reviews.length} {reviews.length === 1 ? 'ocena' : 'ocen'}</span>
-          <ChevronDown size={14} style={{ transform: 'rotate(-90deg)' }} />
-        </div>
+      {/* ─── Reviews (oceny) ─── */}
+      {tab === 'reviews' && (
+        reviews.length > 0 ? (
+          <div className="cpp-reviews-link" onClick={() => navigate('/coach/reviews')}>
+            <FileText size={15} />
+            <span>{reviews.length} {reviews.length === 1 ? 'ocena' : 'ocen'}</span>
+            <ChevronDown size={14} style={{ transform: 'rotate(-90deg)' }} />
+          </div>
+        ) : (
+          <div className="cpp-empty">Brak ocen. Użyj „+ Ocena" u góry, aby dodać pierwszą.</div>
+        )
       )}
 
       <ConfirmModal

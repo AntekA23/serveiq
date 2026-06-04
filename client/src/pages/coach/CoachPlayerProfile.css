@@ -3,7 +3,7 @@
    From 1500 lines to ~350. 7 tabs → 4 sections.
    ═══════════════════════════════════════════ */
 
-.cpp-page { max-width: 680px; }
+.cpp-page { max-width: 760px; margin: 0 auto; }
 
 /* Loading / Error */
 .cpp-loading { display: flex; justify-content: center; padding: 80px; }
@@ -26,6 +26,36 @@
   transition: color 0.15s;
 }
 .cpp-back:hover { color: var(--color-accent); }
+
+/* ─── Tabs ─── */
+.cpp-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+.cpp-tab {
+  flex: 1;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 9px;
+  background: none;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.cpp-tab:hover { color: var(--color-text); }
+.cpp-tab.active {
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
 
 /* ─── Header ─── */
 .cpp-header {
