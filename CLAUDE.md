@@ -269,6 +269,10 @@ about one child, and parent-level concerns live in the sidebar.
   entry points, Badges 3; now one each).
 - **Child context carries over:** hub links pass `?child=<id>`; TrainingPlan, Tournaments and
   the shared Reviews page now preselect that child instead of always defaulting to the first.
+- **Radical pass (2026-06-04):** the separate parent dashboard was removed entirely — the
+  child's page (`/parent/child/:id`) is now the home. "Panel" is gone from the sidebar (children
+  ARE the nav; switching child = clicking another child). `/parent/dashboard` redirects to the
+  first child. `pages/parent/Dashboard.*` deleted; orphan `HealthHistory.css` pruned.
 
 ### Club — DONE (first pass)
 The club panel's problem was discoverability, not size: two fully-working pages were
@@ -285,6 +289,9 @@ All three role panels (coach, parent, club) have now had a first clarity pass. N
 step: walk each panel live with seed data and refine wording/ordering from real use.
 
 ### Known follow-ups (deferred)
-- Dashboard vs ChildProfile still overlap (both show plan/upcoming/latest-review teasers) —
-  acceptable for now (glance vs detail); revisit if it still reads as duplication.
-- No global "selected child" store yet; preselection is via `?child=` query only.
+- Dashboard vs ChildProfile overlap — **RESOLVED** (2026-06-04): the separate parent dashboard
+  was removed; the child hub is the home.
+- No global "selected child" store yet; preselection is via `?child=` query + sidebar nav.
+- Minor wearable/health text remnants still in `parent/Timeline.jsx` (health/device event types)
+  and onboarding/pricing copy — prune in a later pass.
+- See `PLAN_UPROSZCZENIA.md` for the full radical-simplification plan (phases F1–F7).

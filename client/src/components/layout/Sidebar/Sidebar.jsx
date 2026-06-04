@@ -85,9 +85,9 @@ export default function Sidebar() {
 
   // Build parent nav dynamically with children names
   const buildParentNav = () => {
-    const items = [
-      { to: '/parent/dashboard', label: 'Panel', icon: LayoutDashboard },
-    ]
+    // No separate "Panel" — the child's page IS the home. Children are the nav;
+    // switching child = clicking another child here.
+    const items = []
 
     if (children.length > 0) {
       children.forEach((child) => {

@@ -33,7 +33,6 @@ import CoachTournaments from './pages/coach/Tournaments'
 import CoachMessages from './pages/coach/Messages'
 
 // Parent pages
-import ParentDashboard from './pages/parent/Dashboard'
 import ChildProfile from './pages/parent/ChildProfile'
 import ParentTimeline from './pages/parent/Timeline'
 import TrainingPlan from './pages/parent/TrainingPlan'
@@ -145,6 +144,16 @@ function RootRedirect() {
     return <Navigate to="/parent/onboarding" replace />
   }
   return <Navigate to="/parent/dashboard" replace />
+}
+
+/** Parent home = the child's page. With multiple children the sidebar switches between them. */
+function ParentHome() {
+  const user = useAuthStore((s) => s.user)
+  const kids = user?.parentProfile?.children || []
+  const firstId = kids.length
+    ? (typeof kids[0] === 'object' ? kids[0]._id : kids[0])
+    : null
+  return <Navigate to={firstId ? `/parent/child/${firstId}` : '/my-children'} replace />
 }
 
 export default function App() {
@@ -294,11 +303,12 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        {/* Parent home redirects to the child's page — no separate dashboard. */}
         <Route
           path="/parent/dashboard"
           element={
             <ProtectedRoute role="parent">
-              <AppShell><ParentDashboard /></AppShell>
+              <ParentHome />
             </ProtectedRoute>
           }
         />

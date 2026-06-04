@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Target, Star, Calendar, Clock, Award, Dumbbell, Trophy,
+  Target, Star, Calendar, Clock, Award, Dumbbell, Trophy,
 } from 'lucide-react'
 import api from '../../api/axios'
 import Avatar from '../../components/ui/Avatar/Avatar'
@@ -111,11 +111,6 @@ export default function ChildProfile() {
 
   return (
     <div className="cp-page">
-      {/* Back */}
-      <button className="cp-back" onClick={() => navigate('/parent/dashboard')}>
-        <ArrowLeft size={16} /> Powrót
-      </button>
-
       {/* ─── 1. Hero ─── */}
       <div className="cp-hero">
         <Avatar
