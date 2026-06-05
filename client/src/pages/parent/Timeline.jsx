@@ -5,8 +5,6 @@ import {
   TrendingUp,
   Trophy,
   CheckCircle,
-  Activity,
-  Watch,
   Target,
   Dumbbell,
   Filter,
@@ -19,8 +17,6 @@ const eventConfig = {
   skill_update: { icon: TrendingUp, label: 'Aktualizacja umiejetnosci', color: 'var(--color-accent)' },
   tournament: { icon: Trophy, label: 'Turniej', color: 'var(--color-amber)' },
   goal_completed: { icon: CheckCircle, label: 'Cel osiagniety', color: 'var(--color-green)' },
-  health_trend: { icon: Activity, label: 'Trend zdrowotny', color: 'var(--color-hrv)' },
-  device_connected: { icon: Watch, label: 'Urzadzenie polaczone', color: 'var(--color-blue)' },
 }
 
 const sessionTypeColors = {

@@ -66,9 +66,9 @@ const PLANS = [
 const FEATURE_LABELS = {
   dashboard: 'Dashboard',
   children: 'Liczba dzieci',
-  health_history: 'Historia zdrowia',
+  health_history: 'Historia rozwoju',
   charts: 'Wykresy i porownania',
-  alerts: 'Alerty zdrowotne',
+  alerts: 'Powiadomienia',
   weekly_email: 'Email tygodniowy',
   pdf_export: 'Eksport PDF',
   push_notifications: 'Push notifications',
@@ -110,7 +110,7 @@ export default function Pricing() {
       <div className="pricing-header">
         <h1 className="pricing-title">Wybierz plan</h1>
         <p className="pricing-subtitle">
-          Monitoruj zdrowie i postepy Twojego mlodego tenisisty
+          Plan, postępy i oceny Twojego dziecka w jednym miejscu
         </p>
       </div>
 
