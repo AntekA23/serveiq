@@ -356,6 +356,7 @@ export const getDashboard = async (req, res, next) => {
     res.json({
       dashboard: {
         totalPlayers,
+        totalCoaches: (club.coaches || []).length,
         playersByStage,
         attendanceRate,
         totalActivities,
@@ -1195,8 +1196,11 @@ export const getClubReports = async (req, res, next) => {
       },
     ]);
 
-    // Populate coach names
-    const coachIds = attendanceByCoach.map((a) => a._id).filter(Boolean);
+    // Populate coach names — include ALL club coaches, not only those with attendance
+    const coachIds = [...new Set([
+      ...attendanceByCoach.map((a) => a._id).filter(Boolean).map((id) => id.toString()),
+      ...(club.coaches || []).map((id) => id.toString()),
+    ])];
     const coaches = await User.find({ _id: { $in: coachIds } })
       .select('firstName lastName')
       .lean();
