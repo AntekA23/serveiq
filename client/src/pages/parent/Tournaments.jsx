@@ -38,7 +38,12 @@ export default function Tournaments() {
   const fetchTournaments = useCallback(async (playerId) => {
     try {
       const { data } = await api.get(`/tournaments?player=${playerId}`)
-      setTournaments(data.tournaments || [])
+      const tours = data.tournaments || []
+      setTournaments(tours)
+      // Open the tab that actually has content for this child (avoid a blank "Nadchodzące")
+      const hasUpcoming = tours.some((t) => t.status === 'planned' || t.status === 'in-progress')
+      const hasHistory = tours.some((t) => t.status === 'completed' || t.status === 'cancelled')
+      setTab(!hasUpcoming && hasHistory ? 'history' : 'upcoming')
     } catch { setTournaments([]) }
   }, [])
 
