@@ -1294,7 +1294,49 @@ const seed = async () => {
       visibleToParent: true,
     });
 
-    console.log(`  3 przeglady (Kacper marzec, Julia marzec, Sonia Q1)\n`);
+    // Antoni — pierwszy przeglad (Tennis 10 Red, nowy)
+    await ReviewSummary.create({
+      player: antoni._id,
+      club: club._id,
+      author: coach._id,
+      title: 'Przeglad miesieczny — maj 2026 — Antoni',
+      periodType: 'monthly',
+      periodStart: new Date('2026-05-01'),
+      periodEnd: new Date('2026-05-31'),
+      whatHappened: 'Antoni dolaczyl do grupy Tennis 10 Red w maju. 7 zajec grupowych i pierwszy mini-turniej wewnetrzny.',
+      whatWentWell: 'Ogromna radosc z gry i zaangazowanie. Szybko lapie kontakt z pilka, dobra koordynacja jak na poczatek.',
+      whatNeedsFocus: 'Podstawy uderzen z obu stron — naturalnie, dopiero zaczyna. Praca nog do rozwijania.',
+      nextSteps: 'Kontynuowac 2x/tydz w grupie Red, skupic sie na zabawie i podstawach. Za kilka miesiecy ocena postepu.',
+      activitiesCount: 7,
+      goalsReviewed: [],
+      observations: [],
+      status: 'published',
+      publishedAt: daysAgo(6),
+      visibleToParent: true,
+    });
+
+    // Julia — swiezszy przeglad (maj), pokazuje luk rozwoju po marcu
+    await ReviewSummary.create({
+      player: julia._id,
+      club: club._id,
+      author: coach._id,
+      title: 'Przeglad miesieczny — maj 2026 — Julia',
+      periodType: 'monthly',
+      periodStart: new Date('2026-05-01'),
+      periodEnd: new Date('2026-05-31'),
+      whatHappened: 'Julia zagrala turniej w Krakowie — awans do cwiercfinalu (przegrana 6:4 5:7 4:6 po walce). 14 treningow, 4 sparingi.',
+      whatWentWell: 'Tie-breaki — wyrazny progres po pracy z marca, wygrala 2 z 3 w sparingach. Serwis plaski coraz pewniejszy. Mentalnie znacznie mocniejsza.',
+      whatNeedsFocus: 'Koncowka 3. seta — spadek koncentracji przy zmeczeniu. Return z bekhendu wciaz za gleboki. Wytrzymalosc na dystansie.',
+      nextSteps: 'Przygotowanie do turnieju TE w lipcu. Wiecej gier 3-setowych na treningu, blok kondycyjny pod wytrzymalosc.',
+      activitiesCount: 18,
+      goalsReviewed: [],
+      observations: [],
+      status: 'published',
+      publishedAt: daysAgo(4),
+      visibleToParent: true,
+    });
+
+    console.log(`  5 przegladow (Kacper, Julia x2, Antoni, Sonia)\n`);
 
     // ============================================================
     // 11. RECOMMENDATIONS
@@ -1378,12 +1420,17 @@ const seed = async () => {
       name: 'Ogólnopolski Turniej Mlodziezowy — Kraków',
       location: 'Kraków, KS Olsza',
       surface: 'clay',
-      startDate: new Date('2026-04-15'),
-      endDate: new Date('2026-04-18'),
+      startDate: new Date('2026-05-15'),
+      endDate: new Date('2026-05-18'),
       category: 'U14',
       drawSize: 32,
-      status: 'planned',
-      notes: 'Cel: polfinał. Julia jest 5. rozstawiona.',
+      status: 'completed',
+      result: {
+        round: 'Cwiercfinał',
+        wins: 2,
+        losses: 1,
+      },
+      notes: 'Julia 5. rozstawiona. Awans do CF (przegrana 6:4 5:7 4:6 po walce) — najlepszy wynik sezonu.',
     });
 
     await Tournament.create({
@@ -1415,12 +1462,38 @@ const seed = async () => {
       name: 'Turniej Tennis 10 — Warszawa',
       location: 'Warszawa, KT Smecz',
       surface: 'clay',
-      startDate: new Date('2026-04-25'),
-      endDate: new Date('2026-04-26'),
+      startDate: new Date('2026-05-24'),
+      endDate: new Date('2026-05-24'),
       category: 'Tennis 10 Red',
       drawSize: 16,
-      status: 'planned',
-      notes: 'Pierwszy turniej Kacpra!',
+      status: 'completed',
+      result: {
+        round: 'Faza grupowa',
+        wins: 2,
+        losses: 2,
+      },
+      notes: 'Pierwszy turniej Kacpra! Dwie wygrane — ogromna radosc i mnostwo doswiadczenia.',
+    });
+
+    await Tournament.create({
+      player: antoni._id,
+      coach: coach._id,
+      createdBy: coach._id,
+      source: 'coach',
+      name: 'Mini-turniej wewnetrzny — KT Smecz',
+      location: 'Warszawa, KT Smecz',
+      surface: 'clay',
+      startDate: new Date('2026-05-28'),
+      endDate: new Date('2026-05-28'),
+      category: 'Tennis 10 Red',
+      drawSize: 8,
+      status: 'completed',
+      result: {
+        round: 'Faza grupowa',
+        wins: 1,
+        losses: 2,
+      },
+      notes: 'Pierwszy mini-turniej Antoniego. Jedna wygrana — swietna zabawa i pierwsze punkty.',
     });
 
     await Tournament.create({
@@ -1449,7 +1522,7 @@ const seed = async () => {
       notes: 'Drugi start ITF. Cel: ćwierćfinał + punkty rankingowe.',
     });
 
-    console.log(`  5 turniejow (2 Julia, 1 Kacper, 2 Sonia)\n`);
+    console.log(`  7 turniejow (2 Julia, 1 Kacper, 1 Antoni, 2 Sonia)\n`);
 
     // ============================================================
     // 12.5 ACHIEVEMENTS — palmares Sonii
